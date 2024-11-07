@@ -32,13 +32,16 @@ public class Accounts {
 
     @Column(name = "attendanceList")
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
-    private boolean[] attendanceList = new boolean[31]; //매달 리셋됨
+    final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
     @Builder
-    public Accounts(String name, String profilePath){
+    public Accounts(String name, String profilePath, String email){
         this.name = name;
         this.profilePath = profilePath;
+        this.email = email;
         this.point = 0;
     }
 }
