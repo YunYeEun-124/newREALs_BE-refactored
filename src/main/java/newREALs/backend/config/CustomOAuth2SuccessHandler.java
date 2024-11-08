@@ -45,6 +45,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         } else {
             // 신규 사용자 -> /register로 리다이렉트
             redirectUrl = "/register";
+            log.info("로그인 성공! name: {}, email: {}", name, email);
         }
         log.debug("Redirecting to: {}", redirectUrl);
 

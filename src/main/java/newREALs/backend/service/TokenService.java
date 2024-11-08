@@ -17,7 +17,6 @@ import java.util.Date;
 
 @Service
 public class TokenService {
-    private String secretKey;
     private SecretKey key;
 
     @Value("${jwt.expiration-time}")
@@ -27,7 +26,7 @@ public class TokenService {
     public void init() {
         // .env 파일 로드
         Dotenv dotenv = Dotenv.load();
-        this.secretKey = dotenv.get("JWT_SECRET_KEY"); // .env 파일에서 JWT_SECRET_KEY 가져옴
+        String secretKey = dotenv.get("JWT_SECRET_KEY"); // .env 파일에서 JWT_SECRET_KEY 가져옴
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
