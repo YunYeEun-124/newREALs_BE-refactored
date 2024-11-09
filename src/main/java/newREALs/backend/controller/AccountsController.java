@@ -25,6 +25,8 @@ public class AccountsController {
         Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
 
         String redirectUrl;
+        // 플래그로 확인
+        // 여기서 바로 findByEmail하면 이미 DB에 들어가있는 상태라 구분이 안됨
         if ((boolean) kakaoResponse.get("isNewAccount")) {
             redirectUrl = "/register";
         } else {
