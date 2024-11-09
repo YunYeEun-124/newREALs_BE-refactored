@@ -40,7 +40,7 @@ public class TokenService {
                 .claim("profilePath", account.getProfilePath())
                 .setExpiration(new Date(date.getTime() + expirationTime))
                 .setIssuedAt(date)
-                .signWith(SignatureAlgorithm.HS512, key) // 암호화 알고리즘
+                .signWith(key, SignatureAlgorithm.HS512) // 암호화 알고리즘
                 .compact();
     }
 
