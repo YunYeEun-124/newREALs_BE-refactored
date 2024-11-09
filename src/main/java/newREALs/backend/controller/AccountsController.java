@@ -2,8 +2,6 @@ package newREALs.backend.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.service.KakaoService;
@@ -24,7 +22,7 @@ public class AccountsController {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
     @PostMapping("/login")
-    public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request, HttpServletResponse response) {
+    public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
         String authorizationCode = request.get("code");
 
         try {
