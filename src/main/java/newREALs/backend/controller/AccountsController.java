@@ -1,6 +1,7 @@
 package newREALs.backend.controller;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.service.KakaoService;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import java.util.Map;
 public class AccountsController {
 
     private final KakaoService kakaoService;
-    private final Gson gson = new Gson();
+    private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
     @PostMapping("/login")
     public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
