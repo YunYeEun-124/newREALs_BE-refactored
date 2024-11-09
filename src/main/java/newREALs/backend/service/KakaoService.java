@@ -1,6 +1,7 @@
 package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.repository.AccountsRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @SuppressWarnings("unchecked")
 @Service
 @RequiredArgsConstructor
@@ -74,7 +76,7 @@ public class KakaoService {
         response.put("name", account.getName());
         response.put("email", account.getEmail());
         response.put("userPk", account.getId());
-
+        log.info("jwt 토큰 생성한 거 : {}", jwtToken);
         return response;
     }
 
