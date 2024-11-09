@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.repository.AccountsRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("unchecked")
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
@@ -50,7 +52,7 @@ public class KakaoService {
         // 리다이렉트 다르게 하기 위해 플래그 설정
         // findByEmail이 반환하는 객체가 비어있으면 true
         // => 신규계정(객체 비어있으면) true, 아니면 false
-        boolean isNewAccount = accountsRepository.findByEmail(email).isEmpty();;
+        boolean isNewAccount = accountsRepository.findByEmail(email).isEmpty();
 
         Optional<Accounts> existingAccount = accountsRepository.findByEmail(email);
         Accounts account = existingAccount
@@ -63,7 +65,7 @@ public class KakaoService {
                         .build()
         ));
 
-        // JWT 토큰 생성한 거
+        // JWT 토큰 생성한 거 맵에 넣어서 계정 정보랑 같이 전달
         String jwtToken = tokenService.generateToken(account);
 
         Map<String, Object> response = new HashMap<>();
@@ -88,9 +90,16 @@ public class KakaoService {
                 "&code=" + authorizationCode;
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
-        ResponseEntity<Map> response = restTemplate.exchange(tokenUri, HttpMethod.POST, entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                tokenUri,
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<>() {
+                }
+        );
 
         Map<String, Object> responseBody = response.getBody();
+        assert responseBody != null;
         return (String) responseBody.get("access_token");
     }
 
@@ -100,7 +109,13 @@ public class KakaoService {
         headers.setBearerAuth(accessToken);
 
         HttpEntity<Void> entity = new HttpEntity<>(headers);
-        ResponseEntity<Map> response = restTemplate.exchange(userInfoUri, HttpMethod.GET, entity, Map.class);
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                userInfoUri,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {
+                }
+        );
 
         return response.getBody();
     }
