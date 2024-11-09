@@ -63,7 +63,7 @@ public class KakaoService {
                         .build()
         ));
 
-        // JWT 토큰 생성
+        // JWT 토큰 생성한 거
         String jwtToken = tokenService.generateToken(account);
 
         Map<String, Object> response = new HashMap<>();

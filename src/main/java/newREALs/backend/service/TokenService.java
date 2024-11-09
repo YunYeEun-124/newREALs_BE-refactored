@@ -19,10 +19,11 @@ import java.util.Date;
 @Service
 public class TokenService {
     private Key key;
+
+    // JWT_SECRET_KEY는 .env 파일에서 가져오기
     @PostConstruct
     public void init() {
         Dotenv dotenv = Dotenv.load();
-        // .env 파일에서 JWT_SECRET_KEY 가져옴
         String secretKey = dotenv.get("JWT_SECRET_KEY");
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
