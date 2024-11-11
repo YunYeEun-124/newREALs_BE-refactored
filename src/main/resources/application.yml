@@ -7,7 +7,7 @@ spring :
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql:true
@@ -45,4 +45,4 @@ logging:
     org.hibernate.SQL: debug
 
 jwt:
-  expiration-time: 600000
+  expiration-time: 86400000

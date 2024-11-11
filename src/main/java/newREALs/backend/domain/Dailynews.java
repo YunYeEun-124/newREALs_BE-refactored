@@ -29,7 +29,7 @@ public class Dailynews {
 
     @Column
     @ElementCollection
-    private int[] quizeStatus = new int[5];  //-1:틀림 0:안풀었음 1:맞음
+    private int[] quizStatus = new int[5];  //-1:틀림 0:안풀었음 1:맞음
 
     @OneToOne
     @JoinColumn(name = "user_id")
