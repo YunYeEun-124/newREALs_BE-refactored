@@ -3,7 +3,7 @@ package newREALs.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.domain.Accounts;
-import newREALs.backend.repository.AccountsRepository;
+import newREALs.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class KakaoService {
-    private final AccountsRepository accountsRepository;
+    private final UserRepository userRepository;
     private final TokenService tokenService;
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -54,12 +54,12 @@ public class KakaoService {
         // 리다이렉트 다르게 하기 위해 플래그 설정
         // findByEmail이 반환하는 객체가 비어있으면 true
         // => 신규계정(객체 비어있으면) true, 아니면 false
-        boolean isNewAccount = accountsRepository.findByEmail(email).isEmpty();
+        boolean isNewAccount = userRepository.findByEmail(email).isEmpty();
 
-        Optional<Accounts> existingAccount = accountsRepository.findByEmail(email);
+        Optional<Accounts> existingAccount = userRepository.findByEmail(email);
         Accounts account = existingAccount
                 // 없으면 생성
-                .orElseGet(() -> accountsRepository.save(
+                .orElseGet(() -> userRepository.save(
                 Accounts.builder()
                         .name(name)
                         .email(email)

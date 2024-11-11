@@ -2,7 +2,7 @@ package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Accounts;
-import newREALs.backend.repository.AccountsRepository;
+import newREALs.backend.repository.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,15 +15,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
-    private final AccountsRepository accountsRepository;
+    private final UserRepository userRepository;
 
     @Scheduled(cron  = "0 0 6 1 * *")
     @Transactional
     public void resetAttendanceList() {
-        List<Accounts> accounts = accountsRepository.findAll();
+        List<Accounts> accounts = userRepository.findAll();
         for (Accounts account : accounts) {
             Arrays.fill(account.getAttendanceList(), false); // AttendanceList 초기화
-            accountsRepository.save(account);
+            userRepository.save(account);
         }
     }
 }
