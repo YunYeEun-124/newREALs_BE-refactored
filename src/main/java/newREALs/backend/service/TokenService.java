@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.domain.Accounts;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +37,8 @@ public class TokenService {
 
         // claim -> body 영역이라고 생각하면 됨...
         return Jwts.builder()
-                .setSubject(account.getEmail())
+                .setSubject(String.valueOf(account.getId()))
+                .claim("email", account.getEmail())
                 .claim("name", account.getName())
                 .claim("profilePath", account.getProfilePath())
                 .setExpiration(new Date(date.getTime() + expirationTime))
@@ -55,12 +57,26 @@ public class TokenService {
         }
     }
 
-    public String getEmail(String token) {
+    // 헤더에서 토큰 추출
+    public String extractTokenFromHeader(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            log.debug("TokenService - 헤더에서 토큰 찾음");
+            return bearerToken.substring(7); // "Bearer " 이후의 토큰 부분 추출
+        }
+        log.debug("TokenService -  헤더에 토큰 없음.");
+        return null;
+    }
+
+    // 토큰으로 userId 추출
+    public Long extractUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-        return claims.getSubject();
+        Long userId = Long.parseLong(claims.getSubject());
+        log.debug("TokenService - 헤더에서 추출한 토큰의 user Id: {}", userId);
+        return userId;
     }
 }
