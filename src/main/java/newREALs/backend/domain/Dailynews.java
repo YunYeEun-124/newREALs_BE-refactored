@@ -5,8 +5,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.persister.entity.SingleTableEntityPersister;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -23,21 +25,20 @@ public class Dailynews {
     @ElementCollection
     private Basenews[]  newsList = new Basenews[5];  // 5개의 뉴스를 담는 리스트, 담고나서 T로 변환
 
-    @Column
-    @ElementCollection
-    private Quiz[]  quizList = new Quiz[5];      // 각 뉴스마다 연결된 퀴즈 리스트
+//    @Column
+//    @ElementCollection
+    @OneToMany(fetch = FetchType.LAZY)
+    @OrderColumn(name = "quiz_order")
+    private List<Quiz> quizList = new ArrayList<>();    // 각 뉴스마다 연결된 퀴즈 리스트
 
-    @Column
+//    @Column
+//    @ElementCollection
     @ElementCollection
-    private int[] quizStatus = new int[5];  //-1:틀림 0:안풀었음 1:맞음
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private Accounts user;
+    @OrderColumn(name = "quiz_status_order")
+    private List<Integer> quizStatus = new ArrayList<>();  //-1:틀림 0:안풀었음 1:맞음
 
     @Builder
-    public Dailynews(Accounts user ,Quiz[] quizList,Basenews[] newsList){
-        this.user = user;
+    public Dailynews(List<Quiz> quizList,Basenews[] newsList){
         this.quizList = quizList;
 
         if(newsList.length != 5) throw new IllegalArgumentException("dailynews는 5개입니다.");

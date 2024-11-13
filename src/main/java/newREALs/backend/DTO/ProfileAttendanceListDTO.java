@@ -10,6 +10,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ProfileAttendanceListDTO {
-    private Long userId;
+    private Long user_id;
     private List<Boolean> attendanceList;
 }
