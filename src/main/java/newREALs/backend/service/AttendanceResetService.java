@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class AttendanceService {
+public class AttendanceResetService {
     private final UserRepository userRepository;
 
     @Scheduled(cron  = "0 0 6 1 * *")
