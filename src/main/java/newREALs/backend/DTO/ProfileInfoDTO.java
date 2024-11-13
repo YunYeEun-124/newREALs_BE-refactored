@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class ProfileInfoDTO {
-    private Long userId;
+    private Long user_id;
     private String name;
     private String email;
     private String profilePath;

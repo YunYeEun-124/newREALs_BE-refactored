@@ -37,12 +37,17 @@ public class Accounts {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @ManyToOne
+    @JoinColumn(name = "daily_news_id")
+    private Dailynews dailynews;
+
     @Builder
-    public Accounts(String name, String profilePath, String email){
+    public Accounts(String name, String profilePath, String email, Dailynews dailynews) {
         this.name = name;
         this.profilePath = profilePath;
         this.email = email;
         this.point = 0;
+        this.dailynews = dailynews;
     }
 }
 

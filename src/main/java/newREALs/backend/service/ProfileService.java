@@ -1,13 +1,12 @@
 package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.DTO.ProfileAttendanceListDTO;
 import newREALs.backend.DTO.ProfileInfoDTO;
 import newREALs.backend.DTO.ProfileQuizStatusDTO;
-import newREALs.backend.domain.Accounts;
-import newREALs.backend.domain.Dailynews;
-import newREALs.backend.domain.Keyword;
-import newREALs.backend.domain.UserKeyword;
+import newREALs.backend.DTO.QuizDTO;
+import newREALs.backend.domain.*;
 import newREALs.backend.repository.AccountsRepository;
 import newREALs.backend.repository.DailyNewsRepository;
 import newREALs.backend.repository.UserKeywordRepository;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ProfileService {
@@ -37,7 +37,7 @@ public class ProfileService {
         }
 
         return ProfileInfoDTO.builder()
-                .userId(account.getId())
+                .user_id(account.getId())
                 .name(account.getName())
                 .email(account.getEmail())
                 .profilePath(account.getProfilePath())
@@ -50,12 +50,18 @@ public class ProfileService {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
-        Dailynews dailyNews = dailyNewsRepository.findByUserId(account.getId());
+        List<Quiz> quizList = accountsRepository.findQuizListByUserId(userId);
+        List<QuizDTO> quizDTOList = new ArrayList<>();
+        for (Quiz quiz : quizList) {
+            quizDTOList.add(new QuizDTO(quiz));
+        }
+
+        List<Integer> quizStatus = accountsRepository.findQuizStatusByUserId(userId);
 
         return ProfileQuizStatusDTO.builder()
-                .userId(account.getId())
-                .quizList(dailyNews.getQuizList())
-                .quizStatus(dailyNews.getQuizStatus())
+                .user_id(account.getId())
+                .quizList(quizDTOList)
+                .quizStatus(quizStatus)
                 .build();
     }
 
@@ -66,7 +72,7 @@ public class ProfileService {
         List<Boolean> attendanceList = accountsRepository.findAttendanceListByUserId(userId);
 
         return ProfileAttendanceListDTO.builder()
-                .userId(account.getId())
+                .user_id(account.getId())
                 .attendanceList(attendanceList)
                 .build();
     }
