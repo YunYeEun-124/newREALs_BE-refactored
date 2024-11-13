@@ -1,10 +1,14 @@
 package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import newREALs.backend.DTO.ProfileAttendanceListDTO;
 import newREALs.backend.DTO.ProfileInfoDTO;
-import newREALs.backend.DTO.QuizStatusDTO;
+import newREALs.backend.DTO.ProfileQuizStatusDTO;
 import newREALs.backend.domain.Accounts;
+import newREALs.backend.domain.Dailynews;
+import newREALs.backend.domain.Keyword;
 import newREALs.backend.domain.UserKeyword;
+import newREALs.backend.repository.AccountsRepository;
 import newREALs.backend.repository.DailyNewsRepository;
 import newREALs.backend.repository.UserKeywordRepository;
 import newREALs.backend.repository.UserRepository;
@@ -19,20 +23,21 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final UserKeywordRepository userKeywordRepository;
     private final DailyNewsRepository dailyNewsRepository;
+    private final AccountsRepository accountsRepository;
 
-    public ProfileInfoDTO getProfilePage(Long userId) {
+    public ProfileInfoDTO getProfileInfo(Long userId) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         // 유저 키워드 리스트에 저장하기
-        List<UserKeyword> userKeywords = userKeywordRepository.findKeywordsByUserId(userId);
+        List<Keyword> userKeywords = userKeywordRepository.findKeywordsById(userId);
         List<String> keywordList = new ArrayList<>();
-        for(UserKeyword userKeyword : userKeywords){
-            keywordList.add(userKeyword.getKeyword().getName());
+        for(Keyword userKeyword : userKeywords){
+            keywordList.add(userKeyword.getName());
         }
 
         return ProfileInfoDTO.builder()
-                .id(account.getId())
+                .userId(account.getId())
                 .name(account.getName())
                 .email(account.getEmail())
                 .profilePath(account.getProfilePath())
@@ -41,11 +46,28 @@ public class ProfileService {
                 .build();
     }
 
-    public QuizStatusDTO getQuizStatus(Long userId) {
+    public ProfileQuizStatusDTO getQuizStatus(Long userId) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
+        Dailynews dailyNews = dailyNewsRepository.findByUserId(account.getId());
 
+        return ProfileQuizStatusDTO.builder()
+                .userId(account.getId())
+                .quizList(dailyNews.getQuizList())
+                .quizStatus(dailyNews.getQuizStatus())
+                .build();
+    }
 
+    public ProfileAttendanceListDTO getAttendanceList(Long userId) {
+        Accounts account = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+
+        List<Boolean> attendanceList = accountsRepository.findAttendanceListByUserId(userId);
+
+        return ProfileAttendanceListDTO.builder()
+                .userId(account.getId())
+                .attendanceList(attendanceList)
+                .build();
     }
 }
