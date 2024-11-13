@@ -2,9 +2,15 @@ package newREALs.backend.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import newREALs.backend.DTO.ProfileAttendanceListDTO;
+import newREALs.backend.DTO.ProfileInfoDTO;
+import newREALs.backend.DTO.ProfileQuizStatusDTO;
 import newREALs.backend.service.KakaoService;
+import newREALs.backend.service.ProfileService;
+import newREALs.backend.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +25,8 @@ import java.util.Map;
 public class AccountsController {
 
     private final KakaoService kakaoService;
+    private final TokenService tokenService;
+    private final ProfileService profileService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
     @PostMapping("/login")
@@ -61,4 +69,96 @@ public class AccountsController {
 
         }
     }
+
+//    @GetMapping("/profile/info")
+//    public ResponseEntity<?> getProfileInfo(HttpServletRequest request) {
+//        String token = tokenService.extractTokenFromHeader(request);
+//
+//        // 유효하지 않은 토큰인 경우 -> 401
+//        if (token == null || !tokenService.validateToken(token)) {
+//            throw new IllegalArgumentException("유효하지 않은 토큰이에요");
+//        }
+//
+//        Long userId = tokenService.extractUserIdFromToken(token);
+//
+//        ProfileInfoDTO profileInfoDTO = profileService.getProfileInfo(userId);
+//        return ResponseEntity.ok(profileInfoDTO);
+//    }
+@GetMapping("/profile/info")
+public ResponseEntity<?> getProfileInfo(HttpServletRequest request) {
+    try {
+        String token = tokenService.extractTokenFromHeader(request);
+
+        if (token == null || !tokenService.validateToken(token)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+        Long userId = tokenService.extractUserIdFromToken(token);
+
+        ProfileInfoDTO profileInfoDTO = profileService.getProfileInfo(userId);
+        return ResponseEntity.ok(profileInfoDTO);
+
+    } catch (IllegalArgumentException e) {
+        // 유효하지 않은 토큰 -> 401
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("message", "유효하지 않은 토큰이에요");
+        errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+        errorResponse.put("status", "fail");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+    } catch (Exception e) {
+        // 다른 에러들 -> 400
+        Map<String, Object> errorResponse = new HashMap<>();
+        errorResponse.put("message", "실패했어요");
+        errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+        errorResponse.put("status", "fail");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+}
+
+    @GetMapping("/profile/quiz")
+    public ResponseEntity<?> getProfileQuizStatus(HttpServletRequest request) {
+        try {
+            String token = tokenService.extractTokenFromHeader(request);
+
+            if (token == null || !tokenService.validateToken(token)) {
+                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            }
+            Long userId = tokenService.extractUserIdFromToken(token);
+
+            ProfileQuizStatusDTO profileQuizStatusDTO = profileService.getQuizStatus(userId);
+            return ResponseEntity.ok(profileQuizStatusDTO);
+
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 토큰 -> 401
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "유효하지 않은 토큰이에요");
+            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+        } catch (Exception e) {
+            // 다른 에러들 -> 400
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+
+    }
+
+
+    public ResponseEntity<ProfileAttendanceListDTO> getAttendanceList(HttpServletRequest request) {
+        String token = tokenService.extractTokenFromHeader(request);
+
+        // 유효하지 않은 토큰인 경우 -> 401
+        if (token == null || !tokenService.validateToken(token)) {
+            return ResponseEntity.status(401).body(null);
+        }
+        Long userId = tokenService.extractUserIdFromToken(token);
+
+        ProfileAttendanceListDTO profileAttendanceListDTO = profileService.getAttendanceList(userId);
+        return ResponseEntity.ok(profileAttendanceListDTO);
+    }
+
 }
