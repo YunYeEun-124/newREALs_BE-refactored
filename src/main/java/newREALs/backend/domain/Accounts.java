@@ -32,7 +32,7 @@ public class Accounts {
 
     @Column(name = "attendanceList")
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
-    private boolean[] attendanceList = new boolean[31]; //매달 리셋됨
+    private final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
 
     @Builder

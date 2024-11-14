@@ -19,7 +19,7 @@ import java.util.List;
 //    private String keyword; //FK
 //    private Date   uploadDate;
 //    private String imageUrl;
-//    //	private Image image;
+//    private Image image;
 //    private String title;
 //    private String summary;
 //    private String description;
@@ -46,14 +46,14 @@ public class Basenews {
     @JoinColumn(name="subCategory_id",nullable = false)
     private SubCategory subCategory;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "keyword_id", nullable = true) //없는 경우도 있음.
     private Keyword keyword;
 
 
    // private List<HashMap<String,String>> term; //용어-설명세트 리스트
     @ElementCollection
-    @Column
+    @CollectionTable(name = "BASENEWS_TERM_LIST", joinColumns = @JoinColumn(name = "basenews_id"))
     private List<TermDetail> termList = new ArrayList<>();
 
     @Column
@@ -65,20 +65,20 @@ public class Basenews {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = true, length=1000)
     private String summary;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String newsUrl;
 
-    @Column
+    @Column(nullable = false)
     private boolean scrap;
     //dafault = F -> T : 유저 스크랩리스트에 저장돼,
 
-    @Column
+    @Column(nullable = false)
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
@@ -90,18 +90,24 @@ public class Basenews {
         this.title = title;
         this.summary = summary;
         this.description = description;
-        this.uploadDate = uploadDate;
-        this.newsUrl = newsUrl;
-        this.isDailyNews = false;
-        this.scrap = false;
-        this.category = cate;
-        this.subCategory = subCa;
-        this.keyword  = keyword;
-        this.imageUrl = imageUrl;
         this.termList = terms;
 
 
     }
+
+    //setter
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTermList(List<TermDetail> termList) {
+        this.termList = termList;
+    }
+
 
 }
 
