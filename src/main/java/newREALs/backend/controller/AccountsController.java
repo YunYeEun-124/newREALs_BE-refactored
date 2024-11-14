@@ -5,10 +5,7 @@ import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import newREALs.backend.DTO.BaseNewsThumbnailDTO;
-import newREALs.backend.DTO.ProfileAttendanceListDTO;
-import newREALs.backend.DTO.ProfileInfoDTO;
-import newREALs.backend.DTO.ProfileQuizStatusDTO;
+import newREALs.backend.DTO.*;
 import newREALs.backend.service.KakaoService;
 import newREALs.backend.service.ProfileService;
 import newREALs.backend.service.TokenService;
@@ -18,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -136,7 +134,6 @@ public class AccountsController {
 
     }
 
-
     @GetMapping("/profile/attendance")
     public ResponseEntity<?> getAttendanceList(HttpServletRequest request) {
         try {
@@ -181,6 +178,7 @@ public class AccountsController {
             Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
 
             Map<String, Object> response = new HashMap<>();
+            response.put("user_id", userId);
             response.put("basenewsList", scrapNewsPage.getContent());
             response.put("totalPage", scrapNewsPage.getTotalPages());
             response.put("totalElement", scrapNewsPage.getTotalElements());
@@ -205,33 +203,38 @@ public class AccountsController {
         }
     }
 
-//    @GetMapping("/profile/interest")
-//    public ResponseEntity<?> getInterest(HttpServletRequest request) {
-//        try {
-//            String token = tokenService.extractTokenFromHeader(request);
-//
-//            if(token == null || !tokenService.validateToken(token)) {
-//                throw new IllegalArgumentException("유효하지 않은 토큰이에요");
-//            }
-//            Long userId = tokenService.extractUserIdFromToken(token);
-//
-//            // 구현
-//
-//        }  catch (IllegalArgumentException e) {
-//            // 유효하지 않은 토큰 -> 401
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-//
-//        } catch (Exception e) {
-//            // 다른 에러들 -> 400
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
-//    }
+    @GetMapping("/profile/interest")
+    public ResponseEntity<?> getInterest(HttpServletRequest request) {
+        try {
+            String token = tokenService.extractTokenFromHeader(request);
+
+            if (token == null || !tokenService.validateToken(token)) {
+                throw new IllegalArgumentException("유효하지 않은 토큰이에요");
+            }
+            Long userId = tokenService.extractUserIdFromToken(token);
+
+            Map<String, List<ProfileInterestDTO>> interestMap = profileService.getInterest(userId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user_id", userId);
+            response.put("interest", interestMap);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 토큰 -> 401
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+        } catch (Exception e) {
+            // 다른 에러들 -> 400
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
 }
