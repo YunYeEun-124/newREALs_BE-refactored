@@ -19,7 +19,7 @@ import java.util.ArrayList;
 public class ChatGPTServiceImpl implements ChatGPTService {
     private final RestTemplate restTemplate;
     private final HttpHeaders headers;
-    private final String model = "gpt-3.5-turbo"; // 최신 모델로 변경
+    private final String model = "gpt-3.5-turbo";
 
     public ChatGPTServiceImpl(ChatGPTConfig chatGPTConfig) {
         this.restTemplate = chatGPTConfig.restTemplate();
@@ -39,16 +39,16 @@ public class ChatGPTServiceImpl implements ChatGPTService {
 
         HttpEntity<GptRequestDto> entity = new HttpEntity<>(requestDto, headers);
 
-        // 최신 엔드포인트 URL 사용
+        //엔드포인트
         String url = "https://api.openai.com/v1/chat/completions";
         ResponseEntity<GptResponseDto> response = restTemplate.postForEntity(url, entity, GptResponseDto.class);
 
         try {
-            // ObjectMapper를 사용하여 응답을 파싱합니다.
+            // ObjectMapper로 gpt 답변 파싱하기
             ObjectMapper objectMapper = new ObjectMapper();
             Map<String, Object> result = objectMapper.convertValue(response.getBody(), new TypeReference<>() {});
 
-            // "choices"에서 첫 번째 응답의 "message" 항목을 가져옵니다.
+            //choices에서 첫 번째 응답의 message를 가져옴
             List<Map<String, Object>> choices = (List<Map<String, Object>>) result.get("choices");
             Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
             String text = (String) message.get("content");

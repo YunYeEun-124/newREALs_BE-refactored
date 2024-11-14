@@ -15,14 +15,14 @@ public class ChatGPTConfig {
     @Value("${openai.organization-id}")
     private String organizationId;
 
-    //RestTemplate을 사용하기 위한 객체를 구성하였습니다.
+    //RestTemplate 사용하기 위한 객체 만들기
     @Bean
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         return restTemplate;
     }
 
-    // HttpHeader에서 JWT 토큰으로 Bearer 토큰 값을 입력하여서 전송하기 위한 공통 Header를 구성
+    // HttpHeader에서 JWT 토큰으로 Bearer 토큰 값을 입력해서 전송하기 위한 공통 Header 만들기
     @Bean
     public HttpHeaders httpHeaders() {
         HttpHeaders headers = new HttpHeaders();

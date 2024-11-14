@@ -25,30 +25,14 @@ public class NewsService {
         this.basenewsRepository = basenewsRepository;
     }
 
-    // GPT의 용어정리 파싱해서 TermDetail 리스트로 변환
-//    private List<TermDetail> parseTerms(String termsContent) {
-//        List<TermDetail> termDetails = new ArrayList<>();
-//
-//        // 예시: "용어1: 설명1, 용어2: 설명2, ..." 형식의 문자열을 파싱
-//        String[] termsArray = termsContent.split(",");
-//        for (String termPair : termsArray) {
-//            String[] termAndDescription = termPair.split(":");
-//            if (termAndDescription.length == 2) {
-//                String term = termAndDescription[0].trim();
-//                String termDescription = termAndDescription[1].trim();
-//                termDetails.add(new TermDetail(term, termDescription));
-//            }
-//        }
-//        return termDetails;
-//    }
     private List<TermDetail> parseTerms(String termsContent) {
         List<TermDetail> termDetails = new ArrayList<>();
 
-        // 줄바꿈을 기준으로 각 용어 설명 세트를 분리
+        //용어 설명 세트분리하기 (줄바꿈 기준)
         String[] termsArray = termsContent.split("\\n");
         for (String termPair : termsArray) {
-            termPair = termPair.replaceAll("\\d+\\.\\s*", ""); // 번호 제거 (예: "1. ", "2. " 등)
-            String[] termAndDescription = termPair.split(":", 2);  // 첫 번째 콜론을 기준으로 용어와 설명 구분
+            termPair = termPair.replaceAll("\\d+\\.\\s*", ""); // 번호 제거
+            String[] termAndDescription = termPair.split(":", 2);  // 첫 번째 콜론 기준으로 용어와 설명 구분
             if (termAndDescription.length == 2) {
                 String term = termAndDescription[0].trim();
                 String termDescription = termAndDescription[1].trim();
@@ -88,7 +72,7 @@ public class NewsService {
         List<TermDetail> termDetails = parseTerms(termsContent);
 
         // 데이터 저장
-        basenews.setSummary(summary.length() > 255 ? summary.substring(0, 255) : summary);  // 길이 제한
+        basenews.setSummary(summary.length() > 255 ? summary.substring(0, 255) : summary);
         basenews.setDescription(explanation);  // 설명 필드에는 전체 설명 저장
         basenews.setTermList(termDetails);  // termList에 용어 리스트 저장
         basenewsRepository.save(basenews);
