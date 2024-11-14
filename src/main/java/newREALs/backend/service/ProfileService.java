@@ -2,19 +2,16 @@ package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import newREALs.backend.DTO.ProfileAttendanceListDTO;
-import newREALs.backend.DTO.ProfileInfoDTO;
-import newREALs.backend.DTO.ProfileQuizStatusDTO;
-import newREALs.backend.DTO.QuizDTO;
+import newREALs.backend.DTO.*;
 import newREALs.backend.domain.*;
-import newREALs.backend.repository.AccountsRepository;
-import newREALs.backend.repository.DailyNewsRepository;
-import newREALs.backend.repository.UserKeywordRepository;
-import newREALs.backend.repository.UserRepository;
+import newREALs.backend.repository.*;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +21,7 @@ public class ProfileService {
     private final UserKeywordRepository userKeywordRepository;
     private final DailyNewsRepository dailyNewsRepository;
     private final AccountsRepository accountsRepository;
+    private final BaseNewsRepository baseNewsRepository;
 
     public ProfileInfoDTO getProfileInfo(Long userId) {
         Accounts account = userRepository.findById(userId)
@@ -75,5 +73,35 @@ public class ProfileService {
                 .user_id(account.getId())
                 .attendanceList(attendanceList)
                 .build();
+    }
+
+
+    public Pageable getPageInfo(int page) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("uploadDate"));
+        return PageRequest.of(page - 1, 8, Sort.by(sorts));
+    }
+
+    public Page<BaseNewsThumbnailDTO> getScrapNewsThumbnail(Long userId, int page) {
+        Accounts account = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+
+        Pageable pageable = getPageInfo(page);
+
+        // 스크랩 된 뉴스 가져와
+        Page<Basenews> scrapNewsPage = baseNewsRepository.findScrapNewsByUserId(userId, pageable);
+
+        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDTO.builder()
+                .basenewsId(basenews.getId())
+                .category(basenews.getCategory().getName())
+                .subCategory(basenews.getSubCategory().getName())
+                .keyword(basenews.getKeyword().getName())
+                .title(basenews.getTitle())
+                .summary(basenews.getSummary())
+                .imageUrl(basenews.getImageUrl())
+                .date(basenews.getUploadDate().toString())
+                .isScrap(true)
+                .build()
+        );
     }
 }
