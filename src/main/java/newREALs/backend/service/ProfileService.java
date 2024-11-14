@@ -19,9 +19,7 @@ import java.util.Map;
 public class ProfileService {
     private final UserRepository userRepository;
     private final UserKeywordRepository userKeywordRepository;
-    private final DailyNewsRepository dailyNewsRepository;
     private final AccountsRepository accountsRepository;
-    private final BaseNewsRepository baseNewsRepository;
 
     public ProfileInfoDTO getProfileInfo(Long userId) {
         Accounts account = userRepository.findById(userId)
@@ -89,7 +87,7 @@ public class ProfileService {
         Pageable pageable = getPageInfo(page);
 
         // 스크랩 된 뉴스 가져와
-        Page<Basenews> scrapNewsPage = baseNewsRepository.findScrapNewsByUserId(userId, pageable);
+        Page<Basenews> scrapNewsPage = accountsRepository.findScrapNewsByUserId(userId, pageable);
 
         return scrapNewsPage.map(basenews -> BaseNewsThumbnailDTO.builder()
                 .basenewsId(basenews.getId())

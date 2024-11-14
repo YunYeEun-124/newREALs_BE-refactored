@@ -1,18 +1,13 @@
 package newREALs.backend.repository;
 
 import newREALs.backend.domain.Basenews;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
 
     //List<Basenews> findAllBySubcategoryId(Long subCategoryId);
@@ -30,9 +25,4 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
     Page<Basenews> findAllByTitleContainingOrDescriptionContaining(String searchword, Pageable pageable);
 
     Optional<Basenews> findFirstByTitle(String title);
-
-    // Basenews랑 Scrap 조인 -> 유저 id로 isScrap이 true인 거 불러오기
-    @Query("SELECT b FROM Basenews b JOIN Scrap s ON b.id = s.bnews.id " +
-            "WHERE s.user.id = :userId AND b.scrap = true")
-    Page<Basenews> findScrapNewsByUserId(@Param("userId") Long userId, Pageable pageable);
 }
