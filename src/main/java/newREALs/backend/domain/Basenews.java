@@ -1,17 +1,14 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import jdk.jfr.Timestamp;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 //    private String category; //FK
@@ -74,23 +71,25 @@ public class Basenews {
     @Column(nullable = true)
     private String newsUrl;
 
-    @Column(nullable = false)
-    private boolean scrap;
-    //dafault = F -> T : 유저 스크랩리스트에 저장돼,
 
     @Column(nullable = false)
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
+
+//    @Column(name = "likes_count", nullable = false)
+//    private int[] likesCounts=new int[3];
+
     @Builder
     public Basenews(String title,String summary,String description,LocalDateTime uploadDate,
-                    String newsUrl,List<TermDetail> terms ,
-                    Category cate,SubCategory subCa,Keyword keyword, String imageUrl ){
+                    String newsUrl,List<TermDetail> terms ,boolean isDailyNews,
+                    Category category,SubCategory subCategory,Keyword keyword, String imageUrl,boolean scrapped){
 
         this.title = title;
         this.summary = summary;
         this.description = description;
         this.termList = terms;
+        //this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
 
 
     }
@@ -107,6 +106,18 @@ public class Basenews {
     public void setTermList(List<TermDetail> termList) {
         this.termList = termList;
     }
+
+
+//    //공감 수 증가감소
+//    public void updateLikesCounts(int reactionType, boolean increment){
+//        if(reactionType>=0&&reactionType<likesCounts.length){
+//            likesCounts[reactionType]+=increment?1:-1;
+//            //increment=true이면 1증가.
+//            //increment=false이면 1감소.
+//        } else{
+//            throw new IllegalArgumentException("인덱스 범위 초과입니다.");
+//        }
+//    }
 
 
 }
