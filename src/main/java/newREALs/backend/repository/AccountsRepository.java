@@ -27,4 +27,20 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
     @Query("SELECT b FROM Basenews b JOIN Scrap s ON b.id = s.bnews.id " +
             "WHERE s.user.id = :userId AND b.scrap = true")
     Page<Basenews> findScrapNewsByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    // LIMIT 사용 안됨 -> Pageable로 가져오는 개수 정하기
+    // 카테고리별 관심도 count 상위 3개
+    @Query("SELECT sc.category.name, sc.name, si.count " +
+            "FROM SubInterest si " +
+            "JOIN si.subCategory sc " +
+            "WHERE si.user.id = :userId AND sc.category.name = :category " +
+            "ORDER BY si.count DESC")
+    List<Object[]> findCategoryInterestByUserId(Long userId, String category, Pageable pageable);
+
+    // 전체 관심도 count 상위 3개
+    @Query("SELECT si.subCategory.category.name, si.subCategory.name, si.count " +
+            "FROM SubInterest si " +
+            "WHERE si.user.id = :userId " +
+            "ORDER BY si.count DESC")
+    List<Object[]> findTotalInterestByUserId(Long userId, Pageable pageable);
 }
