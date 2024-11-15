@@ -11,20 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-//    private String category; //FK
-//    private String subCategory; //FK
-//    private String keyword; //FK
-//    private Date   uploadDate;
-//    private String imageUrl;
-//    private Image image;
-//    private String title;
-//    private String summary;
-//    private String description;
-//    private String newsUrl;
-//    private List<HashMap<String,String>> term; //용어-설명세트 리스트
-//
-//    private boolean scrap; //dafault = F -> T : 유저 스크랩리스트에 저장돼,
-//    private boolean isDailyNews; //매일 초기화.
+
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -77,8 +64,8 @@ public class Basenews {
     //T : 데일리 뉴스다~
 
 
-//    @Column(name = "likes_count", nullable = false)
-//    private int[] likesCounts=new int[3];
+    @Column(name = "likes_count", nullable = false)
+    private int[] likesCounts=new int[3];
 
     @Builder
     public Basenews(String title,String summary,String description,LocalDateTime uploadDate,
@@ -89,7 +76,7 @@ public class Basenews {
         this.summary = summary;
         this.description = description;
         this.termList = terms;
-        //this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
+        this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
 
 
     }
@@ -108,16 +95,6 @@ public class Basenews {
     }
 
 
-//    //공감 수 증가감소
-//    public void updateLikesCounts(int reactionType, boolean increment){
-//        if(reactionType>=0&&reactionType<likesCounts.length){
-//            likesCounts[reactionType]+=increment?1:-1;
-//            //increment=true이면 1증가.
-//            //increment=false이면 1감소.
-//        } else{
-//            throw new IllegalArgumentException("인덱스 범위 초과입니다.");
-//        }
-//    }
 
 
 }

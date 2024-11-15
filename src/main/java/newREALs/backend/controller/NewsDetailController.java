@@ -31,13 +31,13 @@ public class NewsDetailController {
         return ResponseEntity.ok("스크랩 등록/삭제 완료");
     }
 
-//    @PostMapping("/{id}/likes")
-//    public ResponseEntity<String> getLikes(
-//            @PathVariable Long id,
-//            @RequestParam Long userId,
-//            @RequestParam int reactionType){
-//        newsDetailService.getLikes(id, userId, reactionType);
-//        return ResponseEntity.ok("공감수 반영, 관심도 업데이트 성공");
-//    }
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<String> getLikes(
+            @PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestParam int reactionType){
+        newsDetailService.getLikes(id, userId, reactionType);
+        return ResponseEntity.ok("공감수 반영, 관심도 업데이트 성공");
+    }
 
 }

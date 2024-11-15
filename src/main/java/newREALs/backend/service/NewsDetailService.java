@@ -84,33 +84,39 @@ public class NewsDetailService {
 
     }
 
-//    //공감 버튼 처리
-//    @Transactional
-//    public void getLikes(Long basenewsId, Long userId, int reactionType ){
-//        Basenews basenews=basenewsRepository.findById(basenewsId)
-//                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
-//        Accounts user=userRepository.findById(userId)
-//                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
-//
-//        //Likes 객체 받아와서
-//        Optional<Likes> existingLike=likesRepository.findByUserAndBasenews(user,basenews);
-//
-//        if(existingLike.isPresent()){
-//            //Likes 객체가 존재 : 이미 공감버튼 눌려 있다는 뜻
-//            Likes like=existingLike.get();
-//            basenews.getLikesCounts()[reactionType]--; //현재 반응 취소. 공감수 감소
-//            likesRepository.delete(like);
-//        }else{
-//            //Likes 객체 없음 : 공감 버튼 안눌려있음
-//            basenews.getLikesCounts()[reactionType]++; //공감수 증가
-//            likesRepository.save(new Likes(basenews,user,reactionType));
-//        }
-//
-//        //유저 관심도 업데이트 로직 추가하기!!!
-//
-//        //저장
-//        basenewsRepository.save(basenews);
-//    }
+    //공감 버튼 처리
+    @Transactional
+    public void getLikes(Long basenewsId, Long userId, int reactionType ){
+        Basenews basenews=basenewsRepository.findById(basenewsId)
+                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+
+        if (reactionType < 0 || reactionType >= 3) {
+            throw new IllegalArgumentException("Invalid reaction type. It must be between 0 and 2.");
+        }
+        //Likes 객체 받아와서
+        Optional<Likes> existingLike=likesRepository.findByUserAndBasenews(user,basenews);
+
+        if(existingLike.isPresent()){
+            //Likes 객체가 존재 : 이미 공감버튼 눌려 있다는 뜻
+            Likes like=existingLike.get();
+            if(like.getReactionType()==reactionType){ //화나요에 좋아요 눌러져있음 -> 또 화나요 클릭한 케이스
+                basenews.getLikesCounts()[reactionType]--; //현재 반응 취소. 공감수 감소
+                likesRepository.delete(like);
+            }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
+
+            }
+        }else{
+            //Likes 객체 없음 : 공감 버튼 안눌려있음
+            basenews.getLikesCounts()[reactionType]++; //공감수 증가
+            likesRepository.save(new Likes(basenews,user,reactionType));
+        }
+        //유저 관심도 업데이트 로직 추가하기!!!
+
+        //저장
+        basenewsRepository.save(basenews);
+    }
 
 
 }

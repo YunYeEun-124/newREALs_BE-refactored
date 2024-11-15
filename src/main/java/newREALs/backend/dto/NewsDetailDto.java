@@ -30,10 +30,10 @@ public class NewsDetailDto {
         this.newsUrl = basenews.getNewsUrl();
         this.uploadDate = basenews.getUploadDate();
 
-//        //공감수
-//        this.good=basenews.getLikesCounts()[0];
-//        this.bad=basenews.getLikesCounts()[1];
-//        this.interesting=basenews.getLikesCounts()[2];
+        //공감수
+        this.good=basenews.getLikesCounts()[0];
+        this.bad=basenews.getLikesCounts()[1];
+        this.interesting=basenews.getLikesCounts()[2];
     }
 
     private List<TermDetailDto> termList;
