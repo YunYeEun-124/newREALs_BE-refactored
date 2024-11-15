@@ -29,21 +29,16 @@ public class Dailynews {
 
     @Column
     @ElementCollection
-    private int[] quizeStatus = new int[5];  //-1:틀림 0:안풀었음 1:맞음
-
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    private Accounts user;
+    private int[] quizStatus = new int[5];  //-1:틀림 0:안풀었음 1:맞음
 
     @Builder
-    public Dailynews(Accounts user ,Quiz[] quizList,Basenews[] newsList){
-        this.user = user;
+    public Dailynews(Quiz[] quizList,Basenews[] newsList){
         this.quizList = quizList;
 
         if(newsList.length != 5) throw new IllegalArgumentException("dailynews는 5개입니다.");
 
         for(Basenews b : newsList){ //베이스뉴스필드 isdailynews가 T인 경우만 해당함.
-           if( !b.isDailyNews() ) throw new IllegalArgumentException("basenews isDailynews가 F입니다.");
+            if( !b.isDailyNews() ) throw new IllegalArgumentException("basenews isDailynews가 F입니다.");
         }
 
         this.newsList = newsList;

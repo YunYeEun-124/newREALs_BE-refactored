@@ -23,15 +23,6 @@ public class Likes {
     @Column
     private LocalDateTime createdDate; //매달 분석도를 끊어야하기 때문.
 
-//    //중복방지,
-//    @ElementCollection
-//    @Column
-//    private boolean[] hasLiked = new boolean[3];
-
-//    //공감 수
-//    @ElementCollection
-//    @Column
-//    private int[] likes  = new int[3];
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
