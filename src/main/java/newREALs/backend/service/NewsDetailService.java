@@ -46,6 +46,10 @@ public class NewsDetailService {
             clickRepository.save(c);
             basenews.setViewCount(basenews.getViewCount()+1);
             basenewsRepository.save(basenews);
+        }else{
+            //내가 이걸 몇번 봤는지만 카운트.. 뉴스자체의 조회수는 안올라감
+            Click c= click.get();
+            c.setCount(c.getCount()+1);
         }
 
         //basenews를 newsdetailDTO로 변환

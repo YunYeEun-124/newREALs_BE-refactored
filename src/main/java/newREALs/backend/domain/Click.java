@@ -23,10 +23,16 @@ public class Click {
     @JoinColumn(name = "news_id", nullable = false)
     private Basenews basenews;
 
+    @Column(nullable=false)
+    private Long count;
     @Builder
     public Click(Accounts user, Basenews basenews){
         this.user=user;
         this.basenews=basenews;
+        this.count=1L;
     }
 
+    public void setCount(Long count) {
+        this.count = count;
+    }
 }
