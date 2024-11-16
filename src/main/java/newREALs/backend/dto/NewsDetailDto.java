@@ -20,6 +20,7 @@ public class NewsDetailDto {
     private int bad;
     private int interesting;
     private int totalLikes;
+    private Long viewCount; //조회수
 
     public NewsDetailDto(Basenews basenews) {
         this.id = basenews.getId();
@@ -29,7 +30,7 @@ public class NewsDetailDto {
         this.imageUrl = basenews.getImageUrl();
         this.newsUrl = basenews.getNewsUrl();
         this.uploadDate = basenews.getUploadDate();
-
+        this.viewCount=basenews.getViewCount();
         //공감수
         this.good=basenews.getLikesCounts()[0];
         this.bad=basenews.getLikesCounts()[1];

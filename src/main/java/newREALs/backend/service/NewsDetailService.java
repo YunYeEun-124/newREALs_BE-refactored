@@ -19,19 +19,16 @@ public class NewsDetailService {
     private final ScrapRepository scrapRepository;
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
+    private final ClickRepository clickRepository;
 
-    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository) {
+    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository) {
         this.basenewsRepository = basenewsRepository;
         this.userRepository = userRepository;
         this.scrapRepository = scrapRepository;
         this.likesRepository = likesRepository;
         this.subInterestRepository = subInterestRepository;
+        this.clickRepository = clickRepository;
     }
-
-//    public Basenews getNewsDetail(Long basenewsId){
-//        return basenewsRepository.findById(basenewsId)
-//                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
-//    }
 
     //뉴스 상세페이지 조회 메서드
     @Transactional
@@ -40,6 +37,16 @@ public class NewsDetailService {
                 .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+
+        //조회수 증가
+        Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
+        if(!click.isPresent()){
+            //처음 클릭하는거면
+            Click c=new Click(user,basenews);
+            clickRepository.save(c);
+            basenews.setViewCount(basenews.getViewCount()+1);
+            basenewsRepository.save(basenews);
+        }
 
         //basenews를 newsdetailDTO로 변환
         NewsDetailDto newsDetailDto=new NewsDetailDto(basenews);
@@ -54,6 +61,8 @@ public class NewsDetailService {
         Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
         boolean b=isScrapped.isPresent();
         newsDetailDto.setScrapped(b);
+
+
 
         return newsDetailDto;
     }

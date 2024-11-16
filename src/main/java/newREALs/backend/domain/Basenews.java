@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -58,6 +59,9 @@ public class Basenews {
     @Column(nullable = true)
     private String newsUrl;
 
+    @Column(nullable=false)
+    private Long viewCount;
+
 
     @Column(name = "is_daily_news",nullable = false)
     private boolean isDailyNews; //매일 초기화.
@@ -77,7 +81,7 @@ public class Basenews {
         this.description = description;
         this.termList = terms;
         this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
-
+        this.viewCount=0L;  //기본값 0으로 설정
 
     }
 
@@ -94,6 +98,8 @@ public class Basenews {
         this.termList = termList;
     }
 
-
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount;
+    }
 }
 
