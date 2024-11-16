@@ -25,13 +25,13 @@ public class NewsDetailController {
         return ResponseEntity.ok(newsDetailDto);
     }
 
-    @PostMapping("/{id}/scrap")
+    @PostMapping("/scrap/{id}")
     public ResponseEntity<String> getScrap(@PathVariable Long id, @RequestParam Long userId){
         newsDetailService.getScrap(id,userId);
         return ResponseEntity.ok("스크랩 등록/삭제 완료");
     }
 
-    @PostMapping("/{id}/likes")
+    @PostMapping("/likes/{id}")
     public ResponseEntity<String> getLikes(
             @PathVariable Long id,
             @RequestParam Long userId,

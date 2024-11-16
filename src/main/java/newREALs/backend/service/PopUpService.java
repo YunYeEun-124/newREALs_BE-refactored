@@ -21,10 +21,14 @@ public class PopUpService {
                 .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
 
         int date= LocalDate.now().getDayOfMonth()-1;
+//        if(user.getAttendanceList().get(date)){ //if(user.getAttendanceList()[date])
+//            return ResponseEntity.badRequest().body("이미 출석을 완료했어요.");
+//        }
         if(user.getAttendanceList()[date]){
-            return ResponseEntity.badRequest().body("이미 출석을 완료했어요.");
+                return ResponseEntity.badRequest().body("이미 출석을 완료했어요.");
         }
 
+        //user.getAttendanceList().set(date,true);
         user.getAttendanceList()[date]=true;
         user.setPoint(user.getPoint()+150);
         userRepository.save(user);

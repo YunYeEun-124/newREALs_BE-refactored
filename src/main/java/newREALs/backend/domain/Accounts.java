@@ -6,6 +6,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /** JPA 엔티티는 기본 생성자가 필수인데 이걸로 대체
  * 매개변수 필요한 생성자는 밑에있는 @builder 사용하여 가독성 향상
  * ( 팀프로젝트에 좋을거같아서 도입해봤습니다.)
@@ -31,23 +36,21 @@ public class Accounts {
     private int point;
 
     @Column(name = "attendanceList")
-    @ElementCollection(fetch = FetchType.LAZY) //notion 참고
-    final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
+    @CollectionTable(name = "accounts_attendance_list", joinColumns = @JoinColumn(name ="account_id"))
+    @ElementCollection(fetch = FetchType.LAZY)
+    //private List<Boolean> attendanceList = new ArrayList<>(Collections.nCopies(31, false)); // 기본값으로 31개의 false 생성
+    private boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @ManyToOne
-    @JoinColumn(name = "daily_news_id")
-    private Dailynews dailynews;
 
     @Builder
-    public Accounts(String name, String profilePath, String email, Dailynews dailynews) {
+    public Accounts(String name, String profilePath, String email) {
         this.name = name;
         this.profilePath = profilePath;
         this.email = email;
         this.point = 0;
-        this.dailynews = dailynews;
     }
 
     public void setPoint(int point) {

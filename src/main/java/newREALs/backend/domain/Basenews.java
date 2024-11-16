@@ -59,7 +59,7 @@ public class Basenews {
     private String newsUrl;
 
 
-    @Column(nullable = false)
+    @Column(name = "is_daily_news",nullable = false)
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 

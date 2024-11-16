@@ -17,10 +17,10 @@ public class Quiz {
 
     @OneToOne
     @JoinColumn(name = "basenews_id", nullable = false)
-    private Basenews baseNews; //fk
+    private Basenews basenews; //fk
 
     @Column(nullable = false)
-    private String quiz;//
+    private String problem;//
 
     @Column(nullable = false)
     private Boolean answer; //정답 O -> T, X->F로 지정한다.
@@ -28,11 +28,12 @@ public class Quiz {
     @Column(nullable = false)
     private String comment; //해설
 
+
     @Builder
-    public Quiz(String q, boolean a, String comment,Basenews baseNews){
+    public Quiz(String p, boolean a, String comment,Basenews basenews){
         this.answer = a;
-        this.quiz = q;
+        this.problem = p;
         this.comment = comment;
-        this.baseNews = baseNews;
+        this.basenews = basenews;
     }
 }
