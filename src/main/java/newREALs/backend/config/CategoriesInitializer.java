@@ -1,4 +1,4 @@
-package newREALs.backend.initializer;
+package newREALs.backend.config;
 
 import newREALs.backend.domain.Category;
 import newREALs.backend.domain.Keyword;

@@ -26,6 +26,7 @@ public class ChatGPTServiceImpl implements ChatGPTService {
         this.headers = chatGPTConfig.httpHeaders();
     }
 
+    //요약, 설명, 용어 정리 생성하는 메서드
     @Override
     public Map<String, Object> generateContent(List<Map<String,String>> messages) {
 
@@ -58,4 +59,10 @@ public class ChatGPTServiceImpl implements ChatGPTService {
             throw new RuntimeException("Failed to parse response from GPT", e);
         }
     }
+
+    //퀴즈 생성 메서드
+
+
+
+
 }

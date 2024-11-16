@@ -1,30 +1,32 @@
 package newREALs.backend.service;
 
 import newREALs.backend.domain.Basenews;
+import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.TermDetail;
 import newREALs.backend.dto.GptRequestDto;
 import newREALs.backend.repository.BasenewsRepository;
+import newREALs.backend.repository.QuizRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 
 import java.net.http.HttpHeaders;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BasenewsRepository basenewsRepository;
+    private final QuizRepository quizRepository;
 
-    public NewsService(ChatGPTService chatGPTService, BasenewsRepository basenewsRepository) {
+    public NewsService(ChatGPTService chatGPTService, BasenewsRepository basenewsRepository, QuizRepository quizRepository) {
         this.chatGPTService = chatGPTService;
         this.basenewsRepository = basenewsRepository;
+        this.quizRepository = quizRepository;
     }
 
+    //용어 파싱 메서드
     private List<TermDetail> parseTerms(String termsContent) {
         List<TermDetail> termDetails = new ArrayList<>();
 
@@ -42,7 +44,7 @@ public class NewsService {
         return termDetails;
     }
 
-
+    //요약, 설명, 용어 생성 메서드
     @Transactional
     public void processArticle(Long basenewsId) throws Throwable {
         Basenews basenews = basenewsRepository.findById(basenewsId)
@@ -77,4 +79,60 @@ public class NewsService {
         basenews.setTermList(termDetails);  // termList에 용어 리스트 저장
         basenewsRepository.save(basenews);
     }
+
+
+    //퀴즈 생성하는 메서드
+    @Transactional
+    public void generateAndSaveQuizzesForDailyNews() {
+        // 1. isDailynews=true인 basenews 가져오기
+        List<Basenews> dailyNewsList = basenewsRepository.findByIsDailyNewsTrue();
+
+        for (Basenews news : dailyNewsList) {
+            // 2. GPT를 통해 문제, 정답, 해설 생성 요청
+            List<Map<String, String>> quizMessages = new ArrayList<>();
+            quizMessages.add(Map.of("role", "system", "content", "You are a helpful assistant that generates quizzes."));
+            quizMessages.add(Map.of("role", "user", "content",
+                    "다음 기사의 설명을 읽고 true/false 문제를 만들어 주세요.\n" +
+                            "문제, 정답(O 또는 X), 해설을 다음과 같은 형식으로 제공해주세요:\n" +
+                            "문제: <문제 내용>\n" +
+                            "정답: <O 또는 X>\n" +
+                            "해설: <해설 내용>\n\n" +
+                            "기사 설명: " + news.getDescription()));
+
+            String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
+
+            // 3. GPT 응답 파싱
+            Map<String, String> parsedQuiz = parseQuizContent(quizContent);
+
+            // 4. Quiz 엔티티 생성 및 저장
+            Quiz quiz = Quiz.builder()
+                    .p(parsedQuiz.get("problem"))
+                    .a("O".equalsIgnoreCase(parsedQuiz.get("answer")))
+                    .comment(parsedQuiz.get("comment"))
+                    .basenews(news)
+                    .build();
+
+            quizRepository.save(quiz);
+        }
+    }
+
+    //퀴즈 파싱 메서드
+    private Map<String, String> parseQuizContent(String quizContent) {
+        Map<String, String> parsedQuiz = new HashMap<>();
+        String[] lines = quizContent.split("\n");
+
+        for (String line : lines) {
+            if (line.startsWith("문제:")) {
+                parsedQuiz.put("problem", line.replace("문제:", "").trim());
+            } else if (line.startsWith("정답:")) {
+                parsedQuiz.put("answer", line.replace("정답:", "").trim());
+            } else if (line.startsWith("해설:")) {
+                parsedQuiz.put("comment", line.replace("해설:", "").trim());
+            }
+        }
+
+        return parsedQuiz;
+    }
 }
+
+
