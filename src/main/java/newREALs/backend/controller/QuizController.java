@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/news/quiz")
+@RequestMapping("/news/quiz")
 public class QuizController {
     private final QuizService quizService;
 
