@@ -21,6 +21,10 @@ public class NewsDetailDto {
     private int interesting;
     private int totalLikes;
     private Long viewCount; //조회수
+    private List<TermDetailDto> termList;
+
+    private SimpleNewsDto prevNews;
+    private SimpleNewsDto nextNews;
 
     public NewsDetailDto(Basenews basenews) {
         this.id = basenews.getId();
@@ -37,7 +41,7 @@ public class NewsDetailDto {
         this.interesting=basenews.getLikesCounts()[2];
     }
 
-    private List<TermDetailDto> termList;
+
 
     public void setTermList(List<TermDetailDto> termList) {
         this.termList = termList;
@@ -53,5 +57,13 @@ public class NewsDetailDto {
 
     public void setScrapped(boolean isScrapped) {
         this.isScrapped=isScrapped;
+    }
+
+    public void setPrevNews(SimpleNewsDto prevNews) {
+        this.prevNews = prevNews;
+    }
+
+    public void setNextNews(SimpleNewsDto nextNews) {
+        this.nextNews = nextNews;
     }
 }

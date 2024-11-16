@@ -3,11 +3,11 @@ package newREALs.backend.service;
 import jakarta.transaction.Transactional;
 import newREALs.backend.domain.*;
 import newREALs.backend.dto.NewsDetailDto;
+import newREALs.backend.dto.SimpleNewsDto;
 import newREALs.backend.dto.TermDetailDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -20,56 +20,60 @@ public class NewsDetailService {
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ClickRepository clickRepository;
+    private final CategoryRepository categoryRepository;
+    private final SubCategoryRepository subCategoryRepository;
 
-    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository) {
+    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository) {
         this.basenewsRepository = basenewsRepository;
         this.userRepository = userRepository;
         this.scrapRepository = scrapRepository;
         this.likesRepository = likesRepository;
         this.subInterestRepository = subInterestRepository;
         this.clickRepository = clickRepository;
+        this.categoryRepository = categoryRepository;
+        this.subCategoryRepository = subCategoryRepository;
     }
 
-    //뉴스 상세페이지 조회 메서드
-    @Transactional
-    public NewsDetailDto getNewsDetail(Long basenewsId, Long userId){
-        Basenews basenews=basenewsRepository.findById(basenewsId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
-        Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
 
-        //조회수 증가
-        Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
-        if(!click.isPresent()){
-            //처음 클릭하는거면
-            Click c=new Click(user,basenews);
-            clickRepository.save(c);
-            basenews.setViewCount(basenews.getViewCount()+1);
-            basenewsRepository.save(basenews);
-        }else{
-            //내가 이걸 몇번 봤는지만 카운트.. 뉴스자체의 조회수는 안올라감
-            Click c= click.get();
-            c.setCount(c.getCount()+1);
-        }
+//    //뉴스 상세페이지 조회 메서드
+//    @Transactional
+//    public NewsDetailDto getNewsDetail(Long basenewsId, Long userId){
+//        Basenews basenews=basenewsRepository.findById(basenewsId)
+//                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+//        Accounts user=userRepository.findById(userId)
+//                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+//
+//        //조회수 증가
+//        Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
+//        if(!click.isPresent()){
+//            //처음 클릭하는거면
+//            Click c=new Click(user,basenews);
+//            clickRepository.save(c);
+//            basenews.setViewCount(basenews.getViewCount()+1);
+//            basenewsRepository.save(basenews);
+//        }else{
+//            //내가 이걸 몇번 봤는지만 카운트.. 뉴스자체의 조회수는 안올라감
+//            Click c= click.get();
+//            c.setCount(c.getCount()+1);
+//        }
+//
+//        //basenews를 newsdetailDTO로 변환
+//        NewsDetailDto newsDetailDto=new NewsDetailDto(basenews);
+//
+//        //용어 목록도 DTO로 변환
+//        List<TermDetailDto> termList=basenews.getTermList().stream()
+//                .map(TermDetailDto::new)
+//                .collect(Collectors.toList());
+//        newsDetailDto.setTermList(termList);
+//
+//        //유저 스크랩여부 확인
+//        Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
+//        boolean b=isScrapped.isPresent();
+//        newsDetailDto.setScrapped(b);
+//
+//        return newsDetailDto;
+//    }
 
-        //basenews를 newsdetailDTO로 변환
-        NewsDetailDto newsDetailDto=new NewsDetailDto(basenews);
-
-        //용어 목록도 DTO로 변환
-        List<TermDetailDto> termList=basenews.getTermList().stream()
-                .map(TermDetailDto::new)
-                .collect(Collectors.toList());
-        newsDetailDto.setTermList(termList);
-
-        //유저 스크랩여부 확인
-        Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
-        boolean b=isScrapped.isPresent();
-        newsDetailDto.setScrapped(b);
-
-
-
-        return newsDetailDto;
-    }
 
     //스크랩 처리 메서드
     @Transactional
@@ -159,6 +163,103 @@ public class NewsDetailService {
         //저장
         basenewsRepository.save(basenews);
     }
+
+    //뉴스 상세페이지 조회 메서드
+    @Transactional
+    public NewsDetailDto getNewsDetail(Long basenewsId, Long userId, String cate, String subCate){
+        Basenews basenews=basenewsRepository.findById(basenewsId)
+                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+
+
+        //조회수 증가
+        Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
+        if(!click.isPresent()){
+            //처음 클릭하는거면
+            Click c=new Click(user,basenews);
+            clickRepository.save(c);
+            basenews.setViewCount(basenews.getViewCount()+1);
+            basenewsRepository.save(basenews);
+        }else{
+            //내가 이걸 몇번 봤는지만 카운트.. 뉴스자체의 조회수는 안올라감
+            Click c= click.get();
+            c.setCount(c.getCount()+1);
+        }
+
+        //basenews를 newsdetailDTO로 변환
+        NewsDetailDto newsDetailDto=new NewsDetailDto(basenews);
+
+        //용어 목록도 DTO로 변환
+        List<TermDetailDto> termList=basenews.getTermList().stream()
+                .map(TermDetailDto::new)
+                .collect(Collectors.toList());
+        newsDetailDto.setTermList(termList);
+
+        //유저 스크랩여부 확인
+        Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
+        boolean b=isScrapped.isPresent();
+        newsDetailDto.setScrapped(b);
+
+
+        //이전, 다음 뉴스
+        List<Basenews> sortedNews=fetchSortedNews(cate,subCate);
+        Basenews prevNews=findPrevNews(sortedNews,basenewsId);
+        Basenews nextNews=findNextNews(sortedNews,basenewsId);
+
+        if(prevNews!=null){
+            newsDetailDto.setPrevNews(new SimpleNewsDto(prevNews.getId(),prevNews.getTitle()));
+        }
+        if (nextNews != null) {
+            newsDetailDto.setNextNews(new SimpleNewsDto(nextNews.getId(), nextNews.getTitle()));
+        }
+        return newsDetailDto;
+    }
+
+//    //같은 카테고리/서브카테고리에 속하는 basenews 리스트 만듦
+//    private List<Basenews> fetchSortedNews(String cate, String subCate){
+//        Optional<Category> category=categoryRepository.findByName(cate);
+//        Optional<SubCategory> subCategory=subCategoryRepository.findByName(subCate);
+//
+//        if(subCategory.isPresent()){
+//            return basenewsRepository.findByCategoryAndSubCategoryOrderByIdAsc(category.get(), subCategory.get());
+//        }
+//        //sub가 없으면 카테고리 기준으로 필터링
+//        return basenewsRepository.findByCategoryOrderByIdAsc(category.get());
+//    }
+
+    // 같은 카테고리/서브카테고리에 속하는 Basenews 리스트 생성
+    private List<Basenews> fetchSortedNews(String cate, String subCate) {
+        Category category = categoryRepository.findByName(cate)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid category name: " + cate));
+
+        if (subCate != null && !subCate.isEmpty()) {
+            SubCategory subCategory = subCategoryRepository.findByName(subCate)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid subcategory name: " + subCate));
+            return basenewsRepository.findByCategoryAndSubCategoryOrderByIdAsc(category, subCategory);
+        }
+
+        // 서브카테고리가 없는 경우 카테고리 기준
+        return basenewsRepository.findByCategoryOrderByIdAsc(category);
+    }
+
+    private Basenews findPrevNews(List<Basenews> sortedNews, Long curId) {
+        for (int i = 0; i < sortedNews.size(); i++) {
+            if (sortedNews.get(i).getId().equals(curId) && i > 0) {
+                return sortedNews.get(i - 1); // 현재 뉴스 이전의 뉴스 반환
+            }
+        }
+        return null; // 이전 뉴스가 없을 경우
+    }
+    private Basenews findNextNews(List<Basenews> sortedNews, Long curId) {
+        for (int i = 0; i < sortedNews.size(); i++) {
+            if (sortedNews.get(i).getId().equals(curId) && i < sortedNews.size() - 1) {
+                return sortedNews.get(i + 1); // 현재 뉴스 다음의 뉴스 반환
+            }
+        }
+        return null; // 다음 뉴스가 없을 경우
+    }
+
 
 
 }

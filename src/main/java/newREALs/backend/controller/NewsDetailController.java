@@ -14,11 +14,23 @@ public class NewsDetailController {
         this.newsDetailService=newsDetailService;
     }
 
+//    //[get]뉴스 상세 페이지
+//    @GetMapping("/{id}")
+//    public ResponseEntity<NewsDetailDto> getNewsDetail(@PathVariable Long id, @RequestParam Long userId){
+//        NewsDetailDto newsDetailDto=newsDetailService.getNewsDetail(id,userId);
+//        return ResponseEntity.ok(newsDetailDto);
+//    }
+
     //[get]뉴스 상세 페이지
     @GetMapping("/{id}")
-    public ResponseEntity<NewsDetailDto> getNewsDetail(@PathVariable Long id, @RequestParam Long userId){
-        NewsDetailDto newsDetailDto=newsDetailService.getNewsDetail(id,userId);
-        return ResponseEntity.ok(newsDetailDto);
+    public ResponseEntity<NewsDetailDto> getNewsDetail(
+            @PathVariable Long id,
+            @RequestParam Long userId,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String subCategory,
+            @RequestParam(required=false) String keyword){
+        NewsDetailDto newsDetail = newsDetailService.getNewsDetail(id, userId, category, subCategory);
+        return ResponseEntity.ok(newsDetail);
     }
 
     //[post]스크랩 버튼 클릭
@@ -37,5 +49,8 @@ public class NewsDetailController {
         newsDetailService.getLikes(id, userId, reactionType);
         return ResponseEntity.ok("공감수 반영, 관심도 업데이트 성공");
     }
+
+    //[get] 이전뉴스, 다음 뉴스 가져오기
+
 
 }
