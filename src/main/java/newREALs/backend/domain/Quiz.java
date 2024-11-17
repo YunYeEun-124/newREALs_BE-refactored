@@ -28,7 +28,6 @@ public class Quiz {
     @Column(nullable = false)
     private String comment; //해설
 
-
     @Builder
     public Quiz(String p, boolean a, String comment,Basenews basenews){
         this.answer = a;

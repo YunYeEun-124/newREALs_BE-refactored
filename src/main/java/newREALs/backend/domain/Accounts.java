@@ -36,10 +36,8 @@ public class Accounts {
     private int point;
 
     @Column(name = "attendanceList")
-    @CollectionTable(name = "accounts_attendance_list", joinColumns = @JoinColumn(name ="account_id"))
-    @ElementCollection(fetch = FetchType.LAZY)
-    //private List<Boolean> attendanceList = new ArrayList<>(Collections.nCopies(31, false)); // 기본값으로 31개의 false 생성
-    private boolean[] attendanceList = new boolean[31]; //매달 리셋됨
+    @ElementCollection(fetch = FetchType.LAZY) //notion 참고
+    final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
