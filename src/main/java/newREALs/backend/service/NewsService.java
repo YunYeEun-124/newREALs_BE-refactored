@@ -49,18 +49,35 @@ public class NewsService {
 
         // 요약 생성 summary
         List<Map<String, String>> summaryMessages = new ArrayList<>();
-        summaryMessages.add(Map.of("role", "system", "content", "You are a helpful assistant."));
-        summaryMessages.add(Map.of("role", "user", "content", "다음 뉴스 기사를 3문장 내로 요약해 주세요.: " + basenews.getDescription()));
+        summaryMessages.add(Map.of("role", "system", "content",
+                "You are a professional assistant that specializes in summarizing articles. "
+                        + "Your goal is to create concise and clear summaries of news articles in 3 sentences."));
+        summaryMessages.add(Map.of("role", "user", "content",
+                "다음 뉴스 기사를 핵심만 간결하게 3문장으로 요약해 주세요. "
+                        + "각 문장은 완결된 문장이어야 하고, 기사의 주요 내용과 배경이 명확히 드러나도록 작성해주세요. "
+                        + "기사 내용은 다음과 같습니다: " + basenews.getDescription()));
 
         // 설명 생성 description
         List<Map<String, String>> explanationMessages = new ArrayList<>();
-        explanationMessages.add(Map.of("role", "system", "content", "You are a helpful assistant."));
-        explanationMessages.add(Map.of("role", "user", "content", "다음 뉴스 기사를 이해하기 쉽게 간단히 설명해 주세요: " + basenews.getDescription()));
+        explanationMessages.add(Map.of("role", "system", "content",
+                "You are a professional assistant that explains news articles in simple terms. "
+                        + "Your goal is to make complex news topics easy to understand for a general audience."));
+        explanationMessages.add(Map.of("role", "user", "content",
+                "아래 뉴스 기사를 독자가 쉽게 이해할 수 있도록 간단하게 설명해 주세요. "
+                        + "핵심 배경, 사건의 원인과 결과를 포함하여 전체 내용을 한눈에 파악할 수 있도록 작성해주세요. "
+                        + "설명은 너무 간략하지 않게, 명확하면서도 친절하게 작성해 주세요. "
+                        + "기사 내용은 다음과 같습니다: " + basenews.getDescription()));
 
         // 용어 리스트 생성 termList
         List<Map<String, String>> termsMessages = new ArrayList<>();
-        termsMessages.add(Map.of("role", "system", "content", "너는 '~해요'체를 쓰는 유능한 어시스턴트야"));
-        termsMessages.add(Map.of("role", "user", "content", "다음 뉴스 기사에서 어려운 용어 5개를 뽑아 각 용어에 대해 간단히 설명해 주세요. 각 용어마다 설명은 1~2문장이어야 합니다. '~해요'체를 사용해서 설명해주세요.: " + basenews.getDescription()));
+        termsMessages.add(Map.of("role", "system", "content",
+                "You are a friendly and knowledgeable assistant who uses polite and clear language. "
+                        + "Your task is to identify difficult terms in news articles and explain them in a simple and approachable way."));
+        termsMessages.add(Map.of("role", "user", "content",
+                "다음 뉴스 기사에서 독자가 이해하기 어려운 중요한 용어 5개를 선택해 주세요. "
+                        + "각 용어의 정의와 기사 내에서의 맥락을 1~2문장으로 간단히 설명해 주세요. "
+                        + "설명은 반드시 '~해요'체를 사용하고, 친절하고 명확하게 작성해 주세요. "
+                        + "기사 내용은 다음과 같습니다: " + basenews.getDescription()));
 
         // GPT 서비스 호출
         String summary = (String) chatGPTService.generateContent(summaryMessages).get("text");
@@ -87,14 +104,18 @@ public class NewsService {
         for (Basenews news : dailyNewsList) {
             // 2. GPT를 통해 문제, 정답, 해설 생성 요청
             List<Map<String, String>> quizMessages = new ArrayList<>();
-            quizMessages.add(Map.of("role", "system", "content", "You are a helpful assistant that generates quizzes."));
+            quizMessages.add(Map.of("role", "system", "content",
+                    "You are a highly skilled assistant that generates quiz questions based on news articles. "
+                            + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
             quizMessages.add(Map.of("role", "user", "content",
-                    "다음 기사의 설명을 읽고 true/false 문제를 만들어 주세요.\n" +
-                            "문제, 정답(O 또는 X), 해설을 다음과 같은 형식으로 제공해주세요:\n" +
-                            "문제: <문제 내용>\n" +
-                            "정답: <O 또는 X>\n" +
-                            "해설: <해설 내용>\n\n" +
-                            "기사 설명: " + news.getDescription()));
+                    "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
+                            + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
+                            + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. "
+                            + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
+                            + "문제: <문제 내용>\n"
+                            + "정답: <O 또는 X>\n"
+                            + "해설: <해설 내용>\n\n"
+                            + "기사 요약: " + news.getDescription()));
 
             String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
 

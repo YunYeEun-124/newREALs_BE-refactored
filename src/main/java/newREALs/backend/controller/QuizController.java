@@ -1,7 +1,7 @@
 package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import newREALs.backend.DTO.QuizDto;
+import newREALs.backend.dto.QuizDto;
 import newREALs.backend.service.QuizService;
 import newREALs.backend.service.TokenService;
 import org.springframework.http.ResponseEntity;

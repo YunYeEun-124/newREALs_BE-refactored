@@ -3,8 +3,8 @@ package newREALs.backend.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import newREALs.backend.config.ChatGPTConfig;
-import newREALs.backend.DTO.GptRequestDto;
-import newREALs.backend.DTO.GptResponseDto;
+import newREALs.backend.dto.GptRequestDto;
+import newREALs.backend.dto.GptResponseDto;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,7 @@ import java.util.Map;
 public class ChatGPTServiceImpl implements ChatGPTService {
     private final RestTemplate restTemplate;
     private final HttpHeaders headers;
-    private final String model = "gpt-3.5-turbo";
+    private final String model = "gpt-4-turbo";
 
     public ChatGPTServiceImpl(ChatGPTConfig chatGPTConfig) {
         this.restTemplate = chatGPTConfig.restTemplate();
@@ -34,14 +34,16 @@ public class ChatGPTServiceImpl implements ChatGPTService {
                 .model(model)
                 .messages(messages)
                 .temperature(0.7f)
-                .max_tokens(1000)
+                .max_tokens(2000)
                 .build();
 
         HttpEntity<GptRequestDto> entity = new HttpEntity<>(requestDto, headers);
 
         //엔드포인트
         String url = "https://api.openai.com/v1/chat/completions";
+        //log.info("GPT Request: {}", requestDto); //요청 로그
         ResponseEntity<GptResponseDto> response = restTemplate.postForEntity(url, entity, GptResponseDto.class);
+        //log.info("GPT Response: {}", response.getBody());//응답로그
 
         try {
             // ObjectMapper로 gpt 답변 파싱하기
@@ -58,10 +60,6 @@ public class ChatGPTServiceImpl implements ChatGPTService {
             throw new RuntimeException("Failed to parse response from GPT", e);
         }
     }
-
-    //퀴즈 생성 메서드
-
-
 
 
 }
