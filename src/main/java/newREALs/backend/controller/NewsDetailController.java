@@ -1,7 +1,7 @@
 package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import newREALs.backend.DTO.NewsDetailDto;
+import newREALs.backend.dto.NewsDetailDto;
 import newREALs.backend.service.NewsDetailService;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserActionService;

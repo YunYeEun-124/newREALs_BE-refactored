@@ -21,7 +21,7 @@ public class ChatGPTController {
         return ResponseEntity.ok("News processing completed for ID: " + id);
     }
 
-    @PostMapping("/quiz/")
+    @PostMapping("/quiz")
     public ResponseEntity<String> generateQuiz() throws Throwable{
         newsService.generateAndSaveQuizzesForDailyNews();
         return ResponseEntity.ok("퀴즈 생성 성공~!~!");
