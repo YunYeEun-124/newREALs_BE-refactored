@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
+      ddl-auto: update # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect # PostgreSQL에 맞는 Hibernate dialect
@@ -18,9 +18,6 @@ spring:
 #    console:
 #      enabled: false
 
-openai:
-  secret-key: ${OPENAI_SECRET_KEY}
-  organization-id: ${OPENAI_ORGANIZATION_ID}
 
   security:
     oauth2:
@@ -50,3 +47,8 @@ logging:
 
 jwt:
   expiration-time: 86400000
+
+
+openai:
+  secret-key: ${OPENAI_SECRET_KEY}
+  organization-id: ${OPENAI_ORGANIZATION_ID}

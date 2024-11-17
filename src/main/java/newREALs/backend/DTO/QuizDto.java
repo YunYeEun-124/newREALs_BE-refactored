@@ -1,17 +1,18 @@
 package newREALs.backend.DTO;
 
 import lombok.Getter;
-import newREALs.backend.domain.Quiz;
 
 @Getter
-public class QuizDTO {
-    private String quiz;
-    private Boolean answer;
+public class QuizDto {
+    private String  problem;
+    private boolean answer;
     private String comment;
+    private boolean isSolved;
 
-    public QuizDTO(Quiz quiz) {
-        this.quiz = quiz.getQuiz();
-        this.answer = quiz.getAnswer();
-        this.comment = quiz.getComment();
+    public QuizDto(String problem, boolean answer, String comment, boolean isSolved) {
+        this.problem = problem;
+        this.answer = answer;
+        this.comment = comment;
+        this.isSolved = isSolved;
     }
 }
