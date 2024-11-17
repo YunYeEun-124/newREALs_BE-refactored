@@ -1,17 +1,20 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
+import jdk.jfr.Timestamp;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
 
 @Getter
 @Entity
@@ -79,6 +82,13 @@ public class Basenews {
         this.title = title;
         this.summary = summary;
         this.description = description;
+        this.uploadDate = uploadDate;
+        this.newsUrl = newsUrl;
+        this.isDailyNews = false;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.keyword  = keyword;
+        this.imageUrl = imageUrl;
         this.termList = terms;
         this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
         this.viewCount=0L;  //기본값 0으로 설정
