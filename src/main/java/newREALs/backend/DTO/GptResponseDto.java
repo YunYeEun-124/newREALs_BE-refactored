@@ -1,4 +1,4 @@
-package newREALs.backend.dto;
+package newREALs.backend.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -68,6 +68,10 @@ public class TokenService {
         return null;
     }
 
+    public Long getUserId(HttpServletRequest request){
+        return extractUserIdFromToken( extractTokenFromHeader(request));
+
+    }
     // 토큰으로 userId 추출
     public Long extractUserIdFromToken(String token) {
         Claims claims = Jwts.parserBuilder()

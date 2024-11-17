@@ -1,4 +1,4 @@
-package newREALs.backend.dto;
+package newREALs.backend.DTO;
 
 import lombok.Getter;
 

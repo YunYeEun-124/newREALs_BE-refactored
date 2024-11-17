@@ -2,9 +2,9 @@ package newREALs.backend.service;
 
 import jakarta.transaction.Transactional;
 import newREALs.backend.domain.*;
-import newREALs.backend.dto.NewsDetailDto;
-import newREALs.backend.dto.SimpleNewsDto;
-import newREALs.backend.dto.TermDetailDto;
+import newREALs.backend.DTO.NewsDetailDto;
+import newREALs.backend.DTO.SimpleNewsDto;
+import newREALs.backend.DTO.TermDetailDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
 

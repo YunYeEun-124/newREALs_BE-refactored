@@ -3,15 +3,12 @@ package newREALs.backend.service;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.TermDetail;
-import newREALs.backend.dto.GptRequestDto;
 import newREALs.backend.repository.BasenewsRepository;
 import newREALs.backend.repository.QuizRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-
-import java.net.http.HttpHeaders;
 import java.util.*;
 
 @Service
