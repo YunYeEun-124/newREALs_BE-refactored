@@ -2,6 +2,7 @@ package newREALs.backend.controller;
 
 import newREALs.backend.dto.NewsDetailDto;
 import newREALs.backend.service.NewsDetailService;
+import newREALs.backend.service.UserActionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,17 +10,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/news")
 public class NewsDetailController {
     private final NewsDetailService newsDetailService;
+    private final UserActionService userActionService;
 
-    public NewsDetailController(NewsDetailService newsDetailService){
-        this.newsDetailService=newsDetailService;
+    public NewsDetailController(NewsDetailService newsDetailService, UserActionService userActionService) {
+        this.newsDetailService = newsDetailService;
+        this.userActionService = userActionService;
     }
-
-//    //[get]뉴스 상세 페이지
-//    @GetMapping("/{id}")
-//    public ResponseEntity<NewsDetailDto> getNewsDetail(@PathVariable Long id, @RequestParam Long userId){
-//        NewsDetailDto newsDetailDto=newsDetailService.getNewsDetail(id,userId);
-//        return ResponseEntity.ok(newsDetailDto);
-//    }
 
     //[get]뉴스 상세 페이지
     @GetMapping("/{id}")
@@ -29,14 +25,14 @@ public class NewsDetailController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String subCategory,
             @RequestParam(required=false) String keyword){
-        NewsDetailDto newsDetail = newsDetailService.getNewsDetail(id, userId, category, subCategory);
+        NewsDetailDto newsDetail = newsDetailService.getNewsDetail(id, userId, category, subCategory,keyword);
         return ResponseEntity.ok(newsDetail);
     }
 
     //[post]스크랩 버튼 클릭
     @PostMapping("/scrap/{id}")
-    public ResponseEntity<String> getScrap(@PathVariable Long id, @RequestParam Long userId){
-        newsDetailService.getScrap(id,userId);
+    public ResponseEntity<String> toggleScrap(@PathVariable Long id, @RequestParam Long userId){
+        userActionService.getScrap(id,userId);
         return ResponseEntity.ok("스크랩 등록/삭제 완료");
     }
 
@@ -46,11 +42,8 @@ public class NewsDetailController {
             @PathVariable Long id,
             @RequestParam Long userId,
             @RequestParam int reactionType){
-        newsDetailService.getLikes(id, userId, reactionType);
+        userActionService.getLikes(id, userId, reactionType);
         return ResponseEntity.ok("공감수 반영, 관심도 업데이트 성공");
     }
-
-    //[get] 이전뉴스, 다음 뉴스 가져오기
-
 
 }

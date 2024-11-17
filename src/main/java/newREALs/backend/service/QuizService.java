@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.transaction.Transactional;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Quiz;
@@ -31,6 +32,7 @@ public class QuizService {
     }
 
     //[post]퀴즈 풀기 :  맞았으면 true, 틀렸으면 false 반환
+    @Transactional
     public Boolean solveQuiz(Long id, Long userId, Boolean userAnswer) {
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
@@ -53,6 +55,7 @@ public class QuizService {
     }
 
     //[get] 프로필 페이지에서 퀴즈 현황 보기
+    @Transactional
     public List<QuizStatusDto> getQuizStatus(Long userId){
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
@@ -81,6 +84,7 @@ public class QuizService {
     }
 
     //[get] 뉴스 상세 페이지에서 퀴즈 보여주기
+    @Transactional
     public QuizDto getQuiz(Long id, Long userId ){
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new IllegalArgumentException("유저 없음"));

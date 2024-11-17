@@ -25,6 +25,7 @@ public class NewsDetailDto {
 
     private SimpleNewsDto prevNews;
     private SimpleNewsDto nextNews;
+    private String wherePageFrom;
 
     public NewsDetailDto(Basenews basenews) {
         this.id = basenews.getId();
@@ -65,5 +66,9 @@ public class NewsDetailDto {
 
     public void setNextNews(SimpleNewsDto nextNews) {
         this.nextNews = nextNews;
+    }
+
+    public void setWherePageFrom(String wherePageFrom) {
+        this.wherePageFrom = wherePageFrom;
     }
 }

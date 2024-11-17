@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.transaction.Transactional;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ public class PopUpService {
     }
 
     //출석 완료 처리 메서드
+    @Transactional
     public ResponseEntity<String> markAttendance(Long userId) {
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
