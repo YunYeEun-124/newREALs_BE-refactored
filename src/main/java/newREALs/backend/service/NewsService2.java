@@ -56,7 +56,7 @@ public class NewsService2 {
         //퀴즈가져올 뉴스의 아이디 뽑기
         Long basenews_id = dailynews.get().getId();
         //퀴즈 question만 가져오기
-        Optional<String> question = quizRepository.findQuizByBaseNewsId(basenews_id);
+        Optional<String> question = quizRepository.findProblemByBasenewsId(basenews_id);
         question.orElse("없음");
 
         if(dailynews.isPresent() && question.isPresent()){
@@ -101,7 +101,7 @@ public class NewsService2 {
 
             for(Basenews basenews : page){
                 //scrap 여부 확인하기 매 리스트마다.
-                boolean scrap = scrapRepository.existsByUser_IdAndBnews_Id(userid,basenews.getId());
+                boolean scrap = scrapRepository.existsByUser_IdAndBasenews_Id(userid,basenews.getId());
                 BaseNewsThumbnailDTO basenewsdto = new BaseNewsThumbnailDTO(
                         basenews.getId(),
                         basenews.getSubCategory().getName(),
