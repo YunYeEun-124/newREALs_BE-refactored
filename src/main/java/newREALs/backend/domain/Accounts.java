@@ -51,6 +51,15 @@ public class Accounts {
         this.point = 0;
     }
 
+    public void updateAttendance(int index) {
+        attendanceList[index] = true;
+        point += 5;
+
+        for (boolean a : attendanceList) {
+            System.out.print(a + " ");
+        }
+
+    }
     public void setPoint(int point) {
         this.point=point;
     }
