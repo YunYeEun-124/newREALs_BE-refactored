@@ -55,6 +55,7 @@ public class Basenews {
     @Column(nullable = true, length=1000)
     private String summary;
 
+    @Lob
     @Column(nullable = false, length = 2000)
     private String description;
 
@@ -80,11 +81,10 @@ public class Basenews {
     public Basenews(String title,String newsUrl,String imageUrl,String uploadDate,String description,Keyword keyword,SubCategory subCategory,Category category,
                     boolean isDailyNews){
         this.title = title;
-        this.summary = summary;
         this.description = description;
         this.uploadDate = uploadDate;
         this.newsUrl = newsUrl;
-        this.isDailyNews = false;
+        this.isDailyNews = isDailyNews;
         this.category = category;
         this.subCategory = subCategory;
         this.keyword  = keyword;

@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.UserKeyword;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class NewsService2 {
 
     private final BaseNewsRepository baseNewsRepository;
@@ -48,6 +50,7 @@ public class NewsService2 {
     }
 
     //common code 0
+
     public DailyNewsThumbnailDTO getDailyNewsOne(String category){
         DailyNewsThumbnailDTO dailynewsdto = null;
 
