@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 @AllArgsConstructor
-public class ProfileEditDTO {
+public class ProfileEditDto {
     private String newName;
     private MultipartFile file;
 }

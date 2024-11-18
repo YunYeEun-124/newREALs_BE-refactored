@@ -6,28 +6,16 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.security.Key;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-//    private String category; //FK
-//    private String subCategory; //FK
-//    private String keyword; //FK
-//    private Date   uploadDate;
-//    private String imageUrl;
-//    //	private Image image;
-//    private String title;
-//    private String summary;
-//    private String description;
-//    private String newsUrl;
-//    private List<HashMap<String,String>> term; //용어-설명세트 리스트
-//
-//    private boolean scrap; //dafault = F -> T : 유저 스크랩리스트에 저장돼,
-//    private boolean isDailyNews; //매일 초기화.
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,14 +34,14 @@ public class Basenews {
     @JoinColumn(name="subCategory_id",nullable = false)
     private SubCategory subCategory;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "keyword_id", nullable = true) //없는 경우도 있음.
     private Keyword keyword;
 
 
    // private List<HashMap<String,String>> term; //용어-설명세트 리스트
     @ElementCollection
-    @Column
+    @CollectionTable(name = "BASENEWS_TERM_LIST", joinColumns = @JoinColumn(name = "basenews_id"))
     private List<TermDetail> termList = new ArrayList<>();
 
     @Column
@@ -65,73 +53,63 @@ public class Basenews {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = true, length=1000)
     private String summary;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String description;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String newsUrl;
 
-    @Column
-    private boolean scrap;
-    //dafault = F -> T : 유저 스크랩리스트에 저장돼,
+    @Column(nullable=false)
+    private Long viewCount;
 
-    @Column
+
+    @Column(name = "is_daily_news",nullable = false)
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
-    public void cancelDailyNews(){
-        this.isDailyNews = false;
-    }
 
-
-    public void checkDailyNews(){
-        this.isDailyNews = true;
-    }
-
-    //초기 생성용
-    @Builder
-    public Basenews(String title,String uploadDate,
-                    String newsUrl,String description,
-                    String imageUrl ,Keyword keyword,SubCategory subCategory
-            ,Category category,boolean isDailyNews
-    ){
-
-        this.title = title;
-        this.uploadDate = uploadDate;
-        this.newsUrl = newsUrl;
-        this.scrap = false;
-        this.imageUrl = imageUrl;
-        this.description = description;
-        this.keyword = keyword;
-        this.subCategory = subCategory;
-        this.category =category;
-        this.isDailyNews = isDailyNews;
-
-    }
+    @Column(name = "likes_count", nullable = false)
+    private int[] likesCounts=new int[3];
 
     @Builder
-    public Basenews(String title,String summary,String description,LocalDateTime uploadDate,
-                    String newsUrl,List<TermDetail> terms ,
-                    Category cate,SubCategory subCa,Keyword keyword, String imageUrl,boolean isDailyNews ){
+    public Basenews(String title,String summary,String description,String uploadDate,
+                    String newsUrl,List<TermDetail> terms ,boolean isDailyNews,
+                    Category category,SubCategory subCategory,Keyword keyword, String imageUrl,boolean scrapped){
 
         this.title = title;
         this.summary = summary;
         this.description = description;
-        this.uploadDate = String.valueOf(uploadDate);
+        this.uploadDate = uploadDate;
         this.newsUrl = newsUrl;
-        this.scrap = false;
-        this.category = cate;
-        this.subCategory = subCa;
+        this.isDailyNews = false;
+        this.category = category;
+        this.subCategory = subCategory;
         this.keyword  = keyword;
         this.imageUrl = imageUrl;
         this.termList = terms;
-        this.isDailyNews = isDailyNews;
-
+        this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
+        this.viewCount=0L;  //기본값 0으로 설정
 
     }
 
+    //setter
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTermList(List<TermDetail> termList) {
+        this.termList = termList;
+    }
+
+    public void setViewCount(Long viewCount) {
+        this.viewCount = viewCount;
+    }
 }
+

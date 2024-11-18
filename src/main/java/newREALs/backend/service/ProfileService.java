@@ -21,7 +21,7 @@ public class ProfileService {
     private final UserKeywordRepository userKeywordRepository;
     private final AccountsRepository accountsRepository;
 
-    public ProfileInfoDTO getProfileInfo(Long userId) {
+    public ProfileInfoDto getProfileInfo(Long userId) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
@@ -32,7 +32,7 @@ public class ProfileService {
             keywordList.add(userKeyword.getName());
         }
 
-        return ProfileInfoDTO.builder()
+        return ProfileInfoDto.builder()
                 .user_id(account.getId())
                 .name(account.getName())
                 .email(account.getEmail())
@@ -42,32 +42,32 @@ public class ProfileService {
                 .build();
     }
 
-    public ProfileQuizStatusDTO getQuizStatus(Long userId) {
-        Accounts account = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+//    public ProfileQuizStatusDto getQuizStatus(Long userId) {
+//        Accounts account = userRepository.findById(userId)
+//                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+//
+//        List<Quiz> quizList = accountsRepository.findQuizListByUserId(userId);
+//        List<QuizDTO> quizDTOList = new ArrayList<>();
+//        for (Quiz quiz : quizList) {
+//            quizDTOList.add(new QuizDTO(quiz));
+//        }
+//
+//        List<Integer> quizStatus = accountsRepository.findQuizStatusByUserId(userId);
+//
+//        return ProfileQuizStatusDTO.builder()
+//                .user_id(account.getId())
+//                .quizList(quizDTOList)
+//                .quizStatus(quizStatus)
+//                .build();
+//    }
 
-        List<Quiz> quizList = accountsRepository.findQuizListByUserId(userId);
-        List<QuizDTO> quizDTOList = new ArrayList<>();
-        for (Quiz quiz : quizList) {
-            quizDTOList.add(new QuizDTO(quiz));
-        }
-
-        List<Integer> quizStatus = accountsRepository.findQuizStatusByUserId(userId);
-
-        return ProfileQuizStatusDTO.builder()
-                .user_id(account.getId())
-                .quizList(quizDTOList)
-                .quizStatus(quizStatus)
-                .build();
-    }
-
-    public ProfileAttendanceListDTO getAttendanceList(Long userId) {
+    public ProfileAttendanceListDto getAttendanceList(Long userId) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         List<Boolean> attendanceList = accountsRepository.findAttendanceListByUserId(userId);
 
-        return ProfileAttendanceListDTO.builder()
+        return ProfileAttendanceListDto.builder()
                 .user_id(account.getId())
                 .attendanceList(attendanceList)
                 .build();
@@ -80,7 +80,7 @@ public class ProfileService {
         return PageRequest.of(page - 1, 9, Sort.by(sorts));
     }
 
-    public Page<BaseNewsThumbnailDTO> getScrapNewsThumbnail(Long userId, int page) {
+    public Page<BaseNewsThumbnailDto> getScrapNewsThumbnail(Long userId, int page) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
@@ -89,7 +89,7 @@ public class ProfileService {
         // 스크랩 된 뉴스 가져와
         Page<Basenews> scrapNewsPage = accountsRepository.findScrapNewsByUserId(userId, pageable);
 
-        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDTO.builder()
+        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDto.builder()
                 .basenewsId(basenews.getId())
                 .category(basenews.getCategory().getName())
                 .subCategory(basenews.getSubCategory().getName())
@@ -103,11 +103,11 @@ public class ProfileService {
         );
     }
 
-    public Map<String, List<ProfileInterestDTO>> getInterest(Long userId) {
+    public Map<String, List<ProfileInterestDto>> getInterest(Long userId) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
-        Map<String, List<ProfileInterestDTO>> result = new HashMap<>();
+        Map<String, List<ProfileInterestDto>> result = new HashMap<>();
 
         Pageable three = PageRequest.of(0,3);
 
@@ -118,7 +118,7 @@ public class ProfileService {
 
         // 카테고리 상관 없이 전체에서 3개 가져오기
         List<Object[]> totalInterest = accountsRepository.findTotalInterestByUserId(userId, three);
-        List<ProfileInterestDTO> totalInterestDTO = getPercentage(totalInterest);
+        List<ProfileInterestDto> totalInterestDTO = getPercentage(totalInterest);
         result.put("total", totalInterestDTO); // key를 total로
 
         // 카테고리 별로 3개 가져오기
@@ -127,9 +127,9 @@ public class ProfileService {
         List<Object[]> economyInterest = accountsRepository.findCategoryInterestByUserId(userId, "economy", three);
 
 
-        List<ProfileInterestDTO> societyInterestDTO = getPercentage(societyInterest);
-        List<ProfileInterestDTO> politicsInterestDTO = getPercentage(politicsInterest);
-        List<ProfileInterestDTO> economyInterestDTO = getPercentage(economyInterest);
+        List<ProfileInterestDto> societyInterestDTO = getPercentage(societyInterest);
+        List<ProfileInterestDto> politicsInterestDTO = getPercentage(politicsInterest);
+        List<ProfileInterestDto> economyInterestDTO = getPercentage(economyInterest);
 
         result.put("society", societyInterestDTO);
         result.put("politics", politicsInterestDTO);
@@ -138,8 +138,8 @@ public class ProfileService {
         return result;
     }
 
-    private List<ProfileInterestDTO> getPercentage(List<Object[]> interests) {
-        List<ProfileInterestDTO> interestDTOList = new ArrayList<>();
+    private List<ProfileInterestDto> getPercentage(List<Object[]> interests) {
+        List<ProfileInterestDto> interestDTOList = new ArrayList<>();
 
         int total = 0;
         for (Object[] item : interests) {
@@ -154,7 +154,7 @@ public class ProfileService {
             int count = (int) item[2];
 
             int percentage = (int) Math.round((count * 100.0) / total);
-            ProfileInterestDTO dto = ProfileInterestDTO.builder()
+            ProfileInterestDto dto = ProfileInterestDto.builder()
                     .category(category)
                     .subCategory(subCategory)
                     .percentage(percentage)
@@ -168,7 +168,7 @@ public class ProfileService {
 
         // 퍼센트 합 100 안되면 제일 큰 항목에 그 차이만큼 더해주기
         if (difference != 0 && !interestDTOList.isEmpty()) {
-            ProfileInterestDTO largest = interestDTOList.get(0);
+            ProfileInterestDto largest = interestDTOList.get(0);
             largest.setPercentage(largest.getPercentage() + difference);
         }
         return interestDTOList;

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter @Setter
 @Builder
 @AllArgsConstructor
-public class ProfileInterestDTO {
+public class ProfileInterestDto {
     private String category;
     private String subCategory;
     private int percentage;

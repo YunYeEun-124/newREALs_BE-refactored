@@ -17,7 +17,7 @@ public class Quiz {
 
     @OneToOne
     @JoinColumn(name = "basenews_id", nullable = false)
-    private Basenews baseNews; //fk
+    private Basenews basenews; //fk
 
     @Column(nullable = false)
     private String problem;//
@@ -29,10 +29,10 @@ public class Quiz {
     private String comment; //해설
 
     @Builder
-    public Quiz(String q, boolean a, String comment,Basenews baseNews){
+    public Quiz(String p, boolean a, String comment,Basenews basenews){
         this.answer = a;
-        this.problem = q;
+        this.problem = p;
         this.comment = comment;
-        this.baseNews = baseNews;
+        this.basenews = basenews;
     }
 }
