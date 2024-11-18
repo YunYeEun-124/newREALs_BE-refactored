@@ -14,7 +14,7 @@ public class NewsDetailDto {
     private String description;
     private String imageUrl;
     private String newsUrl;
-    private LocalDateTime uploadDate;
+//    private String uploadDate;
     private boolean isScrapped;
     private String category;
     private String subCategory;
@@ -37,7 +37,7 @@ public class NewsDetailDto {
         this.description = basenews.getDescription();
         this.imageUrl = basenews.getImageUrl();
         this.newsUrl = basenews.getNewsUrl();
-        this.uploadDate = basenews.getUploadDate();
+//        this.uploadDate = basenews.getUploadDate();
         this.viewCount=basenews.getViewCount();
         //공감수
         this.good=basenews.getLikesCounts()[0];
