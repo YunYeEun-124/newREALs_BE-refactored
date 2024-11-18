@@ -1,10 +1,7 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.List;
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)//notion 참고 바람.
 public class Accounts {
 
@@ -60,7 +58,5 @@ public class Accounts {
         }
 
     }
-    public void setPoint(int point) {
-        this.point=point;
-    }
+
 }

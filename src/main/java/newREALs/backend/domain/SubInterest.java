@@ -5,14 +5,12 @@ package newREALs.backend.domain;
 	private int count;(default = 0);*/
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Entity
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SubInterest {
 
@@ -40,7 +38,5 @@ public class SubInterest {
         this.count = count;
     }
 
-    public void setCount(int count) {
-        this.count = count;
-    }
+
 }
