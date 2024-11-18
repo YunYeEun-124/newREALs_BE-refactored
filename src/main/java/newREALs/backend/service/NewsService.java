@@ -7,6 +7,7 @@ import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.QuizRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,24 +30,29 @@ public class NewsService {
 
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
-    @Scheduled(cron="0 10 6 * * ?")//매일 오전 6시 10분 실행
+    //@Scheduled(cron = "0 7 20 ? * *")
+    @Scheduled(cron="0 15 21 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
+    @Async
     public void automaticProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
+       // Optional<Basenews> newBasenews = basenewsRepository.findFirstBySummaryIsNull();
         for (Basenews news : newBasenews) {
             try {
+                //processArticle(newBasenews.get().getId());
                 processArticle(news.getId());
             } catch (Throwable e) {
-                log.error("Failed to process article ID: {}", news.getId(), e);
+               log.error("Failed to process article ID: {}", news.getId(), e);
             }
         }
 
-        // 오늘의 뉴스 5개 찾아와서 퀴즈 생성
+        // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
         List<Basenews> dailyNews = basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc();
         for (Basenews news : dailyNews) {
             try {
                 generateAndSaveQuizzesForDailyNews(news);
+              //  generateAndSaveThinkCommentForDailyNews(news);
             } catch (Exception e) {
                 log.error("Failed to generate quiz for article ID: {}", news.getId(), e);
             }
@@ -58,7 +64,11 @@ public class NewsService {
 
     //요약, 설명, 용어 생성 메서드
     @Transactional
+    @Async
     public void processArticle(Long basenewsId) throws Throwable {
+
+        System.out.println("processArticle in ");
+
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
 
@@ -112,7 +122,11 @@ public class NewsService {
 
     //퀴즈 생성하는 메서드
     @Transactional
+    @Async
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
+
+        System.out.println("generate quiz in ");
+
         // 이미 isDailynews=true인 basenews를 전달받음
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
@@ -144,10 +158,39 @@ public class NewsService {
         quizRepository.save(quiz);
     }
 
+
+    //ThinkComment generate function
+    @Async
+    public void generateAndSaveThinkCommentForDailyNews(Basenews news){
+        List<Map<String, String>> quizMessages = new ArrayList<>();
+        quizMessages.add(Map.of("role", "system", "content",
+                "You are a highly skilled assistant that generates quiz questions based on news articles. "
+                        + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
+        quizMessages.add(Map.of("role", "user", "content",
+                "다음은 뉴스 기사의 요약입니다."+
+                       "해당 기사로 토론할만한 주제를 선정해주세요. 입문자 수준의 토론 주제로 너무 어렵지 않게 해주세요. 어려운 용어를 사용하지 않거나. "
+                        +"사용할 시 쉽게 풀어서 제시 해주세요"
+                        + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
+                        + "토픽:<토픽>\n"
+                        + "기사 요약: " + news.getDescription()));
+
+
+        String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
+        StringTokenizer st = new StringTokenizer(quizContent,":");
+        st.nextToken();
+        System.out.println(st.nextToken()+" is this topic of "+news.getTitle());
+        System.out.println("think comment result");
+        System.out.println(news.getTitle()+" : "+quizContent);
+
+    }
+
+
+
     //*************************************************************
     //*************************************************************
     //*************************************************************
     //용어 파싱 메서드
+    @Async
     private List<TermDetail> parseTerms(String termsContent) {
         List<TermDetail> termDetails = new ArrayList<>();
 
@@ -166,6 +209,7 @@ public class NewsService {
     }
 
     //퀴즈 파싱 메서드
+    @Async
     private Map<String, String> parseQuizContent(String quizContent) {
         Map<String, String> parsedQuiz = new HashMap<>();
         String[] lines = quizContent.split("\n");
