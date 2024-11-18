@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-class Scrap {
+public class Scrap {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,12 +22,12 @@ class Scrap {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)
-    private Basenews bnews;
+    private Basenews basenews;
 
     @Builder
-    public Scrap(Accounts user, Basenews bnews){
+    public Scrap(Accounts user, Basenews basenews){
         this.user = user;
-        this.bnews = bnews;
+        this.basenews = basenews;
     }
 
 

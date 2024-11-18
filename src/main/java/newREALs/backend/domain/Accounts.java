@@ -45,6 +45,10 @@ public class Accounts {
         this.email = email;
         this.point = 0;
     }
+
+    public void setPoint(int point) {
+        this.point=point;
+    }
 }
 
 

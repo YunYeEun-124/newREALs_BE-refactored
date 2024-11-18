@@ -57,7 +57,7 @@ public class Basenews {
     private List<TermDetail> termList = new ArrayList<>();
 
     @Column
-    private LocalDateTime uploadDate;
+    private String uploadDate;
 
     @Column
     private String imageUrl;
@@ -82,26 +82,56 @@ public class Basenews {
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
+    public void cancelDailyNews(){
+        this.isDailyNews = false;
+    }
+
+
+    public void checkDailyNews(){
+        this.isDailyNews = true;
+    }
+
+    //초기 생성용
+    @Builder
+    public Basenews(String title,String uploadDate,
+                    String newsUrl,String description,
+                    String imageUrl ,Keyword keyword,SubCategory subCategory
+            ,Category category,boolean isDailyNews
+    ){
+
+        this.title = title;
+        this.uploadDate = uploadDate;
+        this.newsUrl = newsUrl;
+        this.scrap = false;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.keyword = keyword;
+        this.subCategory = subCategory;
+        this.category =category;
+        this.isDailyNews = isDailyNews;
+
+    }
+
     @Builder
     public Basenews(String title,String summary,String description,LocalDateTime uploadDate,
                     String newsUrl,List<TermDetail> terms ,
-                    Category cate,SubCategory subCa,Keyword keyword, String imageUrl ){
+                    Category cate,SubCategory subCa,Keyword keyword, String imageUrl,boolean isDailyNews ){
 
         this.title = title;
         this.summary = summary;
         this.description = description;
-        this.uploadDate = uploadDate;
+        this.uploadDate = String.valueOf(uploadDate);
         this.newsUrl = newsUrl;
-        this.isDailyNews = false;
         this.scrap = false;
         this.category = cate;
         this.subCategory = subCa;
         this.keyword  = keyword;
         this.imageUrl = imageUrl;
         this.termList = terms;
+        this.isDailyNews = isDailyNews;
 
 
     }
 
-}
 
+}

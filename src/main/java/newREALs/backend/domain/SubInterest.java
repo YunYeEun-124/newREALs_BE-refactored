@@ -39,4 +39,8 @@ public class SubInterest {
         this.subCategory = subCategory;
         this.count = count;
     }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }
