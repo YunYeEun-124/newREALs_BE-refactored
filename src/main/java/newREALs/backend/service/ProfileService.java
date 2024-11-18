@@ -62,7 +62,7 @@ public class ProfileService {
 
     public Pageable getPageInfo(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("uploadDate"));
+        sorts.add(Sort.Order.desc("basenews.uploadDate"));
         return PageRequest.of(page - 1, 9, Sort.by(sorts));
     }
 

@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres # PostgreSQL URL, mydatabase를 실제 데이터베이스 이름으로 변경
+    url: jdbc:postgresql://localhost:5432/db # PostgreSQL URL, mydatabase를 실제 데이터베이스 이름으로 변경
     username: postgres # PostgreSQL 사용자 이름
-    password: "0000" # PostgreSQL 사용자 비밀번호
+    password: 1234 # PostgreSQL 사용자 비밀번호
     driver-class-name: org.postgresql.Driver # PostgreSQL 드라이버 클래스
 
   jpa:
     hibernate:
-      ddl-auto: create # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
+      ddl-auto: create-drop # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
     properties:
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate:
