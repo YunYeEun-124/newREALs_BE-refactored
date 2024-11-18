@@ -108,8 +108,5 @@ public class Basenews {
         this.termList = termList;
     }
 
-    public void setViewCount(Long viewCount) {
-        this.viewCount = viewCount;
-    }
 }
 
