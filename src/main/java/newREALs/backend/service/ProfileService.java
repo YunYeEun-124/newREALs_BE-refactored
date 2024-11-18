@@ -20,9 +20,12 @@ public class ProfileService {
     private final UserRepository userRepository;
     private final UserKeywordRepository userKeywordRepository;
     private final AccountsRepository accountsRepository;
+    private final ScrapRepository scrapRepository;
 
+
+    //[get] 프로필 정보
     public ProfileInfoDto getProfileInfo(Long userId) {
-        Accounts account = userRepository.findById(userId)
+        Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         // 유저 키워드 리스트에 저장하기
@@ -33,42 +36,25 @@ public class ProfileService {
         }
 
         return ProfileInfoDto.builder()
-                .user_id(account.getId())
-                .name(account.getName())
-                .email(account.getEmail())
-                .profilePath(account.getProfilePath())
-                .point(account.getPoint())
+                .user_id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .profilePath(user.getProfilePath())
+                .point(user.getPoint())
                 .keywords(keywordList)
                 .build();
     }
 
-//    public ProfileQuizStatusDto getQuizStatus(Long userId) {
-//        Accounts account = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
-//
-//        List<Quiz> quizList = accountsRepository.findQuizListByUserId(userId);
-//        List<QuizDTO> quizDTOList = new ArrayList<>();
-//        for (Quiz quiz : quizList) {
-//            quizDTOList.add(new QuizDTO(quiz));
-//        }
-//
-//        List<Integer> quizStatus = accountsRepository.findQuizStatusByUserId(userId);
-//
-//        return ProfileQuizStatusDTO.builder()
-//                .user_id(account.getId())
-//                .quizList(quizDTOList)
-//                .quizStatus(quizStatus)
-//                .build();
-//    }
 
+    //[get] 출석현황
     public ProfileAttendanceListDto getAttendanceList(Long userId) {
-        Accounts account = userRepository.findById(userId)
+        Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
-        List<Boolean> attendanceList = accountsRepository.findAttendanceListByUserId(userId);
+        List<Boolean> attendanceList = accountsRepository.findAttendanceListById(userId);
 
         return ProfileAttendanceListDto.builder()
-                .user_id(account.getId())
+                .user_id(user.getId())
                 .attendanceList(attendanceList)
                 .build();
     }
@@ -80,31 +66,37 @@ public class ProfileService {
         return PageRequest.of(page - 1, 9, Sort.by(sorts));
     }
 
+    //[get] 스크랩 보여주기
     public Page<BaseNewsThumbnailDTO> getScrapNewsThumbnail(Long userId, int page) {
-        Accounts account = userRepository.findById(userId)
+        Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         Pageable pageable = getPageInfo(page);
 
         // 스크랩 된 뉴스 가져와
-        Page<Basenews> scrapNewsPage = accountsRepository.findScrapNewsByUserId(userId, pageable);
+        //Page<Basenews> scrapNewsPage = accountsRepository.findScrapNewsById(userId, pageable);
+        Page<Scrap> scrapNewsList = scrapRepository.findByUser(user, pageable);
 
-        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDTO.builder()
-                .basenewsId(basenews.getId())
-                .category(basenews.getCategory().getName())
-                .subCategory(basenews.getSubCategory().getName())
-                .keyword(basenews.getKeyword().getName())
-                .title(basenews.getTitle())
-                .summary(basenews.getSummary())
-                .imageUrl(basenews.getImageUrl())
-                .date(basenews.getUploadDate().toString())
-                .isScrap(true)
-                .build()
-        );
+        return scrapNewsList.map(scrap -> {
+            Basenews basenews = scrap.getBasenews();
+            return BaseNewsThumbnailDTO.builder()
+                    .basenewsId(basenews.getId())
+                    .category(basenews.getCategory().getName())
+                    .subCategory(basenews.getSubCategory().getName())
+                    .keyword(basenews.getKeyword().getName())
+                    .title(basenews.getTitle())
+                    .summary(basenews.getSummary())
+                    .imageUrl(basenews.getImageUrl())
+                    .date(basenews.getUploadDate()) // Basenews의 uploadDate 필드
+                    .isScrap(true)
+                    .build();
+        });
     }
 
+
+    //관심도 분석
     public Map<String, List<ProfileInterestDto>> getInterest(Long userId) {
-        Accounts account = userRepository.findById(userId)
+        Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         Map<String, List<ProfileInterestDto>> result = new HashMap<>();
@@ -117,14 +109,14 @@ public class ProfileService {
         result.put("society", new ArrayList<>());
 
         // 카테고리 상관 없이 전체에서 3개 가져오기
-        List<Object[]> totalInterest = accountsRepository.findTotalInterestByUserId(userId, three);
+        List<Object[]> totalInterest = accountsRepository.findTotalInterestById(userId, three);
         List<ProfileInterestDto> totalInterestDTO = getPercentage(totalInterest);
         result.put("total", totalInterestDTO); // key를 total로
 
         // 카테고리 별로 3개 가져오기
-        List<Object[]> societyInterest = accountsRepository.findCategoryInterestByUserId(userId, "society", three);
-        List<Object[]> politicsInterest = accountsRepository.findCategoryInterestByUserId(userId, "politics", three);
-        List<Object[]> economyInterest = accountsRepository.findCategoryInterestByUserId(userId, "economy", three);
+        List<Object[]> societyInterest = accountsRepository.findCategoryInterestById(userId, "society", three);
+        List<Object[]> politicsInterest = accountsRepository.findCategoryInterestById(userId, "politics", three);
+        List<Object[]> economyInterest = accountsRepository.findCategoryInterestById(userId, "economy", three);
 
 
         List<ProfileInterestDto> societyInterestDTO = getPercentage(societyInterest);
@@ -138,6 +130,7 @@ public class ProfileService {
         return result;
     }
 
+    //[get] 관심도 분석 비율 찾기
     private List<ProfileInterestDto> getPercentage(List<Object[]> interests) {
         List<ProfileInterestDto> interestDTOList = new ArrayList<>();
 
