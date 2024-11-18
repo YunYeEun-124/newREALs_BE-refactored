@@ -5,7 +5,7 @@ import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import newREALs.backend.DTO.*;
+import newREALs.backend.dto.*;
 import newREALs.backend.service.KakaoService;
 import newREALs.backend.service.ProfileService;
 import newREALs.backend.service.TokenService;
@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;

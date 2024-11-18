@@ -2,7 +2,7 @@ package newREALs.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import newREALs.backend.DTO.*;
+import newREALs.backend.dto.*;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
 import org.springframework.data.domain.*;

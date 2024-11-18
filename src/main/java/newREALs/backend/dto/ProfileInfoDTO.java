@@ -1,4 +1,4 @@
-package newREALs.backend.DTO;
+package newREALs.backend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
