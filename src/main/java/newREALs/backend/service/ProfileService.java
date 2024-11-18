@@ -80,7 +80,7 @@ public class ProfileService {
         return PageRequest.of(page - 1, 9, Sort.by(sorts));
     }
 
-    public Page<BaseNewsThumbnailDto> getScrapNewsThumbnail(Long userId, int page) {
+    public Page<BaseNewsThumbnailDTO> getScrapNewsThumbnail(Long userId, int page) {
         Accounts account = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
@@ -89,7 +89,7 @@ public class ProfileService {
         // 스크랩 된 뉴스 가져와
         Page<Basenews> scrapNewsPage = accountsRepository.findScrapNewsByUserId(userId, pageable);
 
-        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDto.builder()
+        return scrapNewsPage.map(basenews -> BaseNewsThumbnailDTO.builder()
                 .basenewsId(basenews.getId())
                 .category(basenews.getCategory().getName())
                 .subCategory(basenews.getSubCategory().getName())
