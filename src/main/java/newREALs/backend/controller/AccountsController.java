@@ -31,7 +31,7 @@ public class AccountsController {
     private final AttendanceService attendanceService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
-    //출석 체크
+    //굿
     @PatchMapping("/attendance")
     public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
         try {
@@ -55,6 +55,7 @@ public class AccountsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
+    //굿
     @PostMapping("/login")
     public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
         String authorizationCode = request.get("code");
@@ -96,7 +97,7 @@ public class AccountsController {
         }
     }
 
-
+    //굿
     @GetMapping("/profile/info")
     public ResponseEntity<?> getProfileInfo(HttpServletRequest request) {
         try {
@@ -128,38 +129,7 @@ public class AccountsController {
         }
     }
 
-//    @GetMapping("/profile/quiz")
-//    public ResponseEntity<?> getProfileQuizStatus(HttpServletRequest request) {
-//        try {
-//            String token = tokenService.extractTokenFromHeader(request);
-//
-//            if (token == null || !tokenService.validateToken(token)) {
-//                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-//            }
-//            Long userId = tokenService.extractUserIdFromToken(token);
-//
-//            ProfileQuizStatusDto profileQuizStatusDTO = profileService.getQuizStatus(userId);
-//            return ResponseEntity.ok(profileQuizStatusDTO);
-//
-//        } catch (IllegalArgumentException e) {
-//            // 유효하지 않은 토큰 -> 401
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-//
-//        } catch (Exception e) {
-//            // 다른 에러들 -> 400
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
-//
-//    }
-
+    //굿
     @GetMapping("/profile/attendance")
     public ResponseEntity<?> getAttendanceList(HttpServletRequest request) {
         try {
@@ -191,6 +161,7 @@ public class AccountsController {
         }
     }
 
+    //
     @GetMapping("/profile/scrap")
     public ResponseEntity<?> getScrapList(HttpServletRequest request, @RequestParam int page) {
         try {
