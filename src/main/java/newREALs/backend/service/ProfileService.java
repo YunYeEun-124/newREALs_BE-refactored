@@ -174,51 +174,7 @@ public class ProfileService {
         return interestDTOList;
     }
 
-//    private Map<String, List<ProfileInterestDTO>> getCategoryPercentage(List<Object[]> interests) {
-//        Map<String, List<ProfileInterestDTO>> result = new HashMap<>();
-//        Map<String, Integer> categoryTotals = new HashMap<>(); // 카테고리 별로 count 합 저장
+//    private String editProfile(Long userId, ProfileEditDTO profileEditDTO) {
 //
-//        for (Object[] item : interests) {
-//            String category = (String) item[0];
-//            int count = (int) item[2];
-//            categoryTotals.put(category, categoryTotals.getOrDefault(category, 0) + count); // 기본값은 0으로
-//        }
-//
-//        // 카테고리별 퍼센트 계산
-//        for (Object[] item : interests) {
-//            String category = (String) item[0];
-//            String subCategory = (String) item[1];
-//            int count = (int) item[2];
-//            int categoryTotal = categoryTotals.get(category);
-//
-//            int percentage = 0;
-//            for (int j = 0; j < count; j++) {
-//                percentage = (int) Math.round((count * 100.0) / categoryTotal);
-//            }
-//
-//            ProfileInterestDTO dto = ProfileInterestDTO.builder()
-//                    .category(category)
-//                    .subCategory(subCategory)
-//                    .percentage(percentage)
-//                    .build();
-//
-//            if (!result.containsKey(category)) {
-//                result.put(category, new ArrayList<>());
-//            }
-//            result.get(category).add(dto);
-//        }
-//
-//        for (String category : result.keySet()) {
-//            List<ProfileInterestDTO> categoryList = result.get(category);
-//            int percentageSum = categoryList.stream().mapToInt(ProfileInterestDTO::getPercentage).sum();
-//            int difference = 100 - percentageSum;
-//
-//            if (difference != 0 && !categoryList.isEmpty()) {
-//                ProfileInterestDTO firstItem = categoryList.get(0);
-//                firstItem.setPercentage(firstItem.getPercentage() + difference);
-//            }
-//        }
-//
-//        return result;
 //    }
 }
