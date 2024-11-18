@@ -15,16 +15,16 @@ public class ChatGPTController {
         this.newsService = newsService;
     }
 
-    @PostMapping("/news/{id}")
-    public ResponseEntity<String> processNews(@PathVariable Long id) throws Throwable {
-        newsService.processArticle(id);
-        return ResponseEntity.ok("News processing completed for ID: " + id);
-    }
-
-    @PostMapping("/quiz")
-    public ResponseEntity<String> generateQuiz() throws Throwable{
-        newsService.generateAndSaveQuizzesForDailyNews();
-        return ResponseEntity.ok("퀴즈 생성 성공~!~!");
-    }
+//    @PostMapping("/news/{id}")
+//    public ResponseEntity<String> processNews(@PathVariable Long id) throws Throwable {
+//        newsService.processArticle(id);
+//        return ResponseEntity.ok("News processing completed for ID: " + id);
+//    }
+//
+//    @PostMapping("/quiz")
+//    public ResponseEntity<String> generateQuiz() throws Throwable{
+//        newsService.generateAndSaveQuizzesForDailyNews();
+//        return ResponseEntity.ok("퀴즈 생성 성공~!~!");
+//    }
 
 }

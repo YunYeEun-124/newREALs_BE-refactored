@@ -5,6 +5,9 @@ import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.TermDetail;
 import newREALs.backend.repository.BasenewsRepository;
 import newREALs.backend.repository.QuizRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +19,7 @@ public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BasenewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
+    private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
     public NewsService(ChatGPTService chatGPTService, BasenewsRepository basenewsRepository, QuizRepository quizRepository) {
         this.chatGPTService = chatGPTService;
@@ -23,23 +27,34 @@ public class NewsService {
         this.quizRepository = quizRepository;
     }
 
-    //용어 파싱 메서드
-    private List<TermDetail> parseTerms(String termsContent) {
-        List<TermDetail> termDetails = new ArrayList<>();
 
-        //용어 설명 세트분리하기 (줄바꿈 기준)
-        String[] termsArray = termsContent.split("\\n");
-        for (String termPair : termsArray) {
-            termPair = termPair.replaceAll("\\d+\\.\\s*", ""); // 번호 제거
-            String[] termAndDescription = termPair.split(":", 2);  // 첫 번째 콜론 기준으로 용어와 설명 구분
-            if (termAndDescription.length == 2) {
-                String term = termAndDescription[0].trim();
-                String termDescription = termAndDescription[1].trim();
-                termDetails.add(new TermDetail(term, termDescription));
+    //요약, 설명, 용어, 퀴즈 생성 자동화
+    @Scheduled(cron="0 10 6 * * ?")//매일 오전 6시 10분 실행
+    @Transactional
+    public void automaticProcess(){
+        //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
+        List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
+        for (Basenews news : newBasenews) {
+            try {
+                processArticle(news.getId());
+            } catch (Throwable e) {
+                log.error("Failed to process article ID: {}", news.getId(), e);
             }
         }
-        return termDetails;
+
+        // 오늘의 뉴스 5개 찾아와서 퀴즈 생성
+        List<Basenews> dailyNews = basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc();
+        for (Basenews news : dailyNews) {
+            try {
+                generateAndSaveQuizzesForDailyNews(news);
+            } catch (Exception e) {
+                log.error("Failed to generate quiz for article ID: {}", news.getId(), e);
+            }
+        }
+
     }
+
+
 
     //요약, 설명, 용어 생성 메서드
     @Transactional
@@ -97,41 +112,57 @@ public class NewsService {
 
     //퀴즈 생성하는 메서드
     @Transactional
-    public void generateAndSaveQuizzesForDailyNews() {
-        // 1. isDailynews=true인 basenews 가져오기
-        List<Basenews> dailyNewsList = basenewsRepository.findByIsDailyNewsTrue();
+    public void generateAndSaveQuizzesForDailyNews(Basenews news) {
+        // 이미 isDailynews=true인 basenews를 전달받음
+        List<Map<String, String>> quizMessages = new ArrayList<>();
+        quizMessages.add(Map.of("role", "system", "content",
+                "You are a highly skilled assistant that generates quiz questions based on news articles. "
+                        + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
+        quizMessages.add(Map.of("role", "user", "content",
+                "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
+                        + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
+                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. "
+                        + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
+                        + "문제: <문제 내용>\n"
+                        + "정답: <O 또는 X>\n"
+                        + "해설: <해설 내용>\n\n"
+                        + "기사 요약: " + news.getDescription()));
 
-        for (Basenews news : dailyNewsList) {
-            // 2. GPT를 통해 문제, 정답, 해설 생성 요청
-            List<Map<String, String>> quizMessages = new ArrayList<>();
-            quizMessages.add(Map.of("role", "system", "content",
-                    "You are a highly skilled assistant that generates quiz questions based on news articles. "
-                            + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
-            quizMessages.add(Map.of("role", "user", "content",
-                    "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
-                            + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
-                            + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. "
-                            + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
-                            + "문제: <문제 내용>\n"
-                            + "정답: <O 또는 X>\n"
-                            + "해설: <해설 내용>\n\n"
-                            + "기사 요약: " + news.getDescription()));
+        String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
 
-            String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
+        // 3. GPT 응답 파싱
+        Map<String, String> parsedQuiz = parseQuizContent(quizContent);
 
-            // 3. GPT 응답 파싱
-            Map<String, String> parsedQuiz = parseQuizContent(quizContent);
+        // 4. Quiz 엔티티 생성 및 저장
+        Quiz quiz = Quiz.builder()
+                .p(parsedQuiz.get("problem"))
+                .a("O".equalsIgnoreCase(parsedQuiz.get("answer")))
+                .comment(parsedQuiz.get("comment"))
+                .basenews(news)
+                .build();
 
-            // 4. Quiz 엔티티 생성 및 저장
-            Quiz quiz = Quiz.builder()
-                    .p(parsedQuiz.get("problem"))
-                    .a("O".equalsIgnoreCase(parsedQuiz.get("answer")))
-                    .comment(parsedQuiz.get("comment"))
-                    .basenews(news)
-                    .build();
+        quizRepository.save(quiz);
+    }
 
-            quizRepository.save(quiz);
+    //*************************************************************
+    //*************************************************************
+    //*************************************************************
+    //용어 파싱 메서드
+    private List<TermDetail> parseTerms(String termsContent) {
+        List<TermDetail> termDetails = new ArrayList<>();
+
+        //용어 설명 세트분리하기 (줄바꿈 기준)
+        String[] termsArray = termsContent.split("\\n");
+        for (String termPair : termsArray) {
+            termPair = termPair.replaceAll("\\d+\\.\\s*", ""); // 번호 제거
+            String[] termAndDescription = termPair.split(":", 2);  // 첫 번째 콜론 기준으로 용어와 설명 구분
+            if (termAndDescription.length == 2) {
+                String term = termAndDescription[0].trim();
+                String termDescription = termAndDescription[1].trim();
+                termDetails.add(new TermDetail(term, termDescription));
+            }
         }
+        return termDetails;
     }
 
     //퀴즈 파싱 메서드

@@ -57,6 +57,7 @@ public class QuizService {
         }
     }
 
+    //퀴즈 모두 맞히면 추가 10포인트 적립
     @Transactional
     public void checkExtraPoint(Long userId){
         Accounts user=userRepository.findById(userId)
