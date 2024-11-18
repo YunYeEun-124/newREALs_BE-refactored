@@ -20,4 +20,9 @@ public interface BasenewsRepository extends JpaRepository<Basenews,Long> {
     List<Basenews> findByKeywordOrderByIdAsc(Keyword keyword);
 
     List<Basenews> findBySubCategoryOrderByIdAsc(SubCategory subCategory);
+
+    List<Basenews> findBySummaryIsNull();
+
+    
+    List<Basenews> findTop5ByIsDailyNewsTrueOrderByIdDesc();
 }
