@@ -18,7 +18,9 @@ import java.util.Optional;
 @SuppressWarnings("unchecked")
 @Service
 @RequiredArgsConstructor
-public class KakaoService {
+public class
+
+KakaoService {
     private final UserRepository userRepository;
     private final TokenService tokenService;
     private final RestTemplate restTemplate = new RestTemplate();

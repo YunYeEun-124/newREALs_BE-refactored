@@ -9,13 +9,13 @@ import java.util.Optional;
 
 @Service
 public class UserActionService {
-    private final BasenewsRepository basenewsRepository;
+    private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
 
-    public UserActionService(BasenewsRepository basenewsRepository, UserRepository userRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ScrapRepository scrapRepository) {
+    public UserActionService(BaseNewsRepository basenewsRepository, UserRepository userRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ScrapRepository scrapRepository) {
         this.basenewsRepository = basenewsRepository;
         this.userRepository = userRepository;
         this.likesRepository = likesRepository;

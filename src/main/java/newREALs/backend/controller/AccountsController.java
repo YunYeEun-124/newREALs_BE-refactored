@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.dto.*;
+import newREALs.backend.service.AttendanceService;
 import newREALs.backend.service.KakaoService;
 import newREALs.backend.service.ProfileService;
 import newREALs.backend.service.TokenService;
@@ -27,8 +28,33 @@ public class AccountsController {
     private final KakaoService kakaoService;
     private final TokenService tokenService;
     private final ProfileService profileService;
+    private final AttendanceService attendanceService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
+    //출석 체크
+    @PatchMapping("/attendance")
+    public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
+        try {
+            Long userid = tokenService.getUserId(userInfo);
+            Map<String, Object> responseBody = new HashMap<>();
+
+            if(attendanceService.UpdateAttendance(userid)){
+                responseBody.put("status", "success");
+            }else {
+                responseBody.put("status", "fail : already checked");
+            }
+
+            return ResponseEntity.ok().body(responseBody);
+
+        }catch (Exception e){
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("status", "fail");
+            errorResponse.put("error", e.getMessage());
+
+            String errorJsonResponse = gson.toJson(errorResponse);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
+    }
     @PostMapping("/login")
     public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
         String authorizationCode = request.get("code");
