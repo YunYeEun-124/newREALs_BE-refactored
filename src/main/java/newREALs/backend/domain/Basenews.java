@@ -2,10 +2,7 @@ package newREALs.backend.domain;
 
 import jakarta.persistence.*;
 import jdk.jfr.Timestamp;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.security.Key;
@@ -18,6 +15,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Basenews {
     @Id
@@ -95,21 +93,14 @@ public class Basenews {
 
     }
 
-    //setter
-    public void setSummary(String summary) {
-        this.summary = summary;
+    public void cancelDailyNews(){
+        this.isDailyNews = false;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+
+    public void checkDailyNews(){
+        this.isDailyNews = true;
     }
 
-    public void setTermList(List<TermDetail> termList) {
-        this.termList = termList;
-    }
-
-    public void setViewCount(Long viewCount) {
-        this.viewCount = viewCount;
-    }
 }
 
