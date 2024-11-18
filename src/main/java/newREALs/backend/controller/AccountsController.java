@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.List;
@@ -102,37 +103,37 @@ public class AccountsController {
         }
     }
 
-    @GetMapping("/profile/quiz")
-    public ResponseEntity<?> getProfileQuizStatus(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            ProfileQuizStatusDTO profileQuizStatusDTO = profileService.getQuizStatus(userId);
-            return ResponseEntity.ok(profileQuizStatusDTO);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-
-    }
+//    @GetMapping("/profile/quiz")
+//    public ResponseEntity<?> getProfileQuizStatus(HttpServletRequest request) {
+//        try {
+//            String token = tokenService.extractTokenFromHeader(request);
+//
+//            if (token == null || !tokenService.validateToken(token)) {
+//                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+//            }
+//            Long userId = tokenService.extractUserIdFromToken(token);
+//
+//            ProfileQuizStatusDTO profileQuizStatusDTO = profileService.getQuizStatus(userId);
+//            return ResponseEntity.ok(profileQuizStatusDTO);
+//
+//        } catch (IllegalArgumentException e) {
+//            // 유효하지 않은 토큰 -> 401
+//            Map<String, Object> errorResponse = new HashMap<>();
+//            errorResponse.put("message", "실패했어요");
+//            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+//            errorResponse.put("status", "fail");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+//
+//        } catch (Exception e) {
+//            // 다른 에러들 -> 400
+//            Map<String, Object> errorResponse = new HashMap<>();
+//            errorResponse.put("message", "실패했어요");
+//            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+//            errorResponse.put("status", "fail");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+//
+//    }
 
     @GetMapping("/profile/attendance")
     public ResponseEntity<?> getAttendanceList(HttpServletRequest request) {
@@ -237,4 +238,35 @@ public class AccountsController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+//
+//    @PatchMapping("profile/edit")
+//    public ResponseEntity<?> ProfileEdit(HttpServletRequest request, @RequestParam MultipartFile file) {
+//        try {
+//            String token = tokenService.extractTokenFromHeader(request);
+//
+//            if (token == null || !tokenService.validateToken(token)) {
+//                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+//            }
+//            Long userId = tokenService.extractUserIdFromToken(token);
+//
+//            String updatedProfileUrl = profileService.editProfile(userId, profileEditDTO);
+//
+//
+//        } catch (IllegalArgumentException e) {
+//            // 유효하지 않은 토큰 -> 401
+//            Map<String, Object> errorResponse = new HashMap<>();
+//            errorResponse.put("message", "실패했어요");
+//            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+//            errorResponse.put("status", "fail");
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+//
+//        } catch (Exception e) {
+//            // 다른 에러들 -> 400
+//            Map<String, Object> errorResponse = new HashMap<>();
+//            errorResponse.put("message", "실패했어요");
+//            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+//            errorResponse.put("status", "fail");
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+//        }
+//    }
 }
