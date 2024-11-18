@@ -143,7 +143,7 @@ public class NewsDetailService {
 
     //조회수 증가 메서드
     @Transactional
-    private void increaseViewCount(Basenews basenews, Accounts user){
+    public void increaseViewCount(Basenews basenews, Accounts user){
         Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
         if(!click.isPresent()){
             //처음 클릭하는거면
