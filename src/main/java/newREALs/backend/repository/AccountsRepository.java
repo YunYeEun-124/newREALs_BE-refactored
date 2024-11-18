@@ -17,15 +17,15 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
     @Query("SELECT n.attendanceList FROM Accounts n WHERE n.id = :userId")
     List<Boolean> findAttendanceListByUserId(Long userId);
 
-    @Query("SELECT d.quizList FROM Accounts a JOIN a.dailynews d WHERE a.id = :userId")
-    List<Quiz> findQuizListByUserId(Long userId);
-
-    @Query("SELECT d.quizStatus FROM Accounts a JOIN a.dailynews d WHERE a.id = :userId")
-    List<Integer> findQuizStatusByUserId(Long userId);
-
-    // Basenews랑 Scrap 조인 -> 유저 id로 isScrap이 true인 거 불러오기
-    @Query("SELECT b FROM Basenews b JOIN Scrap s ON b.id = s.bnews.id " +
-            "WHERE s.user.id = :userId AND b.scrap = true")
+//    @Query("SELECT d.quizList FROM Accounts a JOIN a.dailynews d WHERE a.id = :userId")
+//    List<Quiz> findQuizListByUserId(Long userId);
+//
+//    @Query("SELECT d.quizStatus FROM Accounts a JOIN a.dailynews d WHERE a.id = :userId")
+//    List<Integer> findQuizStatusByUserId(Long userId);
+//
+//    // Basenews랑 Scrap 조인 -> 유저 id로 isScrap이 true인 거 불러오기
+//    @Query("SELECT b FROM Basenews b JOIN Scrap s ON b.id = s.bnews.id " +
+//            "WHERE s.user.id = :userId AND b.scrap = true")
     Page<Basenews> findScrapNewsByUserId(@Param("userId") Long userId, Pageable pageable);
 
     // LIMIT 사용 안됨 -> Pageable로 가져오는 개수 정하기

@@ -6,6 +6,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /** JPA 엔티티는 기본 생성자가 필수인데 이걸로 대체
  * 매개변수 필요한 생성자는 밑에있는 @builder 사용하여 가독성 향상
  * ( 팀프로젝트에 좋을거같아서 도입해봤습니다.)
@@ -50,12 +55,3 @@ public class Accounts {
         this.point=point;
     }
 }
-
-
-/*
-* 	private int id;
-	private String name;
-	private Image profile;
-	private int point;
-	private boolean[] attendanceList = new boolean[31]; //매달 리셋
-* */

@@ -1,0 +1,19 @@
+# 환경 파일
+.env*
+
+# 빌드 폴더
+/build
+
+# IDE 설정 파일
+.idea/
+.gradle/
+
+# 실행 파일
+gradlew
+gradlew.bat
+
+# BFG Repo-Cleaner
+bfg.jar
+
+# 로그 파일
+*.log

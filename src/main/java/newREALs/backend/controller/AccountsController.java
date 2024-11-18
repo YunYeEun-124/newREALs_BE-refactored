@@ -81,7 +81,7 @@ public class AccountsController {
             }
             Long userId = tokenService.extractUserIdFromToken(token);
 
-            ProfileInfoDTO profileInfoDTO = profileService.getProfileInfo(userId);
+            ProfileInfoDto profileInfoDTO = profileService.getProfileInfo(userId);
             return ResponseEntity.ok(profileInfoDTO);
 
         } catch (IllegalArgumentException e) {
@@ -112,7 +112,7 @@ public class AccountsController {
 //            }
 //            Long userId = tokenService.extractUserIdFromToken(token);
 //
-//            ProfileQuizStatusDTO profileQuizStatusDTO = profileService.getQuizStatus(userId);
+//            ProfileQuizStatusDto profileQuizStatusDTO = profileService.getQuizStatus(userId);
 //            return ResponseEntity.ok(profileQuizStatusDTO);
 //
 //        } catch (IllegalArgumentException e) {
@@ -144,7 +144,7 @@ public class AccountsController {
             }
             Long userId = tokenService.extractUserIdFromToken(token);
 
-            ProfileAttendanceListDTO profileAttendanceListDTO = profileService.getAttendanceList(userId);
+            ProfileAttendanceListDto profileAttendanceListDTO = profileService.getAttendanceList(userId);
             return ResponseEntity.ok(profileAttendanceListDTO);
 
         } catch (IllegalArgumentException e) {
@@ -175,7 +175,7 @@ public class AccountsController {
             }
             Long userId = tokenService.extractUserIdFromToken(token);
 
-            Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
+            Page<BaseNewsThumbnailDto> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
 
             Map<String, Object> response = new HashMap<>();
             response.put("user_id", userId);
@@ -213,7 +213,7 @@ public class AccountsController {
             }
             Long userId = tokenService.extractUserIdFromToken(token);
 
-            Map<String, List<ProfileInterestDTO>> interestMap = profileService.getInterest(userId);
+            Map<String, List<ProfileInterestDto>> interestMap = profileService.getInterest(userId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("user_id", userId);

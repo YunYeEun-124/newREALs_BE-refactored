@@ -9,11 +9,7 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ProfileInfoDTO {
+public class ProfileAttendanceListDto {
     private Long user_id;
-    private String name;
-    private String email;
-    private String profilePath;
-    private int point;
-    private List<String> keywords;
+    private List<Boolean> attendanceList;
 }
