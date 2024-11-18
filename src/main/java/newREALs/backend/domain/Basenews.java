@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jdk.jfr.Timestamp;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.jsoup.Connection;
 
 import java.security.Key;
 import java.time.LocalDateTime;
@@ -68,15 +69,16 @@ public class Basenews {
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
+    @Column
+    private boolean scrap;
 
     @Column(name = "likes_count", nullable = false)
     private int[] likesCounts=new int[3];
 
+    //예은
     @Builder
-    public Basenews(String title,String summary,String description,String uploadDate,
-                    String newsUrl,List<TermDetail> terms ,boolean isDailyNews,
-                    Category category,SubCategory subCategory,Keyword keyword, String imageUrl,boolean scrapped){
-
+    public Basenews(String title,String newsUrl,String imageUrl,String uploadDate,String description,Keyword keyword,SubCategory subCategory,Category category,
+                    boolean isDailyNews){
         this.title = title;
         this.summary = summary;
         this.description = description;
@@ -87,7 +89,29 @@ public class Basenews {
         this.subCategory = subCategory;
         this.keyword  = keyword;
         this.imageUrl = imageUrl;
+        this.scrap = false;
+        this.termList = new ArrayList<>();
+        this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
+        this.viewCount=0L;  //기본값 0으로 설정
+    }
+
+    //현진
+    @Builder
+    public Basenews(String title,String summary,String description,String uploadDate,
+                    String newsUrl,List<TermDetail> terms ,boolean isDailyNews,
+                    Category category,SubCategory subCategory,Keyword keyword, String imageUrl,boolean scrapped){
+
+        this.title = title;
+        this.summary = summary;
+        this.description = description;
+        this.uploadDate = uploadDate;
+        this.newsUrl = newsUrl;
+        this.category = category;
+        this.subCategory = subCategory;
+        this.keyword  = keyword;
+        this.imageUrl = imageUrl;
         this.termList = terms;
+        this.isDailyNews = isDailyNews;
         this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
         this.viewCount=0L;  //기본값 0으로 설정
 
