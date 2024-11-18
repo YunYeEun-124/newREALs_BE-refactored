@@ -14,7 +14,7 @@ public class NewsDetailDto {
     private String description;
     private String imageUrl;
     private String newsUrl;
-    private LocalDateTime uploadDate;
+    private String uploadDate;
     private boolean isScrapped;
     private String category;
     private String subCategory;

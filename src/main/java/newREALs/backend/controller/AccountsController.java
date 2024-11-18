@@ -201,7 +201,7 @@ public class AccountsController {
             }
             Long userId = tokenService.extractUserIdFromToken(token);
 
-            Page<BaseNewsThumbnailDto> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
+            Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
 
             Map<String, Object> response = new HashMap<>();
             response.put("user_id", userId);

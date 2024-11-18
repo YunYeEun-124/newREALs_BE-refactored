@@ -9,7 +9,7 @@ import lombok.Setter;
 @Builder
 @Getter @Setter
 @AllArgsConstructor
-public class BaseNewsThumbnailDto {
+public class BaseNewsThumbnailDTO {
 
     private Long basenewsId;
     private String subCategory;
