@@ -10,7 +10,7 @@ public class QuizDTO {
     private String comment;
 
     public QuizDTO(Quiz quiz) {
-        this.quiz = quiz.getQuiz();
+        this.quiz = quiz.getProblem();
         this.answer = quiz.getAnswer();
         this.comment = quiz.getComment();
     }

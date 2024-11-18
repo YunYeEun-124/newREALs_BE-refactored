@@ -20,7 +20,7 @@ public class Quiz {
     private Basenews baseNews; //fk
 
     @Column(nullable = false)
-    private String quiz;//
+    private String problem;//
 
     @Column(nullable = false)
     private Boolean answer; //정답 O -> T, X->F로 지정한다.
@@ -31,7 +31,7 @@ public class Quiz {
     @Builder
     public Quiz(String q, boolean a, String comment,Basenews baseNews){
         this.answer = a;
-        this.quiz = q;
+        this.problem = q;
         this.comment = comment;
         this.baseNews = baseNews;
     }
