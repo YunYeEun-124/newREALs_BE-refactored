@@ -16,16 +16,11 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
 
     List<Quiz> findTop5ByBasenewsIsDailyNewsTrueOrderByIdDesc();
 
-    //이 메서드 이름 분석해서 JPA가 적절한 쿼리문을 자동생성함
-//    SELECT q.*
-//    FROM quiz q
-//    INNER JOIN basenews b ON q.basenews_id = b.id
-//    WHERE b.is_daily_news = true
-//    ORDER BY q.id DESC
-//    LIMIT 5;
+    Optional<String> findProblemByBasenewsId(Long basenewsId);
 
-    //카테고리에서 불러올때.
-    @Query("SELECT c.quiz FROM Quiz c WHERE c.baseNews.id = :basenews_id")
-    Optional<String> findQuizByBaseNewsId(@Param("basenews_id") Long basenews_id);
+//
+//    //카테고리에서 불러올때.
+//    @Query("SELECT c.quiz FROM Quiz c WHERE c.baseNews.id = :basenews_id")
+//    Optional<String> findProblemByBasenewsId(@Param("basenews_id") Long basenews_id);
 
 }
