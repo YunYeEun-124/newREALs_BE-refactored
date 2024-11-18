@@ -41,7 +41,10 @@ public class QuizService {
         Quiz quiz=quizRepository.findByBasenews(basenews)
                 .orElseThrow(()->new IllegalArgumentException("일치하는 퀴즈가 없어요"));
 
-        //이미 푼 퀴즈를 다시 푸는 일은 없음. 한번풀면 안보여주니까
+        //이미 푼 퀴즈이면 다시 풀 수 없음.
+        Optional<QuizStatus> quizStatus=quizStatusRepository.findByUserAndQuiz(user,quiz);
+        if(quizStatus.isPresent()) throw new IllegalArgumentException("이미 푼 퀴즈는 다시 풀 수 없습니다.");
+
         if(quiz.getAnswer().equals(userAnswer)){
             quizStatusRepository.save(new QuizStatus(true,quiz,user));
             //정답 맞췄으니 포인트 획득
@@ -53,6 +56,29 @@ public class QuizService {
             return false;
         }
     }
+
+    @Transactional
+    public void checkExtraPoint(Long userId){
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
+        //오늘의 퀴즈 가져오기
+        int count=0;
+        List<Quiz> todayQuizzes=quizRepository.findTop5ByBasenewsIsDailyNewsTrueOrderByIdDesc();
+        for(Quiz quiz:todayQuizzes){
+            Optional<QuizStatus> status=quizStatusRepository.findByUserAndQuiz(user,quiz);
+            if(status.isEmpty())break;
+            else if(!status.get().getIsCorrect())break;
+            else count+=1;
+
+        }
+        if(count==5){
+            user.setPoint(user.getPoint()+10);
+            userRepository.save(user);
+        }
+    }
+
+
+
 
     //[get] 프로필 페이지에서 퀴즈 현황 보기
     @Transactional

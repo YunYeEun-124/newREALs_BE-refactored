@@ -26,7 +26,10 @@ public class QuizController {
             HttpServletRequest userInfo) {
 
         Long userId = tokenService.getUserId(userInfo);
-        return ResponseEntity.ok(quizService.solveQuiz(id, userId, userAnswer));
+//        return ResponseEntity.ok(quizService.solveQuiz(id, userId, userAnswer));
+        Boolean result=quizService.solveQuiz(id,userId,userAnswer);
+        quizService.checkExtraPoint(userId);
+        return ResponseEntity.ok(result);
     }
 
     // 뉴스 상세페이지 - 퀴즈
