@@ -7,7 +7,7 @@ import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.QuizStatus;
 import newREALs.backend.dto.QuizDto;
 import newREALs.backend.dto.QuizStatusDto;
-import newREALs.backend.repository.BasenewsRepository;
+import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.QuizRepository;
 import newREALs.backend.repository.QuizStatusRepository;
 import newREALs.backend.repository.UserRepository;
@@ -21,10 +21,10 @@ import java.util.Optional;
 public class QuizService {
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
-    private final BasenewsRepository basenewsRepository;
+    private final BaseNewsRepository basenewsRepository;
     private final QuizStatusRepository quizStatusRepository;
 
-    public QuizService(UserRepository userRepository, QuizRepository quizRepository, BasenewsRepository basenewsRepository, QuizStatusRepository quizStatusRepository) {
+    public QuizService(UserRepository userRepository, QuizRepository quizRepository, BaseNewsRepository basenewsRepository, QuizStatusRepository quizStatusRepository) {
         this.userRepository = userRepository;
         this.quizRepository = quizRepository;
         this.basenewsRepository = basenewsRepository;

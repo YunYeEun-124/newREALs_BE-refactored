@@ -3,7 +3,7 @@ package newREALs.backend.service;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.TermDetail;
-import newREALs.backend.repository.BasenewsRepository;
+import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.QuizRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,11 +17,11 @@ import java.util.*;
 @Service
 public class NewsService {
     private final ChatGPTService chatGPTService;
-    private final BasenewsRepository basenewsRepository;
+    private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
-    public NewsService(ChatGPTService chatGPTService, BasenewsRepository basenewsRepository, QuizRepository quizRepository) {
+    public NewsService(ChatGPTService chatGPTService, BaseNewsRepository basenewsRepository, QuizRepository quizRepository) {
         this.chatGPTService = chatGPTService;
         this.basenewsRepository = basenewsRepository;
         this.quizRepository = quizRepository;
