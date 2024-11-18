@@ -1,13 +1,11 @@
 package newREALs.backend.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 //썸네일.
 @Getter @Setter
-@Builder
 @AllArgsConstructor
 public class BaseNewsThumbnailDTO {
 
