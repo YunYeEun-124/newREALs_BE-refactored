@@ -67,10 +67,7 @@ public class Basenews {
 
     @Column(name = "is_daily_news",nullable = false)
     private boolean isDailyNews; //매일 초기화.
-    //T : 데일리 뉴스다~
-
-    @Column
-    private boolean scrap;
+    //T : 데일리 뉴스다~s
 
     @Column(name = "likes_count", nullable = false)
     private int[] likesCounts=new int[3];
@@ -89,7 +86,6 @@ public class Basenews {
         this.subCategory = subCategory;
         this.keyword  = keyword;
         this.imageUrl = imageUrl;
-        this.scrap = false;
         this.termList = new ArrayList<>();
         this.likesCounts=new int[]{0,0,0};  //basenews생성될 때 likeCounts 자동 초기화
         this.viewCount=0L;  //기본값 0으로 설정
