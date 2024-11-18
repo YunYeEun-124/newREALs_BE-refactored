@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 //썸네일.
-@Getter @Setter
 @Builder
+@Getter @Setter
 @AllArgsConstructor
 public class BaseNewsThumbnailDto {
 

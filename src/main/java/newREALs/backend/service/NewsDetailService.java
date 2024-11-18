@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NewsDetailService {
-    private final BasenewsRepository basenewsRepository;
+    private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
     private final LikesRepository likesRepository;
@@ -24,7 +24,7 @@ public class NewsDetailService {
     private final SubCategoryRepository subCategoryRepository;
     private final KeywordRepository keywordRepository;
 
-    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, KeywordRepository keywordRepository) {
+    public NewsDetailService(BaseNewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, KeywordRepository keywordRepository) {
         this.basenewsRepository = basenewsRepository;
         this.userRepository = userRepository;
         this.scrapRepository = scrapRepository;
@@ -70,7 +70,7 @@ public class NewsDetailService {
 
 
         //이전, 다음 뉴스 받아오기~!~!
-        List<Basenews> sortedNews=fetchSortedNews(cate,subCate,keyword);
+        List<Basenews> sortedNews=fetchSortedNews(cate,subCate,keyword,basenews);
         Basenews prevNews=findPrevNews(sortedNews,basenewsId);
         Basenews nextNews=findNextNews(sortedNews,basenewsId);
 
@@ -95,24 +95,27 @@ public class NewsDetailService {
     }
 
     // 같은 카테고리/서브카테고리/키워드에 속하는 Basenews 리스트 생성
-    private List<Basenews> fetchSortedNews(String cate, String subCate,String key) {
+    private List<Basenews> fetchSortedNews(String cate, String subCate,String key,Basenews basenews) {
 
         //키워드 존재 : 메인페이지에서 온것
         if(key!=null&&!key.isEmpty()){
             Keyword keyword=keywordRepository.findByName(key)
                     .orElseThrow(()->new IllegalArgumentException("존재하지 않는 keyword입니다.:" +key));
+            if(basenews.getKeyword()!=keyword){throw new IllegalArgumentException("뉴스 키워드와 파라미터가 일치하지 않습니다.");}
             return basenewsRepository.findByKeywordOrderByIdAsc(keyword);
         }
         //키워드 없고 서브카테고리 존재 : 소카테고리 페이지에서 온것
         else if (subCate != null && !subCate.isEmpty()) {
             SubCategory subCategory = subCategoryRepository.findByName(subCate)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Subcategory입니다.: " + subCate));
+            if(basenews.getSubCategory()!=subCategory){throw new IllegalArgumentException("뉴스 소카테고리와 파라미터 불일치");}
             return basenewsRepository.findBySubCategoryOrderByIdAsc(subCategory);
         }
         //큰 카테고리만 존재 : 큰 카테고리 페이지에서 온 것
         else {
             Category category = categoryRepository.findByName(cate)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Category입니다.:" + cate));
+            if(basenews.getCategory()!=category){throw new IllegalArgumentException("뉴스 카테고리와 파라미터 불일치");}
             return basenewsRepository.findByCategoryOrderByIdAsc(category);
         }
     }

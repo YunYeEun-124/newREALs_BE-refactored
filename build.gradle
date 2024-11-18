@@ -29,7 +29,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	//implementation 'com.h2database:h2'
 	implementation 'io.github.cdimascio:java-dotenv:5.2.2'
-	implementation 'org.postgresql:postgresql:42.7.2'
+	implementation 'org.postgresql:postgresql:42.7.3'
 	implementation 'org.bgee.log4jdbc-log4j2:log4jdbc-log4j2-jdbc4.1:1.16'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
