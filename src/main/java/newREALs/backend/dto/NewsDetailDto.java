@@ -16,6 +16,9 @@ public class NewsDetailDto {
     private String newsUrl;
     private LocalDateTime uploadDate;
     private boolean isScrapped;
+    private String category;
+    private String subCategory;
+    private String keyword;
     private int good;
     private int bad;
     private int interesting;
@@ -40,6 +43,10 @@ public class NewsDetailDto {
         this.good=basenews.getLikesCounts()[0];
         this.bad=basenews.getLikesCounts()[1];
         this.interesting=basenews.getLikesCounts()[2];
+
+        this.category=basenews.getCategory().getName();
+        this.subCategory=basenews.getSubCategory().getName();
+        this.keyword=basenews.getKeyword().getName();
     }
 
 
