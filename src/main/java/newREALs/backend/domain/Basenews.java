@@ -45,7 +45,7 @@ public class Basenews {
     private List<TermDetail> termList = new ArrayList<>();
 
     @Column
-    private LocalDateTime uploadDate;
+    private String uploadDate;
 
     @Column
     private String imageUrl;
@@ -75,7 +75,7 @@ public class Basenews {
     private int[] likesCounts=new int[3];
 
     @Builder
-    public Basenews(String title,String summary,String description,LocalDateTime uploadDate,
+    public Basenews(String title,String summary,String description,String uploadDate,
                     String newsUrl,List<TermDetail> terms ,boolean isDailyNews,
                     Category category,SubCategory subCategory,Keyword keyword, String imageUrl,boolean scrapped){
 
