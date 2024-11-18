@@ -57,7 +57,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 31 19 ? * *")
+    @Scheduled(cron = "0 48 20 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -75,7 +75,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 30 19 ? * *")
+    @Scheduled(cron = "0 48 20 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -261,7 +261,8 @@ public class GetNaverNews {
                                 .isDailyNews(isDailyNews)
                                 .build();
                         baseNewsRepository.save(bnews);
-                        System.out.println(item.getLink());
+                        System.out.println("result : "+bnews.getDescription());
+                        //System.out.println(item.getLink());
                         if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
                     } catch (Exception e) {
                         e.printStackTrace();
