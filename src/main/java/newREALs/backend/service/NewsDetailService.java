@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class NewsDetailService {
-    private final BasenewsRepository basenewsRepository;
+    private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
     private final LikesRepository likesRepository;
@@ -24,7 +24,7 @@ public class NewsDetailService {
     private final SubCategoryRepository subCategoryRepository;
     private final KeywordRepository keywordRepository;
 
-    public NewsDetailService(BasenewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, KeywordRepository keywordRepository) {
+    public NewsDetailService(BaseNewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, KeywordRepository keywordRepository) {
         this.basenewsRepository = basenewsRepository;
         this.userRepository = userRepository;
         this.scrapRepository = scrapRepository;
