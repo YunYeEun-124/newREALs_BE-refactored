@@ -21,7 +21,7 @@ public class Likes {
     private Long id;
 
     @Column
-    private LocalDateTime createdDate; //매달 분석도를 끊어야하기 때문.
+    private String createdDate; //매달 분석도를 끊어야하기 때문.
 
 
     @ManyToOne(fetch = FetchType.LAZY)
