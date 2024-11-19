@@ -1,6 +1,7 @@
 package newREALs.backend.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Quiz;
@@ -18,18 +19,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class QuizService {
     private final UserRepository userRepository;
     private final QuizRepository quizRepository;
     private final BaseNewsRepository basenewsRepository;
     private final QuizStatusRepository quizStatusRepository;
-
-    public QuizService(UserRepository userRepository, QuizRepository quizRepository, BaseNewsRepository basenewsRepository, QuizStatusRepository quizStatusRepository) {
-        this.userRepository = userRepository;
-        this.quizRepository = quizRepository;
-        this.basenewsRepository = basenewsRepository;
-        this.quizStatusRepository = quizStatusRepository;
-    }
 
     //[post]퀴즈 풀기 :  맞았으면 true, 틀렸으면 false 반환
     @Transactional

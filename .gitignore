@@ -17,3 +17,5 @@ bfg.jar
 
 # 로그 파일
 *.log
+
+/out/
