@@ -2,6 +2,7 @@ package newREALs.backend.controller;
 
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.UserKeyword;
 import newREALs.backend.dto.DailyNewsThumbnailDTO;
 import newREALs.backend.dto.KeywordNewsDTO;
@@ -21,17 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("main/")
+@RequiredArgsConstructor
+@RequestMapping("/main")
 public class MainNewsController {
-
 
     private final NewsService2 newsService;
     private final TokenService tokenService;
-
-    public MainNewsController(NewsService2 newsService, TokenService tokenService) {
-        this.newsService = newsService;
-        this.tokenService = tokenService;
-    }
 
     //main news list
     @GetMapping("/daily")
@@ -51,7 +47,6 @@ public class MainNewsController {
 
 
     }
-    //think
 
     //keyword newsList, 사용자 키워드 리스트
     @GetMapping("/keyword")

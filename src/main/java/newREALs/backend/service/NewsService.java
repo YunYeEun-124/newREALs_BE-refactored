@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Quiz;
 import newREALs.backend.domain.TermDetail;
@@ -16,22 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
-    public NewsService(ChatGPTService chatGPTService, BaseNewsRepository basenewsRepository, QuizRepository quizRepository) {
-        this.chatGPTService = chatGPTService;
-        this.basenewsRepository = basenewsRepository;
-        this.quizRepository = quizRepository;
-    }
-
-
     //요약, 설명, 용어, 퀴즈 생성 자동화
     //@Scheduled(cron = "0 7 20 ? * *")
-    @Scheduled(cron="0 15 21 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 37 09 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     @Async
     public void automaticProcess(){

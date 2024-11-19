@@ -1,6 +1,7 @@
 package newREALs.backend.service.externalAPI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import io.github.cdimascio.dotenv.Dotenv;
 import jakarta.transaction.Transactional;
 
 import newREALs.backend.domain.Basenews;
@@ -48,8 +49,9 @@ public class GetNaverNews {
 
     private final ChatGPTService chatGPTService;
 
-    private static final  String clientId = "REMOVED"; //애플리케이션 클라이언트 아이디
-    private static final String clientSecret = "REMOVED"; //애플리케이션 클라이언트 시크릿
+    private static final Dotenv dotenv=Dotenv.load();
+    private static final String clientId=dotenv.get("NAVER_API_CLIENTID");
+    private static final String clientSecret=dotenv.get("NAVER_API_SECRETKEY");
     private static newsInfo newsinfo;
 
     public GetNaverNews(ChatGPTService chatGPTService) {
@@ -57,7 +59,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 48 20 ? * *")
+    @Scheduled(cron = "0 36 09 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -75,7 +77,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 48 20 ? * *")
+    @Scheduled(cron = "0 36 09 ? * *")
     @Transactional
     public void getDailynews(){
 

@@ -71,9 +71,6 @@ public class Basenews {
     private boolean isDailyNews; //매일 초기화.
     //T : 데일리 뉴스다~
 
-/*    @Column
-    private boolean scrap;*/
-
     @Column(name = "likes_count", nullable = false)
     private int[] likesCounts=new int[3];
 
