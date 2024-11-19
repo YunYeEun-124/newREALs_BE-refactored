@@ -1,9 +1,4 @@
 package newREALs.backend.domain;
-/*
-	private Accounts account ;
-	private Keyword keyword;
-	private SubCategory subCategory;
-* */
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

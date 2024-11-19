@@ -1,6 +1,7 @@
 package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.SearchDTO;
 import newREALs.backend.service.NewsService;
 import newREALs.backend.service.NewsService2;
@@ -14,16 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/search")
 public class SearchController {
 
     private final NewsService2 newsService;
     private final TokenService tokenService;
 
-    public SearchController(NewsService2 newsService, TokenService tokenService) {
-        this.newsService = newsService;
-        this.tokenService = tokenService;
-    }
 
     @GetMapping
     public ResponseEntity<?> getNewsList(HttpServletRequest userInfo, @RequestParam String searchWord, @RequestParam int page){

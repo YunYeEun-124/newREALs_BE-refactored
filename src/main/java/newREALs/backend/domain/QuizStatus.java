@@ -37,9 +37,6 @@ public class QuizStatus {
         return isCorrect;
     }
 
-    //    public boolean isAlreadySolved() {
-//        return this.isCorrect || !this.isCorrect; // 이미 푼 상태를 의미
-//    }
 
 
 }
