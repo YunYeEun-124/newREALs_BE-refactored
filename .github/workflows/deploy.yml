@@ -19,7 +19,10 @@ jobs:
           java-version: '17'  # 사용하려는 Java 버전
           distribution: temurin
           java-package: jdk
-
+          
+      - name: Grant execute permission for Gradle Wrapper
+        run: chmod +x ./gradlew
+        
       - name: Build the project
         run: ./gradlew build  # Gradle로 프로젝트 빌드
 
