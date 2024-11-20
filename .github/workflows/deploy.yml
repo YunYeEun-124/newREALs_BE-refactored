@@ -3,7 +3,7 @@ name: Deploy Application
 on:
   push:
     branches:
-      - master  # 배포를 트리거하는 브랜치 이름
+      - master
 
 jobs:
   build-and-deploy:
@@ -19,19 +19,20 @@ jobs:
           java-version: '17'
           distribution: temurin
 
-      - name: Prepare SSH directory and save private key
+      - name: Prepare SSH Key
         run: |
           mkdir -p ~/.ssh  # SSH 디렉토리 생성
           echo "${{ secrets.SERVER_KEY }}" > ~/.ssh/id_rsa  # 개인 키 저장
           chmod 600 ~/.ssh/id_rsa  # 개인 키 권한 설정
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts  # 호스트 키 등록
+        shell: bash
 
       - name: Test SSH Connection
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key_path: ~/.ssh/id_rsa
+          key_path: ~/.ssh/id_rsa  # 개인 키 경로 지정
           script: |
             echo "Testing SSH connection..."
             whoami
@@ -42,17 +43,15 @@ jobs:
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key_path: ~/.ssh/id_rsa
+          key_path: ~/.ssh/id_rsa  # 개인 키 경로 지정
           script: |
             echo "Deploying application..."
-            cd /home/ubuntu/newreals-app
+            cd ~/newreals-app
             docker-compose down || true
             docker-compose up -d
           debug: true
 
       - name: Debug SSH Connection (manual)
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.SERVER_HOST }} -v
-
-
+          ssh -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -v
 
