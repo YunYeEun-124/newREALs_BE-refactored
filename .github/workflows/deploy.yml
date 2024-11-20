@@ -11,34 +11,46 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v3  # GitHub 저장소 코드를 가져옴
+        uses: actions/checkout@v3
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'  # 사용하려는 Java 버전
+          java-version: '17'
           distribution: temurin
-          java-package: jdk
-          
+
       - name: Grant execute permission for Gradle Wrapper
         run: chmod +x ./gradlew
-        
-      - name: Build the project
-        run: ./gradlew build  # Gradle로 프로젝트 빌드
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@v0.1.8  # SSH를 통해 서버에 명령 실행
+      - name: Build the project
+        run: ./gradlew build
+
+      - name: Verify build artifacts
+        run: ls -l build/libs
+
+      - name: Upload JAR file to the server
+        uses: appleboy/scp-action@v0.1.8
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
+          username: ubuntu
+          key: ${{ secrets.SERVER_KEY }}
+          source: build/libs/*.jar
+          target: /home/ubuntu/newreals-app/app.jar
+
+      - name: Add SSH known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy application
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ubuntu
           key: ${{ secrets.SERVER_KEY }}
           script: |
-            echo "Creating target directory on the server..."
-            mkdir -p /home/ubuntu/newreals-app
-            echo "Uploading JAR file to the server..."
-            base64 build/libs/*.jar | ssh -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 'base64 --decode > /home/ubuntu/newreals-app/app.jar'
             echo "Deploying application..."
             cd /home/ubuntu/newreals-app
-            docker build -t newreals-app .
-            docker-compose down
+            docker-compose down || true
             docker-compose up -d
+
