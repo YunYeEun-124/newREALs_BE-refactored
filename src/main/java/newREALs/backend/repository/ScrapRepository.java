@@ -6,6 +6,7 @@ import newREALs.backend.domain.Scrap;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,4 +18,9 @@ public interface ScrapRepository extends JpaRepository<Scrap,Long> {
     Boolean existsByUser_IdAndBasenews_Id(Long userId, Long basenewsId);
 
     Page<Scrap> findByUser(Accounts user, Pageable pageable);
+
+    @Query("SELECT s.basenews FROM Scrap s " + "WHERE s.user.id = :userId " +
+            "AND ((s.basenews.title LIKE %:keyword%) OR (s.basenews.description LIKE %:keyword%))")
+    Page<Basenews> findByUserAndTitleContainingOrDescriptionContaining(Long userId, String keyword, Pageable pageable);
+
 }

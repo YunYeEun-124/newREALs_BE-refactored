@@ -65,7 +65,7 @@ public class ProfileService {
     public Pageable getPageInfo(int page) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("basenews.uploadDate"));
-        return PageRequest.of(page - 1, 9, Sort.by(sorts));
+        return PageRequest.of(page - 1, 6, Sort.by(sorts));
     }
 
     //[get] 스크랩 보여주기
@@ -213,4 +213,25 @@ public class ProfileService {
         // scrap 삭제
         scrapRepository.delete(scrap);
     }
+
+    public Page<BaseNewsThumbnailDTO> getScrapSearchList(Long userId, String keyword, int page){
+        Accounts user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+
+        Pageable pageable = getPageInfo(page);
+
+        Page<Basenews> scrapSearchList = scrapRepository.findByUserAndTitleContainingOrDescriptionContaining(userId, keyword, pageable);
+
+        return scrapSearchList.map(basenews -> BaseNewsThumbnailDTO.builder()
+                    .basenewsId(basenews.getId())
+                    .category(basenews.getCategory().getName())
+                    .subCategory(basenews.getSubCategory().getName())
+                    .keyword(basenews.getKeyword().getName())
+                    .title(basenews.getTitle())
+                    .summary(basenews.getSummary())
+                    .imageUrl(basenews.getImageUrl())
+                    .date(basenews.getUploadDate())
+                    .isScrap(true)
+                    .build());
+        }
 }

@@ -13,11 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -262,6 +260,45 @@ public class ProfileController {
             return ResponseEntity.ok(response);
 
         }  catch (Exception e) {
+            // 다른 에러들 -> 400
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<?> getScrapSearchList(HttpServletRequest request, @RequestParam String keyword, @RequestParam int page) {
+        try {
+            String token = tokenService.extractTokenFromHeader(request);
+
+            if (token == null || !tokenService.validateToken(token)) {
+                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            }
+            Long userId = tokenService.extractUserIdFromToken(token);
+
+            Page<BaseNewsThumbnailDTO> scrapSearchPage = profileService.getScrapSearchList(userId, keyword, page);
+
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("user_id", userId);
+            response.put("searchList", scrapSearchPage.getContent());
+            response.put("totalPage", scrapSearchPage.getTotalPages());
+            response.put("totalElement", scrapSearchPage.getTotalElements());
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 토큰 -> 401
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+        } catch (Exception e) {
             // 다른 에러들 -> 400
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("message", "실패했어요");
