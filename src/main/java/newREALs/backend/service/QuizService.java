@@ -2,16 +2,10 @@ package newREALs.backend.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import newREALs.backend.domain.Accounts;
-import newREALs.backend.domain.Basenews;
-import newREALs.backend.domain.Quiz;
-import newREALs.backend.domain.QuizStatus;
+import newREALs.backend.domain.*;
 import newREALs.backend.dto.QuizDto;
 import newREALs.backend.dto.QuizStatusDto;
-import newREALs.backend.repository.BaseNewsRepository;
-import newREALs.backend.repository.QuizRepository;
-import newREALs.backend.repository.QuizStatusRepository;
-import newREALs.backend.repository.UserRepository;
+import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +19,7 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final BaseNewsRepository basenewsRepository;
     private final QuizStatusRepository quizStatusRepository;
+    private final SubInterestRepository subInterestRepository;
 
     //[post]퀴즈 풀기 :  맞았으면 true, 틀렸으면 false 반환
     @Transactional
@@ -44,11 +39,50 @@ public class QuizService {
             quizStatusRepository.save(new QuizStatus(true,quiz,user));
             //정답 맞췄으니 포인트 획득
             user.setPoint(user.getPoint()+5);
-
+            if (basenews.getKeyword() != null) {
+                int keywordId = basenews.getKeyword().getId().intValue();
+                user.updateKeywordInterest(keywordId, 2);
+            }
+            user.setPoint(user.getPoint() + 5);
             userRepository.save(user);
+
+            SubInterest subInterest = subInterestRepository.findByUserAndSubCategory(user, basenews.getSubCategory())
+                    .orElseGet(() -> SubInterest.builder()
+                            .user(user)
+                            .subCategory(basenews.getSubCategory())
+                            .count(0) // 기본값 설정
+                            .quizCount(0)
+                            .scrapCount(0)
+                            .commentCount(0)
+                            .build()
+                    );
+            subInterest.setCount(subInterest.getCount() + 2);
+            subInterest.setQuizCount(subInterest.getQuizCount() + 1);
+            subInterestRepository.save(subInterest);
+
             return true;  //QuizStatus 객체 생성하고 저장
         }else{
             quizStatusRepository.save(new QuizStatus(false,quiz,user));
+            if (basenews.getKeyword() != null) {
+                int keywordId = basenews.getKeyword().getId().intValue();
+                user.updateKeywordInterest(keywordId, 2);
+            }
+            user.setPoint(user.getPoint() + 5);
+            userRepository.save(user);
+
+            SubInterest subInterest = subInterestRepository.findByUserAndSubCategory(user, basenews.getSubCategory())
+                    .orElseGet(() -> SubInterest.builder()
+                            .user(user)
+                            .subCategory(basenews.getSubCategory())
+                            .count(0) // 기본값 설정
+                            .quizCount(0)
+                            .scrapCount(0)
+                            .commentCount(0)
+                            .build()
+                    );
+            subInterest.setCount(subInterest.getCount() + 2);
+            subInterest.setQuizCount(subInterest.getQuizCount() + 1);
+            subInterestRepository.save(subInterest);
             return false;
         }
     }
