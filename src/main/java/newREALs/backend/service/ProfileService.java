@@ -22,6 +22,7 @@ public class ProfileService {
     private final UserKeywordRepository userKeywordRepository;
     private final AccountsRepository accountsRepository;
     private final ScrapRepository scrapRepository;
+    private final BaseNewsRepository baseNewsRepository;
 
 
     //[get] 프로필 정보
@@ -198,5 +199,18 @@ public class ProfileService {
             user.setProfilePath(newProfilePath);
         }
         userRepository.save(user);
+    }
+
+    public void deleteScrap(Long userId, Long newsId) {
+        Accounts user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+        Basenews news = baseNewsRepository.findById(newsId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 뉴스 ID"));
+
+        Scrap scrap = scrapRepository.findByUserAndBasenews(user, news)
+                .orElseThrow(() -> new IllegalArgumentException("스크랩된 뉴스가 아닙니다."));
+
+        // scrap 삭제
+        scrapRepository.delete(scrap);
     }
 }

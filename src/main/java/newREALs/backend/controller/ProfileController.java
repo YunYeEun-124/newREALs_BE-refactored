@@ -243,4 +243,31 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
+    @DeleteMapping("/unscrap")
+    public ResponseEntity<?> ProfileUnscrap(HttpServletRequest request, @RequestParam Long newsId) {
+        try {
+            String token = tokenService.extractTokenFromHeader(request);
+
+            if (token == null || !tokenService.validateToken(token)) {
+                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            }
+            Long userId = tokenService.extractUserIdFromToken(token);
+
+            profileService.deleteScrap(userId, newsId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", "success");
+            response.put("message", "스크랩 해제 성공");
+            return ResponseEntity.ok(response);
+
+        }  catch (Exception e) {
+            // 다른 에러들 -> 400
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
 }
