@@ -70,10 +70,12 @@ KakaoService {
         ));
 
         // JWT 토큰 생성한 거 맵에 넣어서 계정 정보랑 같이 전달
-        String jwtToken = tokenService.generateToken(account);
+        String jwtToken = tokenService.generateAccessToken(account);
+        String refreshToken = tokenService.generateRefreshToken(account);
 
         Map<String, Object> response = new HashMap<>();
         response.put("accessToken", jwtToken);
+        response.put("refreshToken", refreshToken);
         response.put("isNewAccount", isNewAccount);
         response.put("name", account.getName());
         response.put("email", account.getEmail());
