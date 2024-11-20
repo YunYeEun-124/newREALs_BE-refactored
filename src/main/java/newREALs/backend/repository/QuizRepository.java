@@ -18,9 +18,4 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
 
     Optional<String> findProblemByBasenewsId(Long basenewsId);
 
-//
-//    //카테고리에서 불러올때.
-//    @Query("SELECT c.quiz FROM Quiz c WHERE c.baseNews.id = :basenews_id")
-//    Optional<String> findProblemByBasenewsId(@Param("basenews_id") Long basenews_id);
-
 }

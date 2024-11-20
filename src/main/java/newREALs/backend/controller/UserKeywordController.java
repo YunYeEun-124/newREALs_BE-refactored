@@ -2,6 +2,7 @@ package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.UserKeyword;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserKeywordService;
@@ -13,17 +14,12 @@ import java.util.List;
 
 @Transactional
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/register")
 public class UserKeywordController {
 
     private final UserKeywordService userKeywordService;
     private final TokenService tokenService;
-
-    public UserKeywordController(UserKeywordService userKeywordService, TokenService tokenService){
-        this.userKeywordService = userKeywordService;
-        this.tokenService = tokenService;
-    }
-
 
 
     @PutMapping("/edit")

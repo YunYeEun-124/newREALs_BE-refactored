@@ -41,8 +41,6 @@ public class AttendanceService {
         return false;
     }
 
-
-
     @Scheduled(cron  = "0 0 6 1 * *")
     @Transactional
     public void resetAttendanceList() {

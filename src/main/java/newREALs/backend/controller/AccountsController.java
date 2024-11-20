@@ -31,8 +31,8 @@ public class AccountsController {
     private final AttendanceService attendanceService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
 
-    //굿
-    @PatchMapping("/attendance")
+    //[patch] 출석 체크 버튼 누르기
+    @PatchMapping("/attendance/mark")
     public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
         try {
             Long userid = tokenService.getUserId(userInfo);
@@ -55,7 +55,7 @@ public class AccountsController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
     }
-    //굿
+    //[post] 유저 로그인
     @PostMapping("/login")
     public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
         String authorizationCode = request.get("code");
@@ -97,172 +97,6 @@ public class AccountsController {
         }
     }
 
-    //굿
-    @GetMapping("/profile/info")
-    public ResponseEntity<?> getProfileInfo(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
 
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
 
-            ProfileInfoDto profileInfoDTO = profileService.getProfileInfo(userId);
-            return ResponseEntity.ok(profileInfoDTO);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
-
-    //굿
-    @GetMapping("/profile/attendance")
-    public ResponseEntity<?> getAttendanceList(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            ProfileAttendanceListDto profileAttendanceListDTO = profileService.getAttendanceList(userId);
-            return ResponseEntity.ok(profileAttendanceListDTO);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
-
-    //
-    @GetMapping("/profile/scrap")
-    public ResponseEntity<?> getScrapList(HttpServletRequest request, @RequestParam int page) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user_id", userId);
-            response.put("basenewsList", scrapNewsPage.getContent());
-            response.put("totalPage", scrapNewsPage.getTotalPages());
-            response.put("totalElement", scrapNewsPage.getTotalElements());
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
-
-    @GetMapping("/profile/interest")
-    public ResponseEntity<?> getInterest(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰이에요");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            Map<String, List<ProfileInterestDto>> interestMap = profileService.getInterest(userId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user_id", userId);
-            response.put("interest", interestMap);
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
-//
-//    @PatchMapping("profile/edit")
-//    public ResponseEntity<?> ProfileEdit(HttpServletRequest request, @RequestParam MultipartFile file) {
-//        try {
-//            String token = tokenService.extractTokenFromHeader(request);
-//
-//            if (token == null || !tokenService.validateToken(token)) {
-//                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-//            }
-//            Long userId = tokenService.extractUserIdFromToken(token);
-//
-//            String updatedProfileUrl = profileService.editProfile(userId, profileEditDTO);
-//
-//
-//        } catch (IllegalArgumentException e) {
-//            // 유효하지 않은 토큰 -> 401
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-//
-//        } catch (Exception e) {
-//            // 다른 에러들 -> 400
-//            Map<String, Object> errorResponse = new HashMap<>();
-//            errorResponse.put("message", "실패했어요");
-//            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-//            errorResponse.put("status", "fail");
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-//        }
-//    }
 }

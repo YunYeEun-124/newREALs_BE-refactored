@@ -1,6 +1,6 @@
 package newREALs.backend.service;
 
-import io.github.cdimascio.dotenv.Dotenv;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,12 +20,14 @@ import java.util.Date;
 @Service
 public class TokenService {
     private Key key;
-
+    @Value("${jwt.secret-key}")
+    private String secretKey;
     // JWT_SECRET_KEY는 .env 파일에서 가져오기
     @PostConstruct
     public void init() {
-        Dotenv dotenv = Dotenv.load();
-        String secretKey = dotenv.get("JWT_SECRET_KEY");
+//        Dotenv dotenv = Dotenv.load();
+//        String secretKey = dotenv.get("JWT_SECRET_KEY");
+
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 

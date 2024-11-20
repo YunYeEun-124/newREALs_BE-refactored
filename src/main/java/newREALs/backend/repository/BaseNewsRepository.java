@@ -53,4 +53,6 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
     List<Basenews> findAllByUploadDate(@Param("today") String today);
 
     List<Basenews> findAllByIsDailyNews(boolean b);
+
+    Optional<Basenews> findFirstBySummaryIsNull();
 }

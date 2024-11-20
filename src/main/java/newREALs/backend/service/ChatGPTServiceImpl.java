@@ -2,6 +2,7 @@ package newREALs.backend.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.config.ChatGPTConfig;
 import newREALs.backend.dto.GptRequestDto;
 import newREALs.backend.dto.GptResponseDto;
@@ -15,15 +16,11 @@ import java.util.Map;
 
 
 @Service
+@RequiredArgsConstructor
 public class ChatGPTServiceImpl implements ChatGPTService {
     private final RestTemplate restTemplate;
     private final HttpHeaders headers;
     private final String model = "gpt-4-turbo";
-
-    public ChatGPTServiceImpl(ChatGPTConfig chatGPTConfig) {
-        this.restTemplate = chatGPTConfig.restTemplate();
-        this.headers = chatGPTConfig.httpHeaders();
-    }
 
     //요약, 설명, 용어 정리 생성하는 메서드
     @Override
