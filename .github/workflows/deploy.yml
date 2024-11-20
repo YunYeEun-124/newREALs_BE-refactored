@@ -47,6 +47,6 @@ jobs:
         script: |
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
           cd /home/ubuntu/newreals-app
-          docker-compose pull app # 앱 컨테이너만 최신 이미지로 업데이트
-          docker-compose up -d --no-deps app # 데이터베이스는 유지하고 앱만 재시작
-          docker ps
+          docker-compose down || true
+          docker-compose pull  #최신 이미지로 업데이트
+          docker-compose up -d #새 컨테이너 실행니
