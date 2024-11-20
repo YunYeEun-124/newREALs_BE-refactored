@@ -14,35 +14,37 @@ jobs:
       with:
         java-version: 17
         distribution: 'temurin'
-        
+
     # Gradle Wrapper에 실행 권한 추가
     - name: Grant Execute Permission for Gradlew
       run: chmod +x ./gradlew
-      
+
     # Gradle로 JAR 파일 빌드
     - name: Build Application
       run: ./gradlew clean build
 
-    # 서버로 JAR 파일 업로드 및 배포
-    - name: Deploy to EC2
+    # 서버로 JAR 파일 업로드
+    - name: Upload JAR to EC2
+      uses: appleboy/scp-action@master
+      with:
+        source: build/libs/newReals_BE.jar
+        target: /home/ubuntu/newreals-app/app.jar
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_KEY }}
+        port: 22
+
+    # Docker Compose 배포
+    - name: Deploy Application
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SERVER_KEY }}
-        port: ${{ secrets.PORT }}
+        port: 22
         script: |
-          # EC2 서버의 작업 디렉터리로 이동
           cd /home/ubuntu/newreals-app
-          
-          # 기존 컨테이너 중지
           docker-compose down || true
-          
-          # 새로운 JAR 파일 업로드
-          scp build/libs/newReals_BE.jar ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/home/ubuntu/newreals-app/app.jar
-          
-          # Docker Compose로 애플리케이션 재배포
-          docker-compose build
           docker-compose up --build -d
-
+          docker ps
 
