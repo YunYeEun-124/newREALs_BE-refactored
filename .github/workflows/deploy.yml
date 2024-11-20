@@ -1,0 +1,39 @@
+name: Deploy Application
+
+on:
+  push:
+    branches:
+      - master  # 현재 사용하는 브랜치 이름으로 수정 (예: master)
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3  # GitHub 저장소 코드를 가져옴
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'  # 사용하려는 Java 버전
+
+      - name: Build the project
+        run: ./gradlew build  # Gradle로 프로젝트 빌드
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v0.1.8  # SSH를 통해 서버에 명령 실행
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          script: |
+            echo "Creating target directory on the server..."
+            mkdir -p /home/ubuntu/newreals-app
+            echo "Uploading JAR file to the server..."
+            base64 build/libs/*.jar | ssh -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} 'base64 --decode > /home/ubuntu/newreals-app/app.jar'
+            echo "Deploying application..."
+            cd /home/ubuntu/newreals-app
+            docker build -t newreals-app .
+            docker-compose down
+            docker-compose up -d
