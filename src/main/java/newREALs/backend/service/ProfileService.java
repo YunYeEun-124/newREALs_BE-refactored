@@ -23,6 +23,8 @@ public class ProfileService {
     private final AccountsRepository accountsRepository;
     private final ScrapRepository scrapRepository;
     private final BaseNewsRepository baseNewsRepository;
+    private final SubInterestRepository subInterestRepository;
+    private final SubCategoryRepository subCategoryRepository;
 
 
     //[get] 프로필 정보
@@ -210,8 +212,19 @@ public class ProfileService {
         Scrap scrap = scrapRepository.findByUserAndBasenews(user, news)
                 .orElseThrow(() -> new IllegalArgumentException("스크랩된 뉴스가 아닙니다."));
 
+        int keywordId = news.getKeyword().getId().intValue();
+
+        user.updateKeywordInterest(keywordId, -2);
+        userRepository.save(user);
+
+        SubInterest subInterest = subInterestRepository.findByUserAndSubCategoryId(user, news.getSubCategory().getId())
+                .orElseThrow(() -> new IllegalArgumentException("subInterest 없음"));
+
+            subInterest.setScrapCount(subInterest.getScrapCount() - 1);
+            subInterestRepository.save(subInterest);
         // scrap 삭제
         scrapRepository.delete(scrap);
+
     }
 
     public Page<BaseNewsThumbnailDTO> getScrapSearchList(Long userId, String keyword, int page){

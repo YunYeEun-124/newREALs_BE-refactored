@@ -42,8 +42,7 @@ public class Accounts {
 
     @Column(name = "keywordInterest")
     @ElementCollection(fetch = FetchType.LAZY)
-    private int[] keywordInterest = new int[52]; // 키워드 별 관심도 // 매달 리셋됨
-
+    private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
     @Builder
     public Accounts(String name, String profilePath, String email) {
@@ -61,6 +60,10 @@ public class Accounts {
             System.out.print(a + " ");
         }
 
+    }
+
+    public void updateKeywordInterest(int keywordId, int change) {
+        keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
     }
 
 }

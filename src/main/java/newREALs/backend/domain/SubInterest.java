@@ -47,10 +47,13 @@ public class SubInterest {
 
 
     @Builder
-    public SubInterest(Accounts user, SubCategory subCategory, int count){
+    public SubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
+        this.quizCount = quizCount;
+        this.scrapCount = scrapCount;
+        this.commentCount = commentCount;
     }
 
 

@@ -44,6 +44,7 @@ public class QuizService {
             quizStatusRepository.save(new QuizStatus(true,quiz,user));
             //정답 맞췄으니 포인트 획득
             user.setPoint(user.getPoint()+5);
+
             userRepository.save(user);
             return true;  //QuizStatus 객체 생성하고 저장
         }else{
