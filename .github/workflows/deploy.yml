@@ -39,6 +39,7 @@ jobs:
             echo "Testing SSH connection..."
             whoami
           debug: true
+          cipher: aes256-cbc
 
       - name: Deploy application
         uses: appleboy/ssh-action@master
@@ -52,5 +53,6 @@ jobs:
             docker-compose down || true
             docker-compose up -d
           debug: true
+          cipher: aes256-cbc
 
 
