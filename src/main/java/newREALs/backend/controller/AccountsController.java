@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import newREALs.backend.domain.Accounts;
 import newREALs.backend.dto.*;
+import newREALs.backend.repository.UserRepository;
 import newREALs.backend.service.AttendanceService;
 import newREALs.backend.service.KakaoService;
 import newREALs.backend.service.ProfileService;
@@ -27,6 +29,7 @@ public class AccountsController {
 
     private final KakaoService kakaoService;
     private final TokenService tokenService;
+    private final UserRepository userRepository;
     private final ProfileService profileService;
     private final AttendanceService attendanceService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
@@ -62,6 +65,7 @@ public class AccountsController {
 
         try {
             // 로그인 성공
+            // 로그인 성공
             Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
 
             // 플래그로 확인
@@ -73,9 +77,11 @@ public class AccountsController {
                 redirectUrl = "/home";
             }
 
+            // 응답 객체 생성
             Map<String, Object> responseBody = new HashMap<>();
             responseBody.put("status", "success");
             responseBody.put("access_token", kakaoResponse.get("accessToken"));
+            responseBody.put("refresh_token", kakaoResponse.get("refreshToken")); // Refresh Token 추가
             responseBody.put("redirect_url", redirectUrl);
             responseBody.put("name", kakaoResponse.get("name"));
             responseBody.put("email", kakaoResponse.get("email"));
@@ -97,6 +103,33 @@ public class AccountsController {
         }
     }
 
+    @PostMapping("/token/refresh")
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
+        try {
+            String refreshToken = tokenService.extractTokenFromHeader(request);
 
+            if (!tokenService.validateToken(refreshToken)) {
+                throw new IllegalArgumentException("유효하지 않은 Refresh Token이에요.");
+            }
+
+            Long userId = tokenService.extractUserIdFromToken(refreshToken);
+            Accounts user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+            // access token 다시 생성
+            String newAccessToken = tokenService.generateAccessToken(user);
+
+            return ResponseEntity.ok(Map.of("access_token", newAccessToken));
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 토큰 에러 처리
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "유효하지 않은 refresh token이에요");
+            errorResponse.put("error", "400 Bad Request");
+            errorResponse.put("status", "fail");
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+
+        }
+    }
 
 }

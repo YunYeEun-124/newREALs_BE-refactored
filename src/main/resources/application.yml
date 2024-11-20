@@ -51,7 +51,8 @@ logging:
     org.springframework.jdbc: debug
 
 jwt:
-  expiration-time: 86400000
+  access-expiration-time: 86400000
+  refresh-expiration-time: 2592000000
   secret-key: ${JWT_SECRET_KEY}
 
 naver:
