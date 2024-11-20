@@ -17,6 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -48,8 +49,15 @@ public class GetNaverNews {
 
     private final ChatGPTService chatGPTService;
 
-    private static final  String clientId = "F1IVcWvW5fqvJ7sIO7SS"; //애플리케이션 클라이언트 아이디
-    private static final String clientSecret = "5c_r_a2u50"; //애플리케이션 클라이언트 시크릿
+//    private static final Dotenv dotenv=Dotenv.load();
+//    private static final String clientId=dotenv.get("NAVER_API_CLIENTID");
+//    private static final String clientSecret=dotenv.get("NAVER_API_SECRETKEY");
+    @Value("${naver.api.client-id}")
+    private String clientId;
+
+    @Value("${naver.api.secret-key}")
+    private String clientSecret;
+
     private static newsInfo newsinfo;
 
     public GetNaverNews(ChatGPTService chatGPTService) {
@@ -57,7 +65,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 48 20 ? * *")
+    @Scheduled(cron = "0 36 09 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -75,7 +83,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 48 20 ? * *")
+    @Scheduled(cron = "0 36 09 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -240,7 +248,7 @@ public class GetNaverNews {
                 if(basenews.isPresent()){
                     System.out.println(item.getTitle() + "is already in it.");
                     if(isDailyNews){
-                        basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
+                       basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
                     }
                     return;
                 }else{
@@ -261,8 +269,7 @@ public class GetNaverNews {
                                 .isDailyNews(isDailyNews)
                                 .build();
                         baseNewsRepository.save(bnews);
-                        System.out.println("result : "+bnews.getDescription());
-                        //System.out.println(item.getLink());
+                        System.out.println(item.getLink());
                         if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -295,18 +302,18 @@ public class GetNaverNews {
             Element imageElements = doc.selectFirst(htmlId2);
 
             if(elements != null){
-                plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
+                 plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
                 if(imageElements != null){
                     imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
                 }else{ //default image
-                    imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
+                   imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
                 }
 
                 set.add(imagePath);
                 set.add(plainText);
 
             }else {
-                //  elements = doc.selectFirst("#_article_");
+              //  elements = doc.selectFirst("#_article_");
                 System.out.println("추출 안된 주소 : "+url);
                 throw  new RuntimeException("기사 추출 못했음. ");
             }
@@ -314,8 +321,8 @@ public class GetNaverNews {
         }catch (IOException e){
             throw new RuntimeException("뉴스 원문 못 가져왔대요~~", e);
         }
-        //  System.out.println("get article 기사 추출 성공");
-        return set;
+      //  System.out.println("get article 기사 추출 성공");
+       return set;
     }
 
     ////////////////////////////네이버 뉴스 연동 메서드///////////////////

@@ -1,13 +1,10 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Getter
+@Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Click {
     @Id
@@ -32,7 +29,4 @@ public class Click {
         this.count=1L;
     }
 
-    public void setCount(Long count) {
-        this.count = count;
-    }
 }

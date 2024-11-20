@@ -1,6 +1,7 @@
 package newREALs.backend.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -8,20 +9,13 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserActionService {
     private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
-
-    public UserActionService(BaseNewsRepository basenewsRepository, UserRepository userRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ScrapRepository scrapRepository) {
-        this.basenewsRepository = basenewsRepository;
-        this.userRepository = userRepository;
-        this.likesRepository = likesRepository;
-        this.subInterestRepository = subInterestRepository;
-        this.scrapRepository = scrapRepository;
-    }
 
     //스크랩 처리 메서드
     @Transactional

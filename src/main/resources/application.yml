@@ -1,23 +1,25 @@
+
+openai:
+  secret-key: ${OPENAI_SECRET_KEY}
+  organization-id: ${OPENAI_ORGANIZATION_ID}
+
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres # PostgreSQL URL, mydatabase를 실제 데이터베이스 이름으로 변경
-    username: postgres # PostgreSQL 사용자 이름
-    password: "0000" # PostgreSQL 사용자 비밀번호
-    driver-class-name: org.postgresql.Driver # PostgreSQL 드라이버 클래스
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
 
   jpa:
+    show-sql: true
+    database: postgresql
     hibernate:
-      ddl-auto: create # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
+      ddl-auto: update # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
     properties:
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect # PostgreSQL에 맞는 Hibernate dialect
         format_sql: true # SQL을 보기 쉽게 출력
-
-  # H2 Console 비활성화
-#  h2:
-#    console:
-#      enabled: false
 
 
   security:
@@ -25,8 +27,8 @@ spring:
       client:
         registration:
           kakao:
-            client-id: 62e10d29b8acb986b74f1db20a5e86d4
-            client-secret: D7WISaxfuqxMvI6vdvzbD2WJeAGKBUkX
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
             redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
@@ -42,14 +44,25 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+
 logging:
   level:
     org.hibernate.SQL: debug
+    org.springframework.jdbc: debug
 
 jwt:
-  expiration-time: 86400000
+  access-expiration-time: 86400000
+  refresh-expiration-time: 2592000000
+  secret-key: ${JWT_SECRET_KEY}
+
+naver:
+  api:
+    client-id: ${NAVER_API_CLIENTID}
+    secret-key: ${NAVER_API_SECRETKEY}
+
+file:
+  upload-dir: /Users/iseohyeon/capstone/uploads/
 
 
-openai:
-  secret-key: ${OPENAI_SECRET_KEY}
-  organization-id: ${OPENAI_ORGANIZATION_ID}
+
+

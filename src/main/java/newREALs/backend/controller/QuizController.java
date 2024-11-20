@@ -1,6 +1,7 @@
 package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.QuizDto;
 import newREALs.backend.service.QuizService;
 import newREALs.backend.service.TokenService;
@@ -8,15 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/news/quiz")
 public class QuizController {
     private final QuizService quizService;
     private final TokenService tokenService;
 
-    public QuizController(QuizService quizService, TokenService tokenService) {
-        this.quizService = quizService;
-        this.tokenService = tokenService;
-    }
 
     // 퀴즈 풀기
     @PostMapping("/{id}")
@@ -26,7 +24,6 @@ public class QuizController {
             HttpServletRequest userInfo) {
 
         Long userId = tokenService.getUserId(userInfo);
-//        return ResponseEntity.ok(quizService.solveQuiz(id, userId, userAnswer));
         Boolean result=quizService.solveQuiz(id,userId,userAnswer);
         quizService.checkExtraPoint(userId);
         return ResponseEntity.ok(result);

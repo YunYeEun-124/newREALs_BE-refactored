@@ -1,6 +1,7 @@
 package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.ViewCategoryDTO;
 import newREALs.backend.service.NewsService;
 import newREALs.backend.service.NewsService2;
@@ -14,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/category")
 public class CategoryNewsController {
 
@@ -21,18 +23,13 @@ public class CategoryNewsController {
     private final NewsService2 newsService;
     private  TokenService tokenService;
 
-    public CategoryNewsController(TokenService tokenService, NewsService2 newsService) {
-        this.tokenService = tokenService;
-        this.newsService = newsService;
-    }
-
     // category/sub/?category=society&subcategory=사건사고
     @GetMapping("/sub")
-    public ResponseEntity<?> viewSubCategory(HttpServletRequest userInfo, @RequestParam String category, @RequestParam String sub,@RequestParam int page){
+    public ResponseEntity<?> viewSubCategory(HttpServletRequest userInfo, @RequestParam String category, @RequestParam String subCategory,@RequestParam int page){
         Long userid = tokenService.getUserId(userInfo);
 
         //page오바하면
-        ViewCategoryDTO result  = newsService.getSubCategory(userid,category,sub,page);
+        ViewCategoryDTO result  = newsService.getSubCategory(userid,category,subCategory,page);
 
         return ResponseEntity.ok().body(result);
     }

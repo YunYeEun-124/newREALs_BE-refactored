@@ -1,6 +1,6 @@
 package newREALs.backend.service;
 
-import io.github.cdimascio.dotenv.Dotenv;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -20,19 +20,24 @@ import java.util.Date;
 @Service
 public class TokenService {
     private Key key;
-
+    @Value("${jwt.secret-key}")
+    private String secretKey;
     // JWT_SECRET_KEY는 .env 파일에서 가져오기
     @PostConstruct
     public void init() {
-        Dotenv dotenv = Dotenv.load();
-        String secretKey = dotenv.get("JWT_SECRET_KEY");
+//        Dotenv dotenv = Dotenv.load();
+//        String secretKey = dotenv.get("JWT_SECRET_KEY");
+
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    @Value("${jwt.expiration-time}")
-    private long expirationTime;
+    @Value("${jwt.access-expiration-time}")
+    private long accessExpirationTime;
 
-    public String generateToken(Accounts account) {
+    @Value("${jwt.refresh-expiration-time}")
+    private long refreshExpirationTime;
+
+    public String generateAccessToken(Accounts account) {
         Date date = new Date();
 
         // claim -> body 영역이라고 생각하면 됨...
@@ -41,13 +46,23 @@ public class TokenService {
                 .claim("email", account.getEmail())
                 .claim("name", account.getName())
                 .claim("profilePath", account.getProfilePath())
-                .setExpiration(new Date(date.getTime() + expirationTime))
+                .setExpiration(new Date(date.getTime() + accessExpirationTime))
                 .setIssuedAt(date)
                 .signWith(key, SignatureAlgorithm.HS512) // 암호화 알고리즘
                 .compact();
     }
 
-    public boolean validateToken(String token) {
+    public String generateRefreshToken(Accounts account) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(String.valueOf(account.getId()))
+                .setExpiration(new Date(now.getTime() + refreshExpirationTime))
+                .setIssuedAt(now)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
+
+        public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
@@ -83,4 +98,6 @@ public class TokenService {
         log.debug("TokenService - 헤더에서 추출한 토큰의 user Id: {}", userId);
         return userId;
     }
+
+
 }

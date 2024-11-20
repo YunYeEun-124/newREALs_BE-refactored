@@ -1,6 +1,7 @@
 package newREALs.backend.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.dto.NewsDetailDto;
 import newREALs.backend.dto.SimpleNewsDto;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class NewsDetailService {
     private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
@@ -23,18 +25,6 @@ public class NewsDetailService {
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final KeywordRepository keywordRepository;
-
-    public NewsDetailService(BaseNewsRepository basenewsRepository, UserRepository userRepository, ScrapRepository scrapRepository, LikesRepository likesRepository, SubInterestRepository subInterestRepository, ClickRepository clickRepository, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository, KeywordRepository keywordRepository) {
-        this.basenewsRepository = basenewsRepository;
-        this.userRepository = userRepository;
-        this.scrapRepository = scrapRepository;
-        this.likesRepository = likesRepository;
-        this.subInterestRepository = subInterestRepository;
-        this.clickRepository = clickRepository;
-        this.categoryRepository = categoryRepository;
-        this.subCategoryRepository = subCategoryRepository;
-        this.keywordRepository = keywordRepository;
-    }
 
 
     //뉴스 상세페이지 조회 메서드
