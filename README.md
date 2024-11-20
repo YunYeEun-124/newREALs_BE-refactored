@@ -58,36 +58,25 @@ cd your-repository
 ```
 
 #### 2. 환경 변수 설정
-`application.yml` 또는 `.env` 파일에 아래와 같은 환경 변수를 설정합니다:
-
-**`application.yml` 예시**:
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/db
-    username: postgres
-    password: your-password
-  security:
-    oauth2:
-      client:
-        registration:
-          kakao:
-            client-id: YOUR_KAKAO_CLIENT_ID
-            client-secret: ""
-            redirect-uri: "http://localhost:8080/login/oauth2/code/kakao"
-
-openai:
-  secret-key:""
-  organization-id:""
-
-#### 3. Gradle 빌드 및 실행
-```bash
-./gradlew clean build
-./gradlew bootRun
+##### 2-1. `.env` 설정:
 ```
+OPENAI_SECRET_KEY=
+OPENAI_ORGANIZATION_ID=
+JWT_SECRET_KEY=
+NAVER_API_CLIENTID=
+NAVER_API_SECRETKEY=
+DATABASE_URL=
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
+KAKAO_CLIENT_ID=
+KAKAO_CLIENT_SECRET=
+```
+##### 2-2.플러그인 설정 :
+- IntelliJ의 **Settings → Plugins → Marketplace**로 이동.
+- `EnvFile` 플러그인을 검색하고 설치합니다.
+- Run/Debug Configuration 창에서 **Environment variables** 옆의 **Browse files** 버튼을 클릭합니다.
+- `.env` 파일을 선택하면 자동으로 환경 변수를 로드합니다.
 
-#### 4. 서버 실행 확인
-현재는 로컬 실행만 가능하며, 서버 배포 시 추가 정보를 제공하겠습니다.
 
 ---
 
