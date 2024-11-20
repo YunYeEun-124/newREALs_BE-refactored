@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'  # 사용하려는 Java 버전
+          distribution: temurin
+          java-package: jdk
 
       - name: Build the project
         run: ./gradlew build  # Gradle로 프로젝트 빌드
