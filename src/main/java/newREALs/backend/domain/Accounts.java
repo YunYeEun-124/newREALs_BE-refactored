@@ -40,6 +40,10 @@ public class Accounts {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "keywordInterest")
+    @ElementCollection(fetch = FetchType.LAZY)
+    private int[] keywordInterest = new int[52]; // 키워드 별 관심도 // 매달 리셋됨
+
 
     @Builder
     public Accounts(String name, String profilePath, String email) {
