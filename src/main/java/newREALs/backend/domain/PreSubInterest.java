@@ -1,21 +1,16 @@
 package newREALs.backend.domain;
 
-/*	private User user;
-	private SubCategory subCategory;
-	private int count;(default = 0);*/
-
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.HashMap;
 
-@Getter
 @Entity
+@Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SubInterest {
-
+public class PreSubInterest {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -47,11 +42,9 @@ public class SubInterest {
 
 
     @Builder
-    public SubInterest(Accounts user, SubCategory subCategory, int count){
+    public PreSubInterest(Accounts user, SubCategory subCategory, int count){
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
     }
-
-
 }
