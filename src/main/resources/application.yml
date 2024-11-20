@@ -1,3 +1,8 @@
+
+openai:
+  secret-key: ${OPENAI_SECRET_KEY}
+  organization-id: ${OPENAI_ORGANIZATION_ID}
+
 spring:
   datasource:
     url: ${DATABASE_URL}
@@ -6,8 +11,10 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
+    show-sql: true
+    database: postgresql
     hibernate:
-      ddl-auto: create-drop # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
+      ddl-auto: create # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
     properties:
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate:
@@ -37,6 +44,7 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+
 logging:
   level:
     org.hibernate.SQL: debug
@@ -44,8 +52,13 @@ logging:
 
 jwt:
   expiration-time: 86400000
+  secret-key: ${JWT_SECRET_KEY}
+
+naver:
+  api:
+    client-id: ${NAVER_API_CLIENTID}
+    secret-key: ${NAVER_API_SECRETKEY}
 
 
-openai:
-  secret-key: ${OPENAI_SECRET_KEY}
-  organization-id: ${OPENAI_ORGANIZATION_ID}
+
+
