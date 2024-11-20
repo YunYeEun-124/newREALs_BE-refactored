@@ -28,14 +28,39 @@ public class ProfileController {
     private final ProfileService profileService;
     private final AccountsRepository accountsRepository;
 
-    //[get] 프로필 페이지 나의 퀴즈 현황
     @GetMapping("/quiz")
-    public ResponseEntity<List<QuizStatusDto>> getQuizStatus(HttpServletRequest userInfo) {
-        Long userId = tokenService.getUserId(userInfo);
+    public ResponseEntity<?> getQuizStatus(HttpServletRequest userInfo) {
+        try {
+            String token = tokenService.extractTokenFromHeader(userInfo);
 
-        List<QuizStatusDto> quizStatusList = quizService.getQuizStatus(userId);
-        return ResponseEntity.ok(quizStatusList);
+            // 유효하지 않은 토큰 처리
+            if (token == null || !tokenService.validateToken(token)) {
+                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+            }
+
+            Long userId = tokenService.extractUserIdFromToken(token);
+            List<QuizStatusDto> quizStatusList = quizService.getQuizStatus(userId);
+
+            return ResponseEntity.ok(quizStatusList);
+
+        } catch (IllegalArgumentException e) {
+            // 유효하지 않은 토큰 -> 401 Unauthorized
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "유효하지 않은 토큰이에요");
+            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+
+        } catch (Exception e) {
+            // 기타 에러 -> 400 Bad Request
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("message", "실패했어요");
+            errorResponse.put("error", "400 Bad Request: \"" + (e.getMessage() != null ? e.getMessage() : "null") + "\"");
+            errorResponse.put("status", "fail");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
     }
+
 
     //[get] 프로필페이지 - 유저 정보
     @GetMapping("/info")
