@@ -8,10 +8,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    # Gradle Wrapper에 실행 권한 추가
+    - name: Grant Execute Permission for Gradlew
+      run: chmod +x ./gradlew
+      
     # Gradle로 JAR 파일 빌드
     - name: Build Application
-      run: |
-        ./gradlew clean build
+      run: ./gradlew clean build
 
     # 서버로 JAR 파일 업로드 및 배포
     - name: Deploy to EC2
