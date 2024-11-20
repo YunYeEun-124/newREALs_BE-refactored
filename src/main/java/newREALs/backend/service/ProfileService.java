@@ -5,13 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.dto.*;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -167,7 +168,35 @@ public class ProfileService {
         return interestDTOList;
     }
 
-//    private String editProfile(Long userId, ProfileEditDTO profileEditDTO) {
-//
-//    }
+    // 지금은 저장위치를 로컬로 해놓음..
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+    public void editProfile(Long userId, String newName, MultipartFile file) throws IOException {
+        Accounts user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
+
+        // 이름 변경
+        if (newName != null && !newName.isEmpty()) {
+            user.setName(newName);
+        }
+
+        if (file != null && !file.isEmpty()) {
+            File directory = new File(uploadDir);
+
+            if (!directory.exists()) {
+                if (!directory.mkdirs()) {
+                    throw new IOException("디렉토리를 생성할 수 없습니다: " + uploadDir);
+                }
+            }
+
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            File saveFile = new File(uploadDir + fileName);
+            file.transferTo(saveFile);
+
+            // 일단 로컬로 설정
+            String newProfilePath = "http://localhost:8080/" + uploadDir + fileName;
+            user.setProfilePath(newProfilePath);
+        }
+        userRepository.save(user);
+    }
 }
