@@ -24,6 +24,8 @@ jobs:
           mkdir -p ~/.ssh  # SSH 디렉토리 생성
           echo "${{ secrets.SERVER_KEY }}" > ~/.ssh/id_rsa  # 개인 키 저장
           chmod 600 ~/.ssh/id_rsa  # 개인 키 권한 설정
+          ls -al ~/.ssh  # 디렉토리 내 파일 확인
+          cat ~/.ssh/id_rsa  # 키 내용 확인 (디버깅용, 배포 전 삭제)
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts  # 호스트 키 등록
         shell: bash
 
@@ -51,7 +53,4 @@ jobs:
             docker-compose up -d
           debug: true
 
-      - name: Debug SSH Connection (manual)
-        run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} -v
 
