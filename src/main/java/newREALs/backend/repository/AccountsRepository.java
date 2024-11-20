@@ -33,4 +33,11 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
             "ORDER BY si.count DESC")
     List<Object[]> findTotalInterestById(Long userId, Pageable pageable);
 
+    // 프로필 정보 수정
+    @Query("SELECT a.name, a.profilePath " +
+            "FROM Accounts a " +
+            "WHERE a.id = :userId")
+    List<Object[]> findNameAndProfilePathById(Long userId);
+
+
 }
