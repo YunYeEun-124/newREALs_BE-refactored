@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
@@ -8,6 +9,7 @@ import newREALs.backend.dto.SimpleNewsDto;
 import newREALs.backend.dto.TermDetailDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,15 +32,15 @@ public class NewsDetailService {
     //뉴스 상세페이지 조회 메서드
     @Transactional
     public NewsDetailDto getNewsDetail(Long basenewsId, Long userId, String cate, String subCate, String keyword){
-        Basenews basenews=basenewsRepository.findById(basenewsId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+        Basenews basenews = basenewsRepository.findById(basenewsId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         //cate, subCate, keyword중 하나는 무조건 받아야함
         if(cate==null&&subCate==null&&keyword==null){
            //오류 던짐
-            throw new IllegalArgumentException("카테고리, 서브카테고리, 키워드 중 한가지를 입력하세요.");
+            throw new IllegalArgumentException("카테고리, 서브카테고리, 키워드 중 하나를 입력해야 합니다.");
         }
 
         //조회수 증가
@@ -79,33 +81,35 @@ public class NewsDetailService {
     }
 
     private String determinWherePageFrom(String keyword, String subCate, String cate) {
-        if(keyword!=null) return keyword;
-        if(subCate!=null) return subCate;
-        return cate;
+        if(keyword!=null) return "keyword";
+        if(subCate!=null) return "subCategory";
+        return "category";
     }
 
     // 같은 카테고리/서브카테고리/키워드에 속하는 Basenews 리스트 생성
     private List<Basenews> fetchSortedNews(String cate, String subCate,String key,Basenews basenews) {
 
         //키워드 존재 : 메인페이지에서 온것
-        if(key!=null&&!key.isEmpty()){
+        if(StringUtils.hasText(key)){
             Keyword keyword=keywordRepository.findByName(key)
-                    .orElseThrow(()->new IllegalArgumentException("존재하지 않는 keyword입니다.:" +key));
-            if(basenews.getKeyword()!=keyword){throw new IllegalArgumentException("뉴스 키워드와 파라미터가 일치하지 않습니다.");}
+                    .orElseThrow(()->new EntityNotFoundException("존재하지 않는 keyword입니다"));
+            if (!basenews.getKeyword().equals(keyword)) {
+                throw new IllegalArgumentException("뉴스의 키워드와 요청 파라미터가 일치하지 않습니다.");
+            }
             return basenewsRepository.findByKeywordOrderByIdAsc(keyword);
         }
         //키워드 없고 서브카테고리 존재 : 소카테고리 페이지에서 온것
-        else if (subCate != null && !subCate.isEmpty()) {
+        else if (StringUtils.hasText(subCate)) {
             SubCategory subCategory = subCategoryRepository.findByName(subCate)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Subcategory입니다.: " + subCate));
-            if(basenews.getSubCategory()!=subCategory){throw new IllegalArgumentException("뉴스 소카테고리와 파라미터 불일치");}
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 Subcategory입니다."));
+            if(!basenews.getSubCategory().equals(subCategory)){throw new IllegalArgumentException("뉴스의 서브카테고리와 요청 파라미터가 일치하지 않습니다.");}
             return basenewsRepository.findBySubCategoryOrderByIdAsc(subCategory);
         }
         //큰 카테고리만 존재 : 큰 카테고리 페이지에서 온 것
         else {
             Category category = categoryRepository.findByName(cate)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 Category입니다.:" + cate));
-            if(basenews.getCategory()!=category){throw new IllegalArgumentException("뉴스 카테고리와 파라미터 불일치");}
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 Category입니다."));
+            if(basenews.getCategory()!=category){throw new IllegalArgumentException("뉴스의 카테고리와 요청 파라미터가 일치하지 않습니다.");}
             return basenewsRepository.findByCategoryOrderByIdAsc(category);
         }
     }

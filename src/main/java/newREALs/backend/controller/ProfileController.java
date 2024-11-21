@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,39 +27,15 @@ public class ProfileController {
     private final ProfileService profileService;
     private final AccountsRepository accountsRepository;
 
+    //[get] 프로필 페이지 - 퀴즈 정보
     @GetMapping("/quiz")
-    public ResponseEntity<?> getQuizStatus(HttpServletRequest userInfo) {
-        try {
-            String token = tokenService.extractTokenFromHeader(userInfo);
+    public ResponseEntity<ApiResponseDTO<List<QuizStatusDto>>> getQuizStatus(HttpServletRequest request) {
+        //토큰이 유효하지 않으면 getUserId에서 401에러 "토큰이 유효하지 않습니다"를 반환함
+        Long userId = tokenService.getUserId(request);
+        List<QuizStatusDto> quizStatusList = quizService.getQuizStatus(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("퀴즈 상태 조회 성공", quizStatusList));
 
-            // 유효하지 않은 토큰 처리
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-
-            Long userId = tokenService.extractUserIdFromToken(token);
-            List<QuizStatusDto> quizStatusList = quizService.getQuizStatus(userId);
-
-            return ResponseEntity.ok(quizStatusList);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401 Unauthorized
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "유효하지 않은 토큰이에요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 기타 에러 -> 400 Bad Request
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + (e.getMessage() != null ? e.getMessage() : "null") + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
     }
-
 
     //[get] 프로필페이지 - 유저 정보
     @GetMapping("/info")
@@ -307,4 +284,5 @@ public class ProfileController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+
 }

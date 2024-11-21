@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
@@ -19,11 +20,12 @@ public class UserActionService {
 
     //스크랩 처리 메서드
     @Transactional
-    public void getScrap(Long basenewsId, Long userId){
-        Basenews basenews=basenewsRepository.findById(basenewsId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+    public String getScrap(Long basenewsId, Long userId){
+        Basenews basenews = basenewsRepository.findById(basenewsId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+
         //유저관심도
         Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
         //스크랩 여부 확인
@@ -36,6 +38,7 @@ public class UserActionService {
             SubInterest s=subInterest.get();
             s.setCount(s.getCount()-2);
             subInterestRepository.save(s);
+            return "스크랩이 해제되었습니다.";
         } else{
             //스크랩 안되어있던 거면 스크랩 O
             Scrap newScrap=new Scrap(user,basenews);
@@ -49,6 +52,7 @@ public class UserActionService {
                 SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
                 subInterestRepository.save(s);
             }
+            return "스크랩 등록 완료";
         }
 
     }
@@ -56,11 +60,12 @@ public class UserActionService {
     //공감 버튼 처리
     //reactionType : 좋아요 0 슬퍼오 1 흥미로워요 2
     @Transactional
-    public void getLikes(Long basenewsId, Long userId, int reactionType ){
-        Basenews basenews=basenewsRepository.findById(basenewsId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid news ID"));
+    public String getLikes(Long basenewsId, Long userId, int reactionType ){
+        Basenews basenews = basenewsRepository.findById(basenewsId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("Invalid user ID"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+
 
 
         if (reactionType < 0 || reactionType >= 3) {
@@ -69,7 +74,7 @@ public class UserActionService {
         //Likes 객체 받아와서
         Optional<Likes> existingLike=likesRepository.findByUserAndBasenews(user,basenews);
         Optional<SubInterest> subInterest=subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
-
+        String message;
         if(existingLike.isPresent()){
             //Likes 객체가 존재 : 이미 공감버튼 눌려 있다는 뜻
             Likes like=existingLike.get();
@@ -80,12 +85,14 @@ public class UserActionService {
                 s.setCount(s.getCount()-1);
                 subInterestRepository.save(s);
                 likesRepository.delete(like);
+                message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
-
+                message="이미 다른 공감버튼을 눌렀어요.";
             }
         }else{
             //Likes 객체 없음 : 공감 버튼 안눌려있음
             basenews.getLikesCounts()[reactionType]++; //공감수 증가
+            message="공감 반영 완료";
             //관심도 증가.
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
@@ -104,6 +111,7 @@ public class UserActionService {
 
         //저장
         basenewsRepository.save(basenews);
+        return message;
     }
 
 }

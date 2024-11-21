@@ -3,6 +3,7 @@ package newREALs.backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import newREALs.backend.domain.Accounts;
 
 import java.util.List;
 
@@ -16,4 +17,15 @@ public class ProfileInfoDto {
     private String profilePath;
     private int point;
     private List<String> keywords;
+
+    public static ProfileInfoDto from(Accounts user, List<String> keywords) {
+        return new ProfileInfoDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getProfilePath(),
+                user.getPoint(),
+                keywords
+        );
+    }
 }

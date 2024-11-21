@@ -223,15 +223,15 @@ public class ProfileService {
         Page<Basenews> scrapSearchList = scrapRepository.findByUserAndTitleContainingOrDescriptionContaining(userId, keyword, pageable);
 
         return scrapSearchList.map(basenews -> BaseNewsThumbnailDTO.builder()
-                    .basenewsId(basenews.getId())
-                    .category(basenews.getCategory().getName())
-                    .subCategory(basenews.getSubCategory().getName())
-                    .keyword(basenews.getKeyword().getName())
-                    .title(basenews.getTitle())
-                    .summary(basenews.getSummary())
-                    .imageUrl(basenews.getImageUrl())
-                    .date(basenews.getUploadDate())
-                    .isScrap(true)
-                    .build());
-        }
+                .basenewsId(basenews.getId())
+                .category(basenews.getCategory().getName())
+                .subCategory(basenews.getSubCategory().getName())
+                .keyword(basenews.getKeyword().getName())
+                .title(basenews.getTitle())
+                .summary(basenews.getSummary())
+                .imageUrl(basenews.getImageUrl())
+                .date(basenews.getUploadDate())
+                .isScrap(true)
+                .build());
+    }
 }
