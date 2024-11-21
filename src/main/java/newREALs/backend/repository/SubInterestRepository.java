@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface SubInterestRepository extends JpaRepository<SubInterest,Long> {
 
     Optional<SubInterest> findByUserAndSubCategory(Accounts user, SubCategory subCategory);
+    Optional<SubInterest> findByUserAndSubCategoryId(Accounts user, Long subCategoryId);
 }

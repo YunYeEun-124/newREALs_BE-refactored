@@ -14,7 +14,7 @@ spring:
     show-sql: true
     database: postgresql
     hibernate:
-      ddl-auto: update # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
+      ddl-auto: create # 테이블 자동 생성 (운영 환경에서는 'none' 또는 'validate' 추천)
     properties:
       hibernate.jdbc.lob.non_contextual_creation: true
       hibernate:

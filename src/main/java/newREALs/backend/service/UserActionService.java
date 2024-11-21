@@ -31,13 +31,19 @@ public class UserActionService {
         //스크랩 여부 확인
         Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
 
+        int keywordId = basenews.getKeyword().getId().intValue();
+
         //이미 스크랩 되어있던 거면 스크랩 해제
         if(isScrapped.isPresent()){
             scrapRepository.delete(isScrapped.get());
             //관심도를 삭제할지 말지?
             SubInterest s=subInterest.get();
             s.setCount(s.getCount()-2);
+            s.setScrapCount(s.getScrapCount()-1);
             subInterestRepository.save(s);
+
+            user.updateKeywordInterest(keywordId, -2);
+            userRepository.save(user);
             return "스크랩이 해제되었습니다.";
         } else{
             //스크랩 안되어있던 거면 스크랩 O
@@ -49,7 +55,15 @@ public class UserActionService {
                 s.setCount(s.getCount()+3);
                 subInterestRepository.save(s);
             }else{
-                SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
+//                SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
+                SubInterest s = SubInterest.builder()
+                        .user(user)
+                        .subCategory(basenews.getSubCategory())
+                        .count(3)
+                        .scrapCount(1)
+                        .quizCount(0)
+                        .commentCount(0)
+                        .build();
                 subInterestRepository.save(s);
             }
             return "스크랩 등록 완료";
@@ -100,7 +114,15 @@ public class UserActionService {
                 else {s.setCount(s.getCount()+2);}  //흥미로워요는 +2
                 subInterestRepository.save(s);
             }else{
-                SubInterest s=new SubInterest(user,basenews.getSubCategory(),1);
+//                SubInterest s=new SubInterest(user,basenews.getSubCategory(),1);
+                SubInterest s = SubInterest.builder()
+                        .user(user)
+                        .subCategory(basenews.getSubCategory())
+                        .count(1)
+                        .scrapCount(0)
+                        .quizCount(0)
+                        .commentCount(0)
+                        .build();
                 if(reactionType==2)s.setCount(s.getCount()+1); //흥미로워요는 +2여야하니까..
                 subInterestRepository.save(s);
 
