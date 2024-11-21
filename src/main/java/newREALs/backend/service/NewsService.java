@@ -26,7 +26,7 @@ public class NewsService {
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
     //@Scheduled(cron = "0 7 20 ? * *")
-    @Scheduled(cron="0 37 09 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 43 12 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     @Async
     public void automaticProcess(){
