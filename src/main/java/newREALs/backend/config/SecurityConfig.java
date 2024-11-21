@@ -53,6 +53,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:3000"); // 프론트엔드 로컬 개발 환경 허용
         configuration.addAllowedOrigin("http://127.0.0.1:3000"); // 프론트엔드 로컬 개발 환경 허용
+        configuration.addAllowedOrigin("http://localhost:5173"); // 프론트엔드 로컬 개발 환경 허용
+
         //configuration.addAllowedOrigin("https://frontend.myapp.com"); // 배포된 프론트엔드 도메인 허용
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용

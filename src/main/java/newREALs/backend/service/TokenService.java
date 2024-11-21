@@ -84,8 +84,13 @@ public class TokenService {
     }
 
     public Long getUserId(HttpServletRequest request){
-        return extractUserIdFromToken( extractTokenFromHeader(request));
+        String token = extractTokenFromHeader(request);
 
+        if (token == null || !validateToken(token)) {
+            throw new SecurityException("유효하지 않은 토큰입니다.");
+        }
+
+        return extractUserIdFromToken(token);
     }
     // 토큰으로 userId 추출
     public Long extractUserIdFromToken(String token) {

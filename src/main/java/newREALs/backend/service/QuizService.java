@@ -1,5 +1,6 @@
 package newREALs.backend.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
@@ -24,12 +25,12 @@ public class QuizService {
     //[post]퀴즈 풀기 :  맞았으면 true, 틀렸으면 false 반환
     @Transactional
     public Boolean solveQuiz(Long id, Long userId, Boolean userAnswer) {
+        Basenews basenews = basenewsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
-        Basenews basenews=basenewsRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("Invalid newsId"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
         Quiz quiz=quizRepository.findByBasenews(basenews)
-                .orElseThrow(()->new IllegalArgumentException("일치하는 퀴즈가 없어요"));
+                .orElseThrow(()->new EntityNotFoundException("이 뉴스에 속하는 퀴즈가 없습니다."));
 
         //이미 푼 퀴즈이면 다시 풀 수 없음.
         Optional<QuizStatus> quizStatus=quizStatusRepository.findByUserAndQuiz(user,quiz);
@@ -91,7 +92,7 @@ public class QuizService {
     @Transactional
     public void checkExtraPoint(Long userId){
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
         //오늘의 퀴즈 가져오기
         int count=0;
         List<Quiz> todayQuizzes=quizRepository.findTop5ByBasenewsIsDailyNewsTrueOrderByIdDesc();
@@ -115,7 +116,7 @@ public class QuizService {
     @Transactional
     public List<QuizStatusDto> getQuizStatus(Long userId){
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()-> new IllegalArgumentException("Invalid userId"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         //오늘의 퀴즈 가져오기
         List<Quiz> todayQuizzes=quizRepository.findTop5ByBasenewsIsDailyNewsTrueOrderByIdDesc();
@@ -143,16 +144,18 @@ public class QuizService {
     //[get] 뉴스 상세 페이지에서 퀴즈 보여주기
     @Transactional
     public QuizDto getQuiz(Long id, Long userId ){
+        Basenews basenews = basenewsRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new IllegalArgumentException("유저 없음"));
-        Basenews basenews=basenewsRepository.findById(id)
-                .orElseThrow(()->new IllegalArgumentException("뉴스 없음"));
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         //메인 뉴스 아니면 퀴즈가 없으므로 null반환
         if(!basenews.isDailyNews())return null;
 
+
         Quiz quiz=quizRepository.findByBasenews(basenews)
-                .orElseThrow(()->new IllegalArgumentException("No quiz"));
+                .orElseThrow(()->new IllegalStateException("메인 뉴스임에도 퀴즈가 존재하지 않습니다. 데이터 무결성을 확인하세요."));
+        //메인뉴스이므로 퀴즈가 있어야 하는데 없는 상황=
         Optional<QuizStatus> quizStatus=quizStatusRepository.findByUserAndQuiz(user,quiz);
 
         boolean isSolved=quizStatus.isPresent();
