@@ -81,6 +81,7 @@ public class QuizService {
                             .commentCount(0)
                             .build()
                     );
+
             subInterest.setCount(subInterest.getCount() + 2);
             subInterest.setQuizCount(subInterest.getQuizCount() + 1);
             subInterestRepository.save(subInterest);
