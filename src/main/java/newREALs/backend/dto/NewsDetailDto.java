@@ -1,6 +1,9 @@
 package newREALs.backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import newREALs.backend.domain.Basenews;
 
 import java.time.LocalDateTime;
