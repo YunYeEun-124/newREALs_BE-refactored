@@ -20,14 +20,6 @@ public class UserActionService {
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
 
-    private static final Logger log = LoggerFactory.getLogger(UserActionService.class);
-
-    public void someMethod() {
-        log.debug("Some debug log message");
-    }
-
-
-
     //스크랩 처리 메서드
     @Transactional
     public String getScrap(Long basenewsId, Long userId){
@@ -53,7 +45,7 @@ public class UserActionService {
             subInterestRepository.save(s);
             //스크랩 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
-            //userRepository.save(user);
+            userRepository.save(user);
             return "스크랩이 해제되었습니다.";
         } else{
             //스크랩 안되어있던 거면 스크랩 O
@@ -62,7 +54,7 @@ public class UserActionService {
 
             //스크랩 등록 -> KeywordInterest 증가
             user.updateKeywordInterest(keywordId, 2);
-            //userRepository.save(user);
+            userRepository.save(user);
 
             //스크랩 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
@@ -131,7 +123,7 @@ public class UserActionService {
             message="공감 반영 완료";
             //공감 등록 -> KeywordInterest 증가
             user.updateKeywordInterest(keywordId,1);
-            //userRepository.save(user);
+            userRepository.save(user);
             //공감 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
