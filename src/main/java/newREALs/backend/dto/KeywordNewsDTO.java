@@ -10,7 +10,7 @@ import java.util.List;
 public class KeywordNewsDTO
 {
     private List<String> userKeywords;
-    private List<BaseNewsThumbnailDTO> baseNewsThumbnailDTOList;
+    private List<BaseNewsThumbnailDTO> baseNewsList;
     private int totalPage;
     private Long totalElement;
 }

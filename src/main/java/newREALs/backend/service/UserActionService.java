@@ -21,11 +21,6 @@ public class UserActionService {
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
-    private static final Logger log = LoggerFactory.getLogger(UserActionService.class);
-
-    public void someMethod() {
-        log.debug("Some debug log message");
-    }
 
 
 
@@ -115,10 +110,11 @@ public class UserActionService {
                 SubInterest s=subInterest.get();
                 s.setCount(s.getCount()-1);
                 subInterestRepository.save(s);
-                likesRepository.delete(like);
+
                 //공감 해제 -> KeywordInterest 감소
                 user.updateKeywordInterest(keywordId, -1);
                 userRepository.save(user);
+                likesRepository.delete(like);
 
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
