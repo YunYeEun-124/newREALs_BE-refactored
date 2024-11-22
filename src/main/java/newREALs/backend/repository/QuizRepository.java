@@ -15,8 +15,8 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     Optional<Quiz> findByBasenews(Basenews basenews);
 
     List<Quiz> findTop5ByBasenewsIsDailyNewsTrueOrderByIdDesc();
+
     @Query("SELECT q.problem FROM Quiz q WHERE q.basenews.id = :basenewsId")
     Optional<String> findProblemByBasenewsId(@Param("basenewsId") Long basenewsId);
-    //Optional<String> findProblemByBasenewsId(Long basenewsId);
 
 }
