@@ -34,6 +34,9 @@ public class AttendanceService {
             if(!user.get().getAttendanceList()[day]) {
                 user.get().updateAttendance(day);
                 return true;
+            }else{
+                System.out.println("이미 출석체크함. ");
+                return false;
             }
 
         }

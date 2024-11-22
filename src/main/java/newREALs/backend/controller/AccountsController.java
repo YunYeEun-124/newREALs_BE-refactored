@@ -21,6 +21,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -41,25 +42,33 @@ public class AccountsController {
     //[patch] 출석 체크 버튼 누르기
     @PatchMapping("/attendance/mark")
     public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
+        Map<String, Object> response = new LinkedHashMap<>();
+
         try {
             Long userid = tokenService.getUserId(userInfo);
-            Map<String, Object> responseBody = new HashMap<>();
 
             if(attendanceService.UpdateAttendance(userid)){
-                responseBody.put("status", "success");
+                response.put("isSuccess", true);
+                response.put("code", "S200");
+                response.put("message", "출석 체크 성공");
+                response.put("data", true);
+                return  ResponseEntity.status(HttpStatus.OK).body(response);
+
             }else {
-                responseBody.put("status", "fail : already checked");
+                response.put("isSuccess", false);
+                response.put("code", "E400");
+                response.put("message", "출석 체크 이미 했습니다.");
+                response.put("data", false);
+                return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 
-            return ResponseEntity.ok().body(responseBody);
 
         }catch (Exception e){
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "fail");
-            errorResponse.put("error", e.getMessage());
-
-            String errorJsonResponse = gson.toJson(errorResponse);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            response.put("isSuccess", false);
+            response.put("code", "E400");
+            response.put("message", "출석 체크 실패.");
+            response.put("data", e.getMessage());
+            return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
     //[post] 유저 로그인
