@@ -19,7 +19,7 @@ public class BaseNewsThumbnailDTO {
     private String summary;
     private String imageUrl;
     private String date;
-    private boolean isScrap;
+    private boolean isScrapped;
 
 
 
