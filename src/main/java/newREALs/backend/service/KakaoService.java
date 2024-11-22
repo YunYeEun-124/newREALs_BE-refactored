@@ -49,7 +49,9 @@ KakaoService {
         Map<String, Object> userInfo = getUserInfo(accessToken);
 
         // 받아온 userInfo에서 필요한 정보 가져오기
-        String email = (String) ((Map<String, Object>) userInfo.get("kakao_account")).get("email");
+        String email = Optional.ofNullable((String) ((Map<String, Object>) userInfo.get("kakao_account")).get("email"))
+                .orElseThrow(() -> new IllegalArgumentException("이메일 정보가 없습니다."));
+
         String name = (String) ((Map<String, Object>) userInfo.get("properties")).get("nickname");
         String profilePath = (String) ((Map<String, Object>) userInfo.get("properties")).get("profile_image");
 
@@ -79,7 +81,7 @@ KakaoService {
         response.put("isNewAccount", isNewAccount);
         response.put("name", account.getName());
         response.put("email", account.getEmail());
-        response.put("userPk", account.getId());
+        response.put("userId", account.getId());
         log.info("jwt 토큰 생성한 거 : {}", jwtToken);
         return response;
     }

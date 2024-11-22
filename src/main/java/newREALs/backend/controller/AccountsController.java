@@ -2,6 +2,7 @@ package newREALs.backend.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,76 +61,54 @@ public class AccountsController {
     }
     //[post] 유저 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> kakaoLogin(@RequestBody Map<String, String> request) {
+    public ResponseEntity<ApiResponseDTO<?>> kakaoLogin(@RequestParam Map<String, String> request) {
         String authorizationCode = request.get("code");
-
-        try {
-            // 로그인 성공
-            // 로그인 성공
-            Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
-
-            // 플래그로 확인
-            // 여기서 바로 findByEmail하면 이미 DB에 들어가있는 상태라 구분이 안됨
-            String redirectUrl;
-            if ((boolean) kakaoResponse.get("isNewAccount")) {
-                redirectUrl = "/register";
-            } else {
-                redirectUrl = "/home";
-            }
-
-            // 응답 객체 생성
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("status", "success");
-            responseBody.put("access_token", kakaoResponse.get("accessToken"));
-            responseBody.put("refresh_token", kakaoResponse.get("refreshToken")); // Refresh Token 추가
-            responseBody.put("redirect_url", redirectUrl);
-            responseBody.put("name", kakaoResponse.get("name"));
-            responseBody.put("email", kakaoResponse.get("email"));
-            responseBody.put("user_pk", kakaoResponse.get("userPk"));
-
-            String jsonResponse = gson.toJson(responseBody);
-            return new ResponseEntity<>(jsonResponse, HttpStatus.OK);
-
-        } catch (Exception e) {
-            // 로그인 실패
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "fail");
-            errorResponse.put("message", "로그인 실패했어요");
-            errorResponse.put("error", e.getMessage());
-
-            String errorJsonResponse = gson.toJson(errorResponse);
-            return new ResponseEntity<>(errorJsonResponse, HttpStatus.BAD_REQUEST); // 400
-
+        if (authorizationCode == null || authorizationCode.isBlank()) {
+            throw new IllegalArgumentException("인가코드가 비어있습니다.");
         }
+
+        Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
+        // 플래그로 확인
+        // 여기서 바로 findByEmail하면 이미 DB에 들어가있는 상태라 구분이 안됨
+        String redirectUrl;
+        if ((boolean) kakaoResponse.get("isNewAccount")) {
+            redirectUrl = "/register";
+        } else {
+            redirectUrl = "/home";
+        }
+
+        // 응답 객체 생성
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("access_token", kakaoResponse.get("accessToken"));
+        responseBody.put("refresh_token", kakaoResponse.get("refreshToken")); // Refresh Token 추가
+        responseBody.put("redirect_url", redirectUrl);
+        responseBody.put("name", kakaoResponse.get("name"));
+        responseBody.put("email", kakaoResponse.get("email"));
+        responseBody.put("user_id", kakaoResponse.get("userId"));
+
+        return ResponseEntity.ok(ApiResponseDTO.success("로그인 성공", responseBody));
+
     }
 
     @PostMapping("/token/refresh")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-        try {
-            String refreshToken = tokenService.extractTokenFromHeader(request);
 
-            if (!tokenService.validateToken(refreshToken)) {
-                throw new IllegalArgumentException("유효하지 않은 Refresh Token이에요.");
-            }
+        String refreshToken = tokenService.extractTokenFromHeader(request);
 
-            Long userId = tokenService.extractUserIdFromToken(refreshToken);
-            Accounts user = userRepository.findById(userId)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-
-            // access token 다시 생성
-            String newAccessToken = tokenService.generateAccessToken(user);
-
-            return ResponseEntity.ok(Map.of("access_token", newAccessToken));
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 에러 처리
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "유효하지 않은 refresh token이에요");
-            errorResponse.put("error", "400 Bad Request");
-            errorResponse.put("status", "fail");
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-
+        if (!tokenService.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
         }
+
+        Long userId = tokenService.extractUserIdFromToken(refreshToken);
+        Accounts user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+
+
+        // access token 다시 생성
+        String newAccessToken = tokenService.generateAccessToken(user);
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("access_token", newAccessToken);
+        return ResponseEntity.ok(ApiResponseDTO.success("Access Token 재발급 성공", responseBody));
     }
 
 }
