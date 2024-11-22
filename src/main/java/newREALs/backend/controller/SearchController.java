@@ -2,6 +2,7 @@ package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.SearchDTO;
 import newREALs.backend.service.NewsService;
 import newREALs.backend.service.NewsService2;
@@ -30,39 +31,24 @@ public class SearchController {
 
 
         Long userid = tokenService.getUserId(userInfo);
-        Map<String, Object> response = new LinkedHashMap<>();
         if(searchWord.isEmpty()){
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "검색어를 입력해주세요 ");
-            response.put("data",null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            throw new IllegalArgumentException("매개변수 null");
         }
 
         SearchDTO result = newsService.getSearch(userid,searchWord,page);
 
         if(result.getTotalElement() == 0) {
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "해당 검색어에 대한 결과가 없습니다.");
-            response.put("data",null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.ok(
+                    ApiResponseDTO.success( "검색 결과가 없습니다.", result)
+            );
         }
 
-        if(page > result.getTotalPage()) {
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "페이지 범위를 초과했습니다. ");
-            response.put("data",null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        if(page > result.getTotalPage() || page <= 0) {
+            throw new IllegalArgumentException("페이지 범위 오류");
         }
 
-        response.put("isSuccess", true);
-        response.put("code", "S200");
-        response.put("message", "검색 성공");
-        response.put("data", result);
-
-
-        return   ResponseEntity.status(HttpStatus.OK).body(response);
+        return ResponseEntity.ok(
+                ApiResponseDTO.success( "검색 성공", result)
+        );
     }
 }

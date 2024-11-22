@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import newREALs.backend.domain.Keyword;
 import newREALs.backend.domain.UserKeyword;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -26,7 +27,10 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword,Long> {
     Optional<UserKeyword> findByUser_IdAndKeyword_Name(Long userId, String keywordName);
 
     @Transactional
-    void deleteByUser_IdAndKeyword_Name(Long userid, String key);
+    @Modifying
+    @Query("DELETE FROM UserKeyword uk WHERE uk.user.id = :userId AND uk.keyword.name = :key")
+    void deleteByUser_IdAndKeyword_Name(@Param("userId") Long userId, @Param("key") String key);
+
 
     boolean existsByUserId(Long userId);
 }
