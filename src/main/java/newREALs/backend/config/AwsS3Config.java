@@ -9,7 +9,7 @@ public class AwsS3Config {
     @Bean
     public S3Client s3Client(){
         return S3Client.builder()
-                .region()
+                .region(Region.AP_NORTHEAST_2)
                 .build();
     }
 }
