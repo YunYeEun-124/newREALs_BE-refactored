@@ -1,0 +1,32 @@
+# 환경 파일
+.env*
+
+# 빌드 폴더
+/build
+# 환경 파일
+
+
+# IDE 설정 파일
+.idea/
+.gradle/
+# 빌드 폴더
+
+replace.txt
+# 실행 파일
+gradlew
+gradlew.bat
+# IDE 설정 파일
+
+# BFG Repo-Cleaner
+bfg.jar
+
+# 로그 파일
+*.log
+
+/out/
+
+#도커 파일
+docker-compose.yml
+.dockerignore
+
+

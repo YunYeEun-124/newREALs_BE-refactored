@@ -1,17 +1,20 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /** JPA 엔티티는 기본 생성자가 필수인데 이걸로 대체
  * 매개변수 필요한 생성자는 밑에있는 @builder 사용하여 가독성 향상
  * ( 팀프로젝트에 좋을거같아서 도입해봤습니다.)
  */
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)//notion 참고 바람.
 public class Accounts {
 
@@ -32,22 +35,35 @@ public class Accounts {
 
     @Column(name = "attendanceList")
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
-    private boolean[] attendanceList = new boolean[31]; //매달 리셋됨
+    final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
+
+    @Column(name = "keywordInterest")
+    @ElementCollection(fetch = FetchType.LAZY)
+    private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
     @Builder
-    public Accounts(String name, String profilePath){
+    public Accounts(String name, String profilePath, String email) {
         this.name = name;
         this.profilePath = profilePath;
+        this.email = email;
         this.point = 0;
     }
+
+    public void updateAttendance(int index) {
+        attendanceList[index] = true;
+        point += 5;
+
+        for (boolean a : attendanceList) {
+            System.out.print(a + " ");
+        }
+
+    }
+
+    public void updateKeywordInterest(int keywordId, int change) {
+        keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
+    }
+
 }
-
-
-/*
-* 	private int id;
-	private String name;
-	private Image profile;
-	private int point;
-	private boolean[] attendanceList = new boolean[31]; //매달 리셋
-* */

@@ -5,14 +5,14 @@ package newREALs.backend.domain;
 	private int count;(default = 0);*/
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.HashMap;
 
 @Getter
 @Entity
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SubInterest {
 
@@ -33,10 +33,28 @@ public class SubInterest {
     @ColumnDefault("0")
     private int count;
 
+    @Column
+    @ColumnDefault("0")
+    private int quizCount;
+
+    @Column
+    @ColumnDefault("0")
+    private int scrapCount;
+
+    @Column
+    @ColumnDefault("0")
+    private int commentCount;
+
+
     @Builder
-    public SubInterest(Accounts user, SubCategory subCategory,int count){
+    public SubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
+        this.quizCount = quizCount;
+        this.scrapCount = scrapCount;
+        this.commentCount = commentCount;
     }
+
+
 }

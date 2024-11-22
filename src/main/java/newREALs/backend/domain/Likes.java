@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.cglib.core.Local;
+
 import java.time.LocalDateTime;
 
 
@@ -19,17 +21,8 @@ public class Likes {
     private Long id;
 
     @Column
-    private LocalDateTime createdDate; //매달 분석도를 끊어야하기 때문.
+    private String createdDate; //매달 분석도를 끊어야하기 때문.
 
-    //중복방지,
-    @ElementCollection
-    @Column
-    private boolean[] hasLiked = new boolean[3];
-
-    //공감 수
-    @ElementCollection
-    @Column
-    private int[] likes  = new int[3];
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -37,22 +30,16 @@ public class Likes {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)
-    private Basenews bnews;
+    private Basenews basenews;
+
+    private int reactionType;
 
     @Builder
-    public  Likes(Basenews bnews, Accounts user, int index,LocalDateTime createdDate){
-        this.bnews = bnews;
+    public  Likes(Basenews basenews, Accounts user, int reactionType){
+        this.basenews = basenews;
         this.user = user;
-        this.createdDate = createdDate;
-
-        if(index >= 0 && index <=2){
-            hasLiked[index] = true;
-            likes[index] ++;
-        }else{
-            throw new IllegalArgumentException("인덱스 범위가 오바임 ");
-        }
-
-
+        this.reactionType=reactionType;
+        //this.createdDate = createdDate;
     }
 
 

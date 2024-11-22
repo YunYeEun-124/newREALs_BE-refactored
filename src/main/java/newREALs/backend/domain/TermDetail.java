@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class TermDetail{
 
-    @Column
+    @Column(name="term")
     private String term;
 
-    @Column
+    @Column(name="term_info",length=1000)
     private String termInfo;
 
     public TermDetail(String term, String info){

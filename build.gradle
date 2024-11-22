@@ -28,12 +28,38 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.postgresql:postgresql:42.7.3' // PostgreSQL 의존성
+	implementation 'com.google.code.gson:gson:2.8.9'
+	implementation 'org.jsoup:jsoup:1.17.2'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'com.h2database:h2' // H2를 테스트 전용으로 설정
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // 카카오 용도
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'// jwt 토큰
+
+//	implementation 'io.github.cdimascio:dotenv-java:2.2.0' // jwt secret key .env 파일에서 자동으로 가져오도록..
+	implementation 'org.postgresql:postgresql:42.7.3'
+
+
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
+tasks.named('jar') {
+	enabled = false // 일반 JAR 생성을 비활성화
+}
+
+bootJar {
+	archiveBaseName.set("newReals_BE") // 실행 가능한 JAR 파일 이름 설정
+	archiveVersion.set("") // 버전 제거
+}
+
+
+bootJar {
+	archiveBaseName.set("newReals_BE") // JAR 파일 기본 이름 설정
+	archiveVersion.set("") // 버전 제거 (필요하면 남겨도 됨)
+	archiveClassifier.set("") // 분류 제거 (예: plain 등)
 }
