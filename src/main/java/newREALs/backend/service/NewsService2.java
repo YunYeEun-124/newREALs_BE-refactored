@@ -3,6 +3,7 @@ package newREALs.backend.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Basenews;
+import newREALs.backend.domain.Category;
 import newREALs.backend.domain.UserKeyword;
 import newREALs.backend.dto.*;
 import newREALs.backend.repository.*;
@@ -59,10 +60,10 @@ public class NewsService2 {
 
     public DailyNewsThumbnailDTO getDailyNewsOne(String category) {
         DailyNewsThumbnailDTO dailynewsdto = null;
-        Long dailynewsCategoryId=categoryRepository.findByName(category).get().getId();
+        Category dailynewsCategory=categoryRepository.findByName(category).get();
 
         // 데일리 뉴스 가져오기
-        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryAndIsDailyNews(dailynewsCategoryId, true);
+        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryAndIsDailyNews(dailynewsCategory, true);
         Long basenews_id;
         if(dailynews.isPresent()) basenews_id = dailynews.get().getId();
         else return null;
