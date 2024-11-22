@@ -31,7 +31,7 @@ public class UserActionService {
 
     //스크랩 처리 메서드
     @Transactional
-    public String getScrap(Long basenewsId, Long userId){
+    public boolean getScrap(Long basenewsId, Long userId){
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
@@ -54,8 +54,8 @@ public class UserActionService {
             subInterestRepository.save(s);
             //스크랩 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
-            //userRepository.save(user);
-            return "스크랩이 해제되었습니다.";
+            userRepository.save(user);
+            return false;
         } else{
             //스크랩 안되어있던 거면 스크랩 O
             Scrap newScrap=new Scrap(user,basenews);
@@ -63,7 +63,7 @@ public class UserActionService {
 
             //스크랩 등록 -> KeywordInterest 증가
             user.updateKeywordInterest(keywordId, 2);
-            //userRepository.save(user);
+            userRepository.save(user);
 
             //스크랩 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
@@ -83,7 +83,7 @@ public class UserActionService {
                         .build();
                 subInterestRepository.save(s);
             }
-            return "스크랩 등록 완료";
+            return true;
         }
 
     }
@@ -118,7 +118,7 @@ public class UserActionService {
                 likesRepository.delete(like);
                 //공감 해제 -> KeywordInterest 감소
                 user.updateKeywordInterest(keywordId, -1);
-                //userRepository.save(user);
+                userRepository.save(user);
 
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
@@ -130,7 +130,7 @@ public class UserActionService {
             message="공감 반영 완료";
             //공감 등록 -> KeywordInterest 증가
             user.updateKeywordInterest(keywordId,1);
-            //userRepository.save(user);
+            userRepository.save(user);
             //공감 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
