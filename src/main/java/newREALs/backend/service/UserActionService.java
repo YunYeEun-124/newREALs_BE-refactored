@@ -36,12 +36,13 @@ public class UserActionService {
         //이미 스크랩 되어있던 거면 스크랩 해제
         if(isScrapped.isPresent()){
             scrapRepository.delete(isScrapped.get());
-            //관심도를 삭제할지 말지?
+            //스크랩 해제 -> SubInterest 감소
             SubInterest s=subInterest.get();
             s.setCount(s.getCount()-2);
             s.setScrapCount(s.getScrapCount()-1);
             subInterestRepository.save(s);
 
+            //공감 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
             userRepository.save(user);
             return "스크랩이 해제되었습니다.";
@@ -49,10 +50,16 @@ public class UserActionService {
             //스크랩 안되어있던 거면 스크랩 O
             Scrap newScrap=new Scrap(user,basenews);
             scrapRepository.save(newScrap);
-            //관심도 증가
+
+            //스크랩 등록 -> KeywordInterest 증가
+            user.updateKeywordInterest(keywordId, 2);
+            userRepository.save(user);
+
+            //스크랩 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
                 s.setCount(s.getCount()+3);
+                s.setScrapCount(s.getScrapCount()+1);
                 subInterestRepository.save(s);
             }else{
 //                SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
@@ -79,7 +86,7 @@ public class UserActionService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-
+        int keywordId=basenews.getKeyword().getId().intValue();
 
 
         if (reactionType < 0 || reactionType >= 3) {
@@ -94,11 +101,15 @@ public class UserActionService {
             Likes like=existingLike.get();
             if(like.getReactionType()==reactionType){ //화나요에 좋아요 눌러져있음 -> 또 화나요 클릭한 케이스
                 basenews.getLikesCounts()[reactionType]--; //현재 반응 취소.
-                //관심도 감소 할지말지??
+                //공감 해제 -> SubInterest 감소
                 SubInterest s=subInterest.get();
                 s.setCount(s.getCount()-1);
                 subInterestRepository.save(s);
                 likesRepository.delete(like);
+                //공감 해제 -> KeywordInterest 감소
+                user.updateKeywordInterest(keywordId, -1);
+                userRepository.save(user);
+
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
                 message="이미 다른 공감버튼을 눌렀어요.";
@@ -107,7 +118,10 @@ public class UserActionService {
             //Likes 객체 없음 : 공감 버튼 안눌려있음
             basenews.getLikesCounts()[reactionType]++; //공감수 증가
             message="공감 반영 완료";
-            //관심도 증가.
+            //공감 등록 -> KeywordInterest 증가
+            user.updateKeywordInterest(keywordId,1);
+            userRepository.save(user);
+            //공감 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
                 if(reactionType<2){s.setCount(s.getCount()+1); } //좋아요, 슬퍼요는 +1
