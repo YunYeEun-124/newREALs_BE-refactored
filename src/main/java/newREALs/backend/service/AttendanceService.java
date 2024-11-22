@@ -20,7 +20,7 @@ public class AttendanceService {
     private final UserRepository userRepository;
 
     @Transactional
-    public boolean UpdateAttendance(Long userid) {
+    public int UpdateAttendance(Long userid) {
 
         Optional<Accounts> user = userRepository.findById(userid);
         LocalDateTime current = LocalDateTime.now();
@@ -28,20 +28,21 @@ public class AttendanceService {
         int day = current.getDayOfMonth();
 
         if(user.isPresent()){
-
-            if (hour < 6) day -= 2; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
+            //마지막날일때 주의 해야하는데 ...
+            if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
             else day --;
+
             if(!user.get().getAttendanceList()[day]) {
                 user.get().updateAttendance(day);
-                return true;
+                return day;
             }else{
                 System.out.println("이미 출석체크함. ");
-                return false;
+                return day;
             }
 
         }
 
-        return false;
+        return -1;
     }
 
     @Scheduled(cron  = "0 0 6 1 * *")
