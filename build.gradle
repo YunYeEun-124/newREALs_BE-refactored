@@ -37,7 +37,7 @@ dependencies {
 	testImplementation 'com.h2database:h2' // H2를 테스트 전용으로 설정
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client' // 카카오 용도
-
+	implementation 'software.amazon.awssdk:s3:2.20.11' //s3의존성 추가
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'// jwt 토큰
