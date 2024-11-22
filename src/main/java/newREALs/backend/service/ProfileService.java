@@ -25,6 +25,7 @@ public class ProfileService {
     private final BaseNewsRepository baseNewsRepository;
     private final SubInterestRepository subInterestRepository;
     private final SubCategoryRepository subCategoryRepository;
+    private final S3Service s3Service;
 
 
     //[get] 프로필 정보
@@ -128,15 +129,7 @@ public class ProfileService {
         return result;
     }
 
-//    public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
-//        Map<String, List<ReportInterestDto>> result = new HashMap<>();
-//
-//        result.put("society", new ArrayList<>());
-//        result.put("politics", new ArrayList<>());
-//        result.put("economy", new ArrayList<>());
-//
-//
-//    }
+
 
     //[get] 관심도 분석 비율 찾기
     private List<ProfileInterestDto> getPercentage(List<ProfileInterestProjection> interests) {
@@ -190,23 +183,28 @@ public class ProfileService {
             user.setName(newName);
         }
 
-        if (file != null && !file.isEmpty()) {
-            File directory = new File(uploadDir);
-
-            if (!directory.exists()) {
-                if (!directory.mkdirs()) {
-                    throw new IOException("디렉토리를 생성할 수 없습니다: " + uploadDir);
-                }
-            }
-
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-            File saveFile = new File(uploadDir + fileName);
-            file.transferTo(saveFile);
-
-            // 일단 로컬로 설정
-            String newProfilePath = "http://localhost:8080/" + uploadDir + fileName;
-            user.setProfilePath(newProfilePath);
+        if(file!=null&&!file.isEmpty()) {
+            String s3Url = s3Service.uploadFile(file);
+            user.setProfilePath(s3Url);
         }
+
+//        if (file != null && !file.isEmpty()) {
+//            File directory = new File(uploadDir);
+//
+//            if (!directory.exists()) {
+//                if (!directory.mkdirs()) {
+//                    throw new IOException("디렉토리를 생성할 수 없습니다: " + uploadDir);
+//                }
+//            }
+
+//            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+//            File saveFile = new File(uploadDir + fileName);
+//            file.transferTo(saveFile);
+//
+//            // 일단 로컬로 설정
+//            String newProfilePath = "http://localhost:8080/" + uploadDir + fileName;
+//            user.setProfilePath(newProfilePath);
+
         userRepository.save(user);
     }
 
