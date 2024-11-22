@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ApiResponseDTO<T> {
     //응답 공통 구조 정의
-    private boolean isSuccess;
+    private boolean success;
     private String code;
     private String message;
     private T data;
