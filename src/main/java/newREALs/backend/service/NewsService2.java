@@ -26,6 +26,7 @@ public class NewsService2 {
     private final QuizRepository quizRepository;
     private final ScrapRepository scrapRepository;
     private final UserKeywordRepository userKeywordRepository;
+    private final CategoryRepository categoryRepository;
 
     public ViewCategoryDTO getSubCategory(Long userid, String category, String subCategory, int page){
 
@@ -58,10 +59,10 @@ public class NewsService2 {
 
     public DailyNewsThumbnailDTO getDailyNewsOne(String category) {
         DailyNewsThumbnailDTO dailynewsdto = null;
-
+        Long dailynewsCategoryId=categoryRepository.findByName(category).get().getId();
 
         // 데일리 뉴스 가져오기
-        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryNameAndIsDailyNews(category, true);
+        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryAndIsDailyNews(dailynewsCategoryId, true);
         Long basenews_id;
         if(dailynews.isPresent()) basenews_id = dailynews.get().getId();
         else return null;

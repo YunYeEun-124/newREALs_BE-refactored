@@ -55,4 +55,6 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
     List<Basenews> findAllByIsDailyNews(boolean b);
 
     Optional<Basenews> findFirstBySummaryIsNull();
+
+    Optional<Basenews> findFirstByCategoryAndIsDailyNews(Long dailynewsCategoryId, boolean b);
 }
