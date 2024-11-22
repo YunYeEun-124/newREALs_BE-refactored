@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Entity
@@ -17,6 +19,7 @@ public class Quiz {
 
     @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "basenews_id", nullable = false)
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Basenews basenews; //fk
 
     @Column(nullable = false)
