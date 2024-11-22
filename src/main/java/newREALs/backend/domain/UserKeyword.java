@@ -15,7 +15,7 @@ public class UserKeyword {
     @Column(updatable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false,cascade = CascadeType.REMOVE)
     @JoinColumn(name= "user_id", nullable = false)
     private Accounts  user;
 
