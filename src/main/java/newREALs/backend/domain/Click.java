@@ -12,11 +12,11 @@ public class Click {
     @Column(nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name="user_id",nullable = false)
     private Accounts user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "news_id", nullable = false)
     private Basenews basenews;
 

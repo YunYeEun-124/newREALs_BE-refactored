@@ -24,11 +24,11 @@ public class Likes {
     private String createdDate; //매달 분석도를 끊어야하기 때문.
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", nullable = false)
     private Accounts user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "news_id", nullable = false)
     private Basenews basenews;
 

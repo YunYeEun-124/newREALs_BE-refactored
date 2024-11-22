@@ -16,11 +16,11 @@ public class UserComment {
     @Column(updatable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", nullable = false)
     private Accounts user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "thinkComment_id", nullable = false)
     private ThinkComment thinkComment;
 

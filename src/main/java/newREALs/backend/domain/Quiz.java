@@ -15,7 +15,7 @@ public class Quiz {
     @Column(updatable = false)
     private Long id;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "basenews_id", nullable = false)
     private Basenews basenews; //fk
 

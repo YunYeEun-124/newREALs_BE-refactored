@@ -15,11 +15,11 @@ public class QuizStatus {
     @Column(updatable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "user_id", nullable = false)
     private Accounts user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
