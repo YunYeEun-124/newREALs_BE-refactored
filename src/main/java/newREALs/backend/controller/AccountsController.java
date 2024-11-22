@@ -56,14 +56,6 @@ public class AccountsController {
 
             }
             return  ResponseEntity.status(HttpStatus.OK).body(response);
-//            else { //사용자가 브라우저에 patch로 요청 못 보내니까 사용할 경우가 없음
-
-//                response.put("isSuccess", false);
-//                response.put("code", "E400");
-//                response.put("message","출석 체크 이미 했습니다.");
-//                response.put("data", null);
-//                return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-//            }
 
 
         }catch (Exception e){
