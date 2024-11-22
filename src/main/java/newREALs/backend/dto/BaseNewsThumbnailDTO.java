@@ -1,5 +1,6 @@
 package newREALs.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class BaseNewsThumbnailDTO {
     private String summary;
     private String imageUrl;
     private String date;
+    @JsonProperty("isScrapped") // JSON에서 isScrapped로 표시
     private boolean isScrapped;
 
 
