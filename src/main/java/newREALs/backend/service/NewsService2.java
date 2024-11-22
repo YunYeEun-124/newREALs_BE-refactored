@@ -64,6 +64,7 @@ public class NewsService2 {
         Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryNameAndIsDailyNews(category, true);
         Long basenews_id;
         if(dailynews.isPresent()) basenews_id = dailynews.get().getId();
+
         else return null;
 
         // 퀴즈 문제 가져오기
@@ -93,7 +94,6 @@ public class NewsService2 {
     //getSubCategory, getCategory 페이지에 공통으로 쓰임.
     public ViewCategoryDTO getCategoryAndSubPage(Page<Basenews> repositoryFindBy,String category,Long userid){
 
-        System.out.println("getCategoryAndSubPage in ");
         ViewCategoryDTO result;
 
         DailyNewsThumbnailDTO dailynewsdto =  getDailyNewsOne(category);
@@ -102,8 +102,10 @@ public class NewsService2 {
         List<BaseNewsThumbnailDTO> basenewsList = getBaseNewsList(page,userid);
 
         result = new ViewCategoryDTO(dailynewsdto,basenewsList,page.getTotalPages(),page.getTotalElements());
-        if(dailynewsdto == null) System.out.println("daily is null now");
-        System.out.println("getCategoryAndSubPage end ");
+        if(dailynewsdto == null) {
+            System.out.println("daily is null");
+            return null;
+        }
 
         return result;
     }

@@ -35,16 +35,21 @@ public class CategoryNewsController {
         return ResponseEntity.ok().body(result);
     }
 
-    // category?categoryname=society
+    // category?category=society
     @GetMapping
     public ResponseEntity<?> viewCategory(HttpServletRequest userInfo, @RequestParam String category, @RequestParam int page) {
         Long userid = tokenService.getUserId(userInfo);
-        ViewCategoryDTO result = newsService.getCategory(userid, category, page);
 
         // 카테고리 입력 확인
         if (category == null || category.isEmpty()) {
             return createResponse(false, "E400", "카테고리를 입력해주세요", null, HttpStatus.BAD_REQUEST);
         }
+        if(!category.equals("society") && !category.equals("politics") && !category.equals("economy") ){
+            System.out.println("category is wrong");
+            return createResponse(false, "E400", "카테고리 입력이 틀렸습니다.", category, HttpStatus.BAD_REQUEST);
+        }
+        ViewCategoryDTO result = newsService.getCategory(userid, category, page);
+
 
         // 페이지 범위 확인
         if (page < 1 || page > result.getTotalPage()) {
@@ -52,8 +57,8 @@ public class CategoryNewsController {
         }
 
         // 결과가 비어 있는 경우
-        if (result.getBasenewsList().isEmpty()) {
-            return createResponse(false, "E400", category + " 카테고리에 해당하는 뉴스가 없습니다.", null, HttpStatus.NOT_FOUND);
+        if (result.getBasenewsList().isEmpty() || result.getDailynews() == null) {
+            return createResponse(false, "E500", "뉴스 불러오기 실패", null, HttpStatus.NOT_FOUND);
         }
 
         // 성공 응답
