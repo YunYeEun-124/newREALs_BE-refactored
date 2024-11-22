@@ -9,6 +9,7 @@ import newREALs.backend.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriUtils;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -26,9 +27,6 @@ public class SearchController {
 
     @GetMapping
     public ResponseEntity<?> getNewsList(HttpServletRequest userInfo, @RequestParam String searchWord, @RequestParam int page){
-
-        System.out.println("search : "+searchWord);
-        System.out.println("page : "+page);
 
 
         Long userid = tokenService.getUserId(userInfo);

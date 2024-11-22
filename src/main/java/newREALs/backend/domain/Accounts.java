@@ -62,6 +62,7 @@ public class Accounts {
 
     }
 
+
     public void updateKeywordInterest(int keywordId, int change) {
         keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
     }
