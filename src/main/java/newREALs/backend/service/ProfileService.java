@@ -92,7 +92,7 @@ public class ProfileService {
                     .summary(basenews.getSummary())
                     .imageUrl(basenews.getImageUrl())
                     .date(basenews.getUploadDate()) // Basenews의 uploadDate 필드
-                    .isScrap(true)
+                    .isScrapped(true)
                     .build();
         });
     }
@@ -255,7 +255,7 @@ public class ProfileService {
                 .summary(basenews.getSummary())
                 .imageUrl(basenews.getImageUrl())
                 .date(basenews.getUploadDate())
-                .isScrap(true)
+                .isScrapped(true)
                 .build());
     }
 }
