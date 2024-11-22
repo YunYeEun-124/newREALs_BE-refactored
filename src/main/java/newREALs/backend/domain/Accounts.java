@@ -64,6 +64,9 @@ public class Accounts {
 
 
     public void updateKeywordInterest(int keywordId, int change) {
+        if(keywordId<1 || keywordId>keywordInterest.size()) {
+            throw new IllegalArgumentException("keywordId는 1에서 50까지 입니다");
+        }
         keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
     }
 

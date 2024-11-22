@@ -1,5 +1,6 @@
 package newREALs.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ public class NewsDetailDto {
     private String imageUrl;
     private String newsUrl;
     private String uploadDate;
+    @JsonProperty("isScrapped")
     private boolean isScrapped;
     private String category;
     private String subCategory;
