@@ -28,13 +28,18 @@ public class NewsService2 {
     private final UserKeywordRepository userKeywordRepository;
 
     public ViewCategoryDTO getSubCategory(Long userid, String category, String subCategory, int page){
+
         Pageable pageable = getPageInfo(page);
+
         return getCategoryAndSubPage(baseNewsRepository.findAllBySubCategoryName(subCategory,pageable),category,userid);
     }
 
     //error처리해라//category처음 로딩시
     public ViewCategoryDTO getCategory(Long userid,String category,int page){
+        System.out.println("category service in ");
+
         Pageable pageable = getPageInfo(page);
+        System.out.println("get category service result : " );
         return getCategoryAndSubPage(baseNewsRepository.findAllByCategoryName(category,pageable),category,userid);
     }
 
@@ -51,40 +56,44 @@ public class NewsService2 {
 
     //common code 0
 
-    public DailyNewsThumbnailDTO getDailyNewsOne(String category){
+    public DailyNewsThumbnailDTO getDailyNewsOne(String category) {
         DailyNewsThumbnailDTO dailynewsdto = null;
 
-        //데일리 뉴스 5개 중 카테고리 맞춰서 1개 가져오기 .
-        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryNameAndIsDailyNews(category,true);
-        //퀴즈가져올 뉴스의 아이디 뽑기
-        Long basenews_id = dailynews.get().getId();
-        //퀴즈 question만 가져오기
+
+        // 데일리 뉴스 가져오기
+        Optional<Basenews> dailynews = baseNewsRepository.findFirstByCategoryNameAndIsDailyNews(category, true);
+        Long basenews_id;
+        if(dailynews.isPresent()) basenews_id = dailynews.get().getId();
+        else return null;
+
+        // 퀴즈 문제 가져오기
         Optional<String> question = quizRepository.findProblemByBasenewsId(basenews_id);
-        question.orElse("없음");
 
-        if(dailynews.isPresent() && question.isPresent()){
-            dailynewsdto = new DailyNewsThumbnailDTO(
-
-                    dailynews.get().getId(),
-                    dailynews.get().getTitle(),
-                    dailynews.get().getImageUrl(),
-                    dailynews.get().getCategory().getName(),
-                    dailynews.get().getSubCategory().getName(),
-                    dailynews.get().getKeyword().getName(),
-                    question.get()
-
-            );
-
-            System.out.println("dailyenews get 완료");
-        }else {
-            System.out.println("daily news & quiz가 없어요");
+        if (question.isEmpty() ) {
+            System.out.println("No quiz found for basenews_id: " + basenews_id);
+            return null;
         }
+
+
+        // DTO 생성
+        dailynewsdto = new DailyNewsThumbnailDTO(
+                dailynews.get().getId(),
+                dailynews.get().getTitle(),
+                dailynews.get().getImageUrl(),
+                dailynews.get().getCategory().getName(),
+                dailynews.get().getSubCategory().getName(),
+                dailynews.get().getKeyword().getName(),
+                question.get()
+        );
 
         return dailynewsdto;
     }
 
+
     //getSubCategory, getCategory 페이지에 공통으로 쓰임.
     public ViewCategoryDTO getCategoryAndSubPage(Page<Basenews> repositoryFindBy,String category,Long userid){
+
+        System.out.println("getCategoryAndSubPage in ");
         ViewCategoryDTO result;
 
         DailyNewsThumbnailDTO dailynewsdto =  getDailyNewsOne(category);
@@ -93,6 +102,9 @@ public class NewsService2 {
         List<BaseNewsThumbnailDTO> basenewsList = getBaseNewsList(page,userid);
 
         result = new ViewCategoryDTO(dailynewsdto,basenewsList,page.getTotalPages(),page.getTotalElements());
+        if(dailynewsdto == null) System.out.println("daily is null now");
+        System.out.println("getCategoryAndSubPage end ");
+
         return result;
     }
 

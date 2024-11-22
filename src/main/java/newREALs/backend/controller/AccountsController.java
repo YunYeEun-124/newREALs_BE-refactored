@@ -46,30 +46,35 @@ public class AccountsController {
 
         try {
             Long userid = tokenService.getUserId(userInfo);
-
-            if(attendanceService.UpdateAttendance(userid)){
+            int day = attendanceService.UpdateAttendance(userid);
+            if(day != -1){
                 response.put("isSuccess", true);
                 response.put("code", "S200");
-                response.put("message", "출석 체크 성공");
-                response.put("data", true);
-                return  ResponseEntity.status(HttpStatus.OK).body(response);
+                response.put("message", (day+1) + "일 출석 체크 성공");
+                response.put("data",null);
 
-            }else {
-                response.put("isSuccess", false);
-                response.put("code", "E400");
-                response.put("message", "출석 체크 이미 했습니다.");
-                response.put("data", false);
-                return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+
             }
+            return  ResponseEntity.status(HttpStatus.OK).body(response);
+//            else { //사용자가 브라우저에 patch로 요청 못 보내니까 사용할 경우가 없음
+
+//                response.put("isSuccess", false);
+//                response.put("code", "E400");
+//                response.put("message","출석 체크 이미 했습니다.");
+//                response.put("data", null);
+//                return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+//            }
 
 
         }catch (Exception e){
             response.put("isSuccess", false);
             response.put("code", "E400");
-            response.put("message", "출석 체크 실패.");
-            response.put("data", e.getMessage());
+            response.put("message", "출석 체크 실패 : "+e.getMessage());
+            response.put("data", null);
             return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
+
+
     }
     //[post] 유저 로그인
     @PostMapping("/login")
