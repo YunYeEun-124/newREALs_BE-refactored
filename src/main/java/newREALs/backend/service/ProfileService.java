@@ -100,12 +100,7 @@ public class ProfileService {
 
     //관심도 분석
     public Map<String, List<ProfileInterestDto>> getInterest(Long userId) {
-        Accounts user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
-
         Map<String, List<ProfileInterestDto>> result = new HashMap<>();
-
-//        Pageable three = PageRequest.of(0,3);
 
         result.put("total", new ArrayList<>());
         result.put("politics", new ArrayList<>());
@@ -122,7 +117,6 @@ public class ProfileService {
         List<ProfileInterestProjection> politicsInterest = accountsRepository.findCategoryInterestById(userId, "politics");
         List<ProfileInterestProjection> economyInterest = accountsRepository.findCategoryInterestById(userId, "economy");
 
-
         List<ProfileInterestDto> societyInterestDTO = getPercentage(societyInterest);
         List<ProfileInterestDto> politicsInterestDTO = getPercentage(politicsInterest);
         List<ProfileInterestDto> economyInterestDTO = getPercentage(economyInterest);
@@ -134,6 +128,16 @@ public class ProfileService {
         return result;
     }
 
+//    public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
+//        Map<String, List<ReportInterestDto>> result = new HashMap<>();
+//
+//        result.put("society", new ArrayList<>());
+//        result.put("politics", new ArrayList<>());
+//        result.put("economy", new ArrayList<>());
+//
+//
+//    }
+
     //[get] 관심도 분석 비율 찾기
     private List<ProfileInterestDto> getPercentage(List<ProfileInterestProjection> interests) {
         List<ProfileInterestDto> interestDTOList = new ArrayList<>();
@@ -141,6 +145,9 @@ public class ProfileService {
         int total = 0;
         for (ProfileInterestProjection item : interests) {
             total += item.getCount();
+        }
+        if(total == 0) {
+            return interestDTOList;
         }
 
         int percentageSum = 0;
@@ -201,6 +208,10 @@ public class ProfileService {
             user.setProfilePath(newProfilePath);
         }
         userRepository.save(user);
+    }
+
+    public boolean isScrapped(Long userId, Long newsId) {
+        return scrapRepository.existsByUser_IdAndBasenews_Id(userId, newsId);
     }
 
     public void deleteScrap(Long userId, Long newsId) {
