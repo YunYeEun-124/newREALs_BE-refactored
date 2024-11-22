@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.UserKeyword;
+import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.repository.UserKeywordRepository;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserKeywordService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@Transactional
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/register")
@@ -26,66 +27,55 @@ public class UserKeywordController {
     @PutMapping("/edit")
     public ResponseEntity<?> editUserKeywords(HttpServletRequest userInfo, @RequestBody List<String> keywords){
         Long userid = tokenService.getUserId(userInfo);
+
+        //keywords is null case
+        if(keywords.isEmpty() || keywords.size() > 6) {
+            throw new IllegalArgumentException("매개변수 사이즈 오류");
+        }
+        for(String key : keywords){
+            if(key.isEmpty())  throw new IllegalArgumentException("매개변수 is null ");
+
+        }
+
+
         List<String> updateUserKeywods = userKeywordService.updateUserKeywords(keywords,userid);
 
         //출력
-        Map<String, Object> response = new LinkedHashMap<>();
-        Map<String,List<String>> keys = new LinkedHashMap<>();
+        if(updateUserKeywods.isEmpty())  throw new IllegalStateException("유저 관심 키워드 변경 실패");
 
+        Map<String,List<String>> keys = new LinkedHashMap<>();
         keys.put("keywords",updateUserKeywods);
 
-        response.put("isSuccess", true);
-        response.put("code", "S200");
-        response.put("message", "키워드 등록 성공");
-        response.put("data", keys);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(
+                ApiResponseDTO.success( "유저 관심 키워드 변경 성공", keys.get("keywords"))
+        );
     }
 
     //처음 키워드 만들기.
     @PostMapping
-    public ResponseEntity<?> registerUserKeywords(HttpServletRequest userInfo,@RequestBody List<String> keywords){
+    public ResponseEntity<?> registerUserKeywords(HttpServletRequest userInfo,@RequestBody List<String> keywords)  {
         Long userid = tokenService.getUserId(userInfo);
         Map<String, Object> response = new LinkedHashMap<>();
 
         //keywords is null case
         if(keywords.isEmpty() || keywords.size() > 6) {
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "keywords are wrong ");
-            response.put("data",null);
+            throw new IllegalArgumentException("매개변수 사이즈 오류");
+        }
+        for(String key : keywords){
+            if(key.isEmpty())  throw new IllegalArgumentException("매개변수 is null ");
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
-        //key
-        //실제 도메인 객체 생성
-        List<UserKeyword> createdUserKeywords = userKeywordService.createUserKeywords(keywords,userid);
-
-        if(createdUserKeywords.isEmpty()) {
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "이미 유저의 관심 키워드가 존재합니다.");
-            response.put("data", null);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-
-
-
-        List<String> result = new ArrayList<>();
-        for(UserKeyword userKeyword : createdUserKeywords)
-            result.add(userKeyword.getKeyword().getName());
-
+        List<String> createdUserKeywords = userKeywordService.createUserKeywords(keywords,userid);
         Map<String,List<String>> keys = new LinkedHashMap<>();
-        keys.put("keywords",result);
 
-        response.put("isSuccess", true);
-        response.put("code", "S200");
-        response.put("message", "키워드 등록 성공");
-        response.put("data", keys);
+        keys.put("keywords",createdUserKeywords);
+        if(createdUserKeywords.isEmpty())
+          throw new IllegalStateException("유저 관심 키워드 저장 실패");
 
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.ok(
+                ApiResponseDTO.success( "유저 관심 키워드 저장 성공", keys.get("keywords"))
+        );
 
     }
 }

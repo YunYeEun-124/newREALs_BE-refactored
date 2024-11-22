@@ -4,8 +4,10 @@ package newREALs.backend.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.UserKeyword;
+import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.DailyNewsThumbnailDTO;
 import newREALs.backend.dto.KeywordNewsDTO;
+import newREALs.backend.repository.UserKeywordRepository;
 import newREALs.backend.service.NewsService;
 import newREALs.backend.service.NewsService2;
 import newREALs.backend.service.TokenService;
@@ -28,6 +30,7 @@ public class MainNewsController {
 
     private final NewsService2 newsService;
     private final TokenService tokenService;
+    private final UserKeywordRepository userKeywordRepository;
 
     //main news list
     @GetMapping("/daily")
@@ -35,14 +38,10 @@ public class MainNewsController {
 
         List<DailyNewsThumbnailDTO> result = newsService.getDailynewsList();
         if(result.size() != 5){ //error
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("timestamp", LocalDateTime.now());
-            errorResponse.put("status", 400);
-            errorResponse.put("error", "Dailynews List is not ready");
-            errorResponse.put("path", "/main/daily");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-
-        }else  return  ResponseEntity.ok().body(result);
+            throw new IllegalStateException("dailynews 5개 조회 실패. 서버 문제");
+        }else  return ResponseEntity.ok(
+                ApiResponseDTO.success( "main/daily 뉴스 5개 조회 성공", result)
+        );
 
 
 
@@ -52,9 +51,19 @@ public class MainNewsController {
     @GetMapping("/keyword")
     public ResponseEntity<?> viewKeywordnewsList(HttpServletRequest userInfo, @RequestParam int keywordIndex,@RequestParam int page){
         Long userid = tokenService.getUserId(userInfo);
-        KeywordNewsDTO keywordnewsList =  newsService.getKeywordnewsList(userid,keywordIndex,page);
 
-        return ResponseEntity.ok().body(keywordnewsList);
+        if(userKeywordRepository.findAllByUserId(userid).size() <= keywordIndex || keywordIndex < 0 ){
+            throw  new IllegalArgumentException("keywordIndex 범위 오류");
+        }
+        KeywordNewsDTO keywordnewsList =  newsService.getKeywordnewsList(userid,keywordIndex,page);
+        if (page <= 0 ||page > keywordnewsList.getTotalPage())
+            throw  new IllegalArgumentException("페이지 범위 오류");
+
+
+
+        return ResponseEntity.ok(
+                ApiResponseDTO.success( "main/keyword 뉴스 리스트 조회 성공 ", keywordnewsList)
+        );
     }
 
 }

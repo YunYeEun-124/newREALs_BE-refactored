@@ -19,7 +19,6 @@ public class UserKeyword {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name= "user_id", nullable = false)
-    @OnDelete(action= OnDeleteAction.CASCADE)
     private Accounts  user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

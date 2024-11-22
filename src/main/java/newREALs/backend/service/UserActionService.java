@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
 import org.aspectj.bridge.MessageUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,6 +19,7 @@ public class UserActionService {
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
+
     private static final Logger log = LoggerFactory.getLogger(UserActionService.class);
 
     public void someMethod() {
@@ -88,6 +87,7 @@ public class UserActionService {
 
     }
 
+
     //공감 버튼 처리
     //reactionType : 좋아요 0 슬퍼오 1 흥미로워요 2
     @Transactional
@@ -115,10 +115,11 @@ public class UserActionService {
                 SubInterest s=subInterest.get();
                 s.setCount(s.getCount()-1);
                 subInterestRepository.save(s);
-                likesRepository.delete(like);
+                
                 //공감 해제 -> KeywordInterest 감소
                 user.updateKeywordInterest(keywordId, -1);
-                //userRepository.save(user);
+                userRepository.save(user);
+                likesRepository.delete(like);
 
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음

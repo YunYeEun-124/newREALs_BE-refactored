@@ -43,29 +43,19 @@ public class AccountsController {
     @PatchMapping("/attendance/mark")
     public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
         Map<String, Object> response = new LinkedHashMap<>();
-
-        try {
-            Long userid = tokenService.getUserId(userInfo);
-            int day = attendanceService.UpdateAttendance(userid);
-            if(day != -1){
-                response.put("isSuccess", true);
-                response.put("code", "S200");
-                response.put("message", (day+1) + "일 출석 체크 성공");
-                response.put("data",null);
+        Long userid = tokenService.getUserId(userInfo);
+        int day = attendanceService.UpdateAttendance(userid);
 
 
-            }
-            return  ResponseEntity.status(HttpStatus.OK).body(response);
 
+        if(day != -1 ){
+            return ResponseEntity.ok(
+                    ApiResponseDTO.success( (day+1)+"일 출석 체크 성공 ",null)
+            );
 
-        }catch (Exception e){
-            response.put("isSuccess", false);
-            response.put("code", "E400");
-            response.put("message", "출석 체크 실패 : "+e.getMessage());
-            response.put("data", null);
-            return   ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
+        throw new IllegalStateException("출석 체크 실패 ");
 
     }
     //[post] 유저 로그인
