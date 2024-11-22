@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
 import org.aspectj.bridge.MessageUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -22,7 +24,7 @@ public class UserActionService {
 
     //스크랩 처리 메서드
     @Transactional
-    public String getScrap(Long basenewsId, Long userId){
+    public boolean getScrap(Long basenewsId, Long userId){
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
@@ -46,7 +48,10 @@ public class UserActionService {
             //스크랩 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
             userRepository.save(user);
-            return "스크랩이 해제되었습니다.";
+
+            return false;
+
+
         } else{
             //스크랩 안되어있던 거면 스크랩 O
             Scrap newScrap=new Scrap(user,basenews);
@@ -74,11 +79,10 @@ public class UserActionService {
                         .build();
                 subInterestRepository.save(s);
             }
-            return "스크랩 등록 완료";
+            return true;
         }
 
     }
-
 
     //공감 버튼 처리
     //reactionType : 좋아요 0 슬퍼오 1 흥미로워요 2
@@ -107,7 +111,7 @@ public class UserActionService {
                 SubInterest s=subInterest.get();
                 s.setCount(s.getCount()-1);
                 subInterestRepository.save(s);
-                
+
                 //공감 해제 -> KeywordInterest 감소
                 user.updateKeywordInterest(keywordId, -1);
                 userRepository.save(user);

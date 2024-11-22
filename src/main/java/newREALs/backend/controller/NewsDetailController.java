@@ -38,12 +38,14 @@ public class NewsDetailController {
 
     //[post] 스크랩 버튼 클릭
     @PostMapping("/scrap/{id}")
-    public ResponseEntity<ApiResponseDTO<Void>> toggleScrap(@PathVariable Long id, HttpServletRequest request) {
+    public ResponseEntity<ApiResponseDTO<Boolean>> toggleScrap(@PathVariable Long id, HttpServletRequest request) {
         Long userId = tokenService.getUserId(request);
-        String message=userActionService.getScrap(id, userId);
-
+        boolean scrapped=userActionService.getScrap(id, userId);
+        String message;
+        if(scrapped)message="스크랩 등록 완료";
+        else message="스크랩이 해제되었습니다.";
         return ResponseEntity.ok(
-                ApiResponseDTO.success(message,null));
+                ApiResponseDTO.success(message,scrapped));
     }
 
     //[post] 공감 버튼 클릭
