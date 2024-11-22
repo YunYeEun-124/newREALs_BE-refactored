@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -26,19 +27,44 @@ public class SearchController {
     @GetMapping
     public ResponseEntity<?> getNewsList(HttpServletRequest userInfo, @RequestParam String searchWord, @RequestParam int page){
 
+        System.out.println("search : "+searchWord);
+        System.out.println("page : "+page);
+
+
         Long userid = tokenService.getUserId(userInfo);
-        //./ Long userid = 1l;
+        Map<String, Object> response = new LinkedHashMap<>();
         if(searchWord.isEmpty()){
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("timestamp", LocalDateTime.now());
-            errorResponse.put("status", 400);
-            errorResponse.put("error", "searchWord is empty");
-            errorResponse.put("path", "/search");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            response.put("isSuccess", false);
+            response.put("code", "E400");
+            response.put("message", "검색어를 입력해주세요 ");
+            response.put("data",null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
 
         SearchDTO result = newsService.getSearch(userid,searchWord,page);
 
-        return  ResponseEntity.ok().body(result);
+        if(result.getTotalElement() == 0) {
+            response.put("isSuccess", false);
+            response.put("code", "E400");
+            response.put("message", "해당 검색어에 대한 결과가 없습니다.");
+            response.put("data",null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        if(page > result.getTotalPage()) {
+            response.put("isSuccess", false);
+            response.put("code", "E400");
+            response.put("message", "페이지 범위를 초과했습니다. ");
+            response.put("data",null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        response.put("isSuccess", true);
+        response.put("code", "S200");
+        response.put("message", "검색 성공");
+        response.put("data", result);
+
+
+        return   ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
