@@ -105,7 +105,7 @@ public class ProfileService {
 
         Map<String, List<ProfileInterestDto>> result = new HashMap<>();
 
-        Pageable three = PageRequest.of(0,3);
+//        Pageable three = PageRequest.of(0,3);
 
         result.put("total", new ArrayList<>());
         result.put("politics", new ArrayList<>());
@@ -113,14 +113,14 @@ public class ProfileService {
         result.put("society", new ArrayList<>());
 
         // 카테고리 상관 없이 전체에서 3개 가져오기
-        List<Object[]> totalInterest = accountsRepository.findTotalInterestById(userId, three);
+        List<ProfileInterestProjection> totalInterest = accountsRepository.findTotalInterestById(userId);
         List<ProfileInterestDto> totalInterestDTO = getPercentage(totalInterest);
         result.put("total", totalInterestDTO); // key를 total로
 
         // 카테고리 별로 3개 가져오기
-        List<Object[]> societyInterest = accountsRepository.findCategoryInterestById(userId, "society", three);
-        List<Object[]> politicsInterest = accountsRepository.findCategoryInterestById(userId, "politics", three);
-        List<Object[]> economyInterest = accountsRepository.findCategoryInterestById(userId, "economy", three);
+        List<ProfileInterestProjection> societyInterest = accountsRepository.findCategoryInterestById(userId, "society");
+        List<ProfileInterestProjection> politicsInterest = accountsRepository.findCategoryInterestById(userId, "politics");
+        List<ProfileInterestProjection> economyInterest = accountsRepository.findCategoryInterestById(userId, "economy");
 
 
         List<ProfileInterestDto> societyInterestDTO = getPercentage(societyInterest);
@@ -135,20 +135,20 @@ public class ProfileService {
     }
 
     //[get] 관심도 분석 비율 찾기
-    private List<ProfileInterestDto> getPercentage(List<Object[]> interests) {
+    private List<ProfileInterestDto> getPercentage(List<ProfileInterestProjection> interests) {
         List<ProfileInterestDto> interestDTOList = new ArrayList<>();
 
         int total = 0;
-        for (Object[] item : interests) {
-            total += (int) item[2];
+        for (ProfileInterestProjection item : interests) {
+            total += item.getCount();
         }
 
         int percentageSum = 0;
 
-        for (Object[] item : interests) {
-            String category = (String) item[0];
-            String subCategory = (String) item[1];
-            int count = (int) item[2];
+        for (ProfileInterestProjection item : interests) {
+            String category = item.getCategory();
+            String subCategory = item.getSubCategory();
+            int count = item.getCount();
 
             int percentage = (int) Math.round((count * 100.0) / total);
             ProfileInterestDto dto = ProfileInterestDto.builder()
