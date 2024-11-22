@@ -5,6 +5,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
@@ -24,12 +26,14 @@ public class Likes {
     private String createdDate; //매달 분석도를 끊어야하기 때문.
 
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Accounts user;
 
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id", nullable = false)
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Basenews basenews;
 
     private int reactionType;

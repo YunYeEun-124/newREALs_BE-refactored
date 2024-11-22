@@ -7,9 +7,11 @@ import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
 import org.aspectj.bridge.MessageUtil;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,112 +21,72 @@ public class UserActionService {
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
-    private final Logger log;
+    private static final Logger log = LoggerFactory.getLogger(UserActionService.class);
+
+    public void someMethod() {
+        log.debug("Some debug log message");
+    }
+
+
+
+    //스크랩 처리 메서드
     @Transactional
-    public String getScrap(Long basenewsId, Long userId) {
+    public String getScrap(Long basenewsId, Long userId){
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
-        Accounts user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
-        Optional<SubInterest> subInterest = subInterestRepository.findByUserAndSubCategory(user, basenews.getSubCategory());
-        Optional<Scrap> isScrapped = scrapRepository.findByUserAndBasenews(user, basenews);
+        //유저관심도
+        Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
+        //스크랩 여부 확인
+        Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
 
         int keywordId = basenews.getKeyword().getId().intValue();
 
-        if (isScrapped.isPresent()) {
-            Scrap scrap = isScrapped.get();
-
-            log.debug("Scrap 삭제 대상: {}", scrap);
-
-            // Scrap 삭제
-            scrapRepository.delete(scrap);
-            log.debug("Scrap 삭제 완료");
-
-            // SubInterest 업데이트
-            SubInterest s = subInterest.orElseThrow(() ->
-                    new IllegalStateException("SubInterest가 존재하지 않습니다."));
-            log.debug("SubInterest 업데이트 전 - count: {}, scrapCount: {}", s.getCount(), s.getScrapCount());
-
-            // 음수 방지 로직 추가
-            int newCount = Math.max(s.getCount() - 2, 0);
-            int newScrapCount = Math.max(s.getScrapCount() - 1, 0);
-
-            s.setCount(newCount);
-            s.setScrapCount(newScrapCount);
+        //이미 스크랩 되어있던 거면 스크랩 해제
+        if(isScrapped.isPresent()){
+            scrapRepository.delete(isScrapped.get());
+            //스크랩 해제 -> SubInterest 감소
+            SubInterest s=subInterest.get();
+            s.setCount(s.getCount()-2);
+            s.setScrapCount(s.getScrapCount()-1);
             subInterestRepository.save(s);
-            log.debug("SubInterest 업데이트 후 - count: {}, scrapCount: {}", s.getCount(), s.getScrapCount());
-
-            // KeywordInterest 업데이트
-            log.debug("KeywordInterest 업데이트 전 상태: {}", user.getKeywordInterest());
+            //스크랩 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
-            userRepository.save(user);
-            log.debug("KeywordInterest 업데이트 후 상태: {}", user.getKeywordInterest());
-
+            //userRepository.save(user);
             return "스크랩이 해제되었습니다.";
-        } else {
-            throw new IllegalStateException("스크랩이 존재하지 않습니다.");
-        }
-    }
+        } else{
+            //스크랩 안되어있던 거면 스크랩 O
+            Scrap newScrap=new Scrap(user,basenews);
+            scrapRepository.save(newScrap);
 
-//    //스크랩 처리 메서드
-//    @Transactional
-//    public String getScrap(Long basenewsId, Long userId){
-//        Basenews basenews = basenewsRepository.findById(basenewsId)
-//                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
-//        Accounts user=userRepository.findById(userId)
-//                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-//
-//        //유저관심도
-//        Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
-//        //스크랩 여부 확인
-//        Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
-//
-//        int keywordId = basenews.getKeyword().getId().intValue();
-//
-//        //이미 스크랩 되어있던 거면 스크랩 해제
-//        if(isScrapped.isPresent()){
-//            scrapRepository.delete(isScrapped.get());
-//            //스크랩 해제 -> SubInterest 감소
-//            SubInterest s=subInterest.get();
-//            s.setCount(s.getCount()-2);
-//            s.setScrapCount(s.getScrapCount()-1);
-//            subInterestRepository.save(s);
-//            //스크랩 해제 -> KeywordInterest 감소
-//            user.updateKeywordInterest(keywordId, -2);
-//            userRepository.save(user);
-//            return "스크랩이 해제되었습니다.";
-//        } else{
-//            //스크랩 안되어있던 거면 스크랩 O
-//            Scrap newScrap=new Scrap(user,basenews);
-//            scrapRepository.save(newScrap);
-//
-//            //스크랩 등록 -> KeywordInterest 증가
-//            user.updateKeywordInterest(keywordId, 2);
-//            userRepository.save(user);
-//
-//            //스크랩 등록 -> SubInterest 증가
-//            if(subInterest.isPresent()){
-//                SubInterest s=subInterest.get();
-//                s.setCount(s.getCount()+3);
-//                s.setScrapCount(s.getScrapCount()+1);
-//                subInterestRepository.save(s);
-//            }else{
-////                SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
-//                SubInterest s = SubInterest.builder()
-//                        .user(user)
-//                        .subCategory(basenews.getSubCategory())
-//                        .count(3)
-//                        .scrapCount(1)
-//                        .quizCount(0)
-//                        .commentCount(0)
-//                        .build();
-//                subInterestRepository.save(s);
-//            }
-//            return "스크랩 등록 완료";
-//        }
-//
-//    }
+            //스크랩 등록 -> KeywordInterest 증가
+            user.updateKeywordInterest(keywordId, 2);
+            //userRepository.save(user);
+
+            //스크랩 등록 -> SubInterest 증가
+            if(subInterest.isPresent()){
+                SubInterest s=subInterest.get();
+                s.setCount(s.getCount()+3);
+                s.setScrapCount(s.getScrapCount()+1);
+                subInterestRepository.save(s);
+            }else{
+//                SubInterest s=new SubInterest(user,basenews.getSubCategory(),3);
+                SubInterest s = SubInterest.builder()
+                        .user(user)
+                        .subCategory(basenews.getSubCategory())
+                        .count(3)
+                        .scrapCount(1)
+                        .quizCount(0)
+                        .commentCount(0)
+                        .build();
+                subInterestRepository.save(s);
+            }
+            return "스크랩 등록 완료";
+        }
+
+    }
 
     //공감 버튼 처리
     //reactionType : 좋아요 0 슬퍼오 1 흥미로워요 2
@@ -156,7 +118,7 @@ public class UserActionService {
                 likesRepository.delete(like);
                 //공감 해제 -> KeywordInterest 감소
                 user.updateKeywordInterest(keywordId, -1);
-                userRepository.save(user);
+                //userRepository.save(user);
 
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
@@ -168,7 +130,7 @@ public class UserActionService {
             message="공감 반영 완료";
             //공감 등록 -> KeywordInterest 증가
             user.updateKeywordInterest(keywordId,1);
-            userRepository.save(user);
+            //userRepository.save(user);
             //공감 등록 -> SubInterest 증가
             if(subInterest.isPresent()){
                 SubInterest s=subInterest.get();
