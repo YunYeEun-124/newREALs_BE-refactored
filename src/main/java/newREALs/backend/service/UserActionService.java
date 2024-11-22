@@ -22,8 +22,6 @@ public class UserActionService {
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
 
-
-
     //스크랩 처리 메서드
     @Transactional
     public boolean getScrap(Long basenewsId, Long userId){
@@ -50,7 +48,10 @@ public class UserActionService {
             //스크랩 해제 -> KeywordInterest 감소
             user.updateKeywordInterest(keywordId, -2);
             userRepository.save(user);
+
             return false;
+
+
         } else{
             //스크랩 안되어있던 거면 스크랩 O
             Scrap newScrap=new Scrap(user,basenews);
