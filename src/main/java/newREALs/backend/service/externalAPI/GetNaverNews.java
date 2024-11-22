@@ -83,7 +83,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 18 13 ? * *")
+    @Scheduled(cron = "0 43 11 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -92,6 +92,7 @@ public class GetNaverNews {
         if(!previousDailynews.isEmpty()) {
             for (Basenews basenews : previousDailynews) basenews.cancelDailyNews();
         }
+
         List<Category> categoryList = categoryRepository.findAll();
 
         int pageNum = 102; int limit = 2;

@@ -46,14 +46,18 @@ public class UserKeywordService {
         List<UserKeyword> result = new ArrayList<>();
         Optional<Accounts> user = userRepository.findById(userid);
 
-        for(String keyword: keywords){
+        if(userKeywordRepository.findAllByUserId(userid).isEmpty()){
+            for(String keyword: keywords){
 
-            Optional<Keyword> optionalKeyword = keywordRepository.findByName(keyword);
-            //만약에 해당 키워드가 DB에 있으면 저장해라
-            if(optionalKeyword.isPresent() && user.isPresent()) {
-                result.add(save(keyword,userid));
+                Optional<Keyword> optionalKeyword = keywordRepository.findByName(keyword);
+                //만약에 해당 키워드가 DB에 있으면 저장해라
+                if(optionalKeyword.isPresent() && user.isPresent()) {
+                    result.add(save(keyword,userid));
+                }
             }
         }
+
+
 
         return result;
     }
