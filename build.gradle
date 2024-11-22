@@ -52,14 +52,15 @@ tasks.named('jar') {
 	enabled = false // 일반 JAR 생성을 비활성화
 }
 
-bootJar {
-	archiveBaseName.set("newReals_BE") // 실행 가능한 JAR 파일 이름 설정
-	archiveVersion.set("") // 버전 제거
-}
-
 
 bootJar {
 	archiveBaseName.set("newReals_BE") // JAR 파일 기본 이름 설정
 	archiveVersion.set("") // 버전 제거 (필요하면 남겨도 됨)
 	archiveClassifier.set("") // 분류 제거 (예: plain 등)
+}
+test {
+	useJUnitPlatform() // JUnit5 테스트를 실행하도록 설정
+	testLogging {
+		events "passed", "failed", "skipped"
+	}
 }
