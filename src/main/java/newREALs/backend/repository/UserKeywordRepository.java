@@ -27,4 +27,6 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword,Long> {
 
     @Transactional
     void deleteByUser_IdAndKeyword_Name(Long userid, String key);
+
+    boolean existsByUserId(Long userId);
 }
