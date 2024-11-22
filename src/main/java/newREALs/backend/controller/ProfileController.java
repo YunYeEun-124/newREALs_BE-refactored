@@ -1,5 +1,6 @@
 package newREALs.backend.controller;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.*;
@@ -39,250 +40,97 @@ public class ProfileController {
 
     //[get] 프로필페이지 - 유저 정보
     @GetMapping("/info")
-    public ResponseEntity<?> getProfileInfo(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            ProfileInfoDto profileInfoDTO = profileService.getProfileInfo(userId);
-            return ResponseEntity.ok(profileInfoDTO);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+    public ResponseEntity<ApiResponseDTO<ProfileInfoDto>> getProfileInfo(HttpServletRequest request) {
+        Long userId = tokenService.getUserId(request);
+        ProfileInfoDto profileInfoDTO = profileService.getProfileInfo(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("유저 정보 조회 성공", profileInfoDTO));
     }
+
 
     //[get] 프로필페이지 - 출석 현황
     @GetMapping("/attendance")
     public ResponseEntity<?> getAttendanceList(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            ProfileAttendanceListDto profileAttendanceListDTO = profileService.getAttendanceList(userId);
-            return ResponseEntity.ok(profileAttendanceListDTO);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+        Long userId = tokenService.getUserId(request);
+        ProfileAttendanceListDto profileAttendanceListDTO = profileService.getAttendanceList(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("유저 출석 현황 조회 성공", profileAttendanceListDTO));
     }
 
     //[get] 프로필 페이지 - 유저 스크랩 목록
     @GetMapping("/scrap")
-    public ResponseEntity<?> getScrapList(HttpServletRequest request, @RequestParam int page) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user_id", userId);
-            response.put("basenewsList", scrapNewsPage.getContent());
-            response.put("totalPage", scrapNewsPage.getTotalPages());
-            response.put("totalElement", scrapNewsPage.getTotalElements());
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<?> getScrapList(HttpServletRequest request, @RequestParam(required = false) Integer page) {
+        if (page == null) {
+            throw new IllegalArgumentException("파라미터가 비어있습니다.");
         }
+
+        Long userId = tokenService.getUserId(request);
+        Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("user_id", userId);
+        response.put("basenewsList", scrapNewsPage.getContent());
+        response.put("totalPage", scrapNewsPage.getTotalPages());
+        response.put("totalElement", scrapNewsPage.getTotalElements());
+
+        return ResponseEntity.ok(ApiResponseDTO.success("유저 스크랩 목록 조회 성공", response));
     }
 
     //[get] 프로필 페이지 - 유저 관심사
     @GetMapping("/interest")
     public ResponseEntity<?> getInterest(HttpServletRequest request) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
+        Long userId = tokenService.getUserId(request);
+        Map<String, List<ProfileInterestDto>> interestMap = profileService.getInterest(userId);
 
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰이에요");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            Map<String, List<ProfileInterestDto>> interestMap = profileService.getInterest(userId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user_id", userId);
-            response.put("interest", interestMap);
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("user_id", userId);
+        response.put("interest", interestMap);
+        return ResponseEntity.ok(ApiResponseDTO.success("유저 관심도 조회 성공", response));
     }
 
     // profile patch
     @PatchMapping("/edit")
-    public ResponseEntity<?> ProfileEdit(HttpServletRequest request,
-                                         @RequestParam(required = false) String name,
-                                         @RequestParam(required = false) MultipartFile file) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
+    public ResponseEntity<ApiResponseDTO<?>> ProfileEdit(HttpServletRequest request,
+                                                         @RequestParam(required = false) String name,
+                                                         @RequestParam(required = false) MultipartFile file) throws IOException {
+        Long userId = tokenService.getUserId(request);
 
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            if((name == null || name.isEmpty()) && (file == null || file.isEmpty())) {
-                Map<String, String> response = new HashMap<>();
-                response.put("message", "변경된 정보가 없어요");
-                response.put("status", "fail");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
-
-            profileService.editProfile(userId, name, file);
-            Map<String, String> successResponse = new HashMap<>();
-            successResponse.put("message", "프로필 변경 성공했어요");;
-            successResponse.put("status", "success");
-            return ResponseEntity.ok(successResponse);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "유효하지 않은 토큰이에요");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        if ((name == null || name.isBlank()) && (file == null || (file.getSize() == 0))) {
+            throw new IllegalArgumentException("변경된 정보가 없습니다.");
         }
+
+        profileService.editProfile(userId, name, file);
+        return ResponseEntity.ok(ApiResponseDTO.success("프로필 변경 성공", null));
     }
 
     @DeleteMapping("/unscrap")
-    public ResponseEntity<?> ProfileUnscrap(HttpServletRequest request, @RequestParam Long newsId) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            profileService.deleteScrap(userId, newsId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("status", "success");
-            response.put("message", "스크랩 해제 성공");
-            return ResponseEntity.ok(response);
-
-        }  catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<?> ProfileUnscrap(HttpServletRequest request, @RequestParam(required = false) Long newsId) {
+        if(newsId == null) {
+            throw new IllegalArgumentException("파라미터가 비어있습니다.");
         }
+
+        Long userId = tokenService.getUserId(request);
+        boolean exists = profileService.isScrapped(userId, newsId);
+        if (!exists) {
+            throw new EntityNotFoundException("스크랩 목록에 해당 id의 뉴스가 없습니다.");
+        }
+
+        profileService.deleteScrap(userId, newsId);
+        return ResponseEntity.ok(ApiResponseDTO.success("스크랩 해제 성공", null));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> getScrapSearchList(HttpServletRequest request, @RequestParam String keyword, @RequestParam int page) {
-        try {
-            String token = tokenService.extractTokenFromHeader(request);
-
-            if (token == null || !tokenService.validateToken(token)) {
-                throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-            }
-            Long userId = tokenService.extractUserIdFromToken(token);
-
-            Page<BaseNewsThumbnailDTO> scrapSearchPage = profileService.getScrapSearchList(userId, keyword, page);
-
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user_id", userId);
-            response.put("searchList", scrapSearchPage.getContent());
-            response.put("totalPage", scrapSearchPage.getTotalPages());
-            response.put("totalElement", scrapSearchPage.getTotalElements());
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            // 유효하지 않은 토큰 -> 401
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "401 Unauthorized: " + e.getMessage());
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
-
-        } catch (Exception e) {
-            // 다른 에러들 -> 400
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "실패했어요");
-            errorResponse.put("error", "400 Bad Request: \"" + e.getMessage() + "\"");
-            errorResponse.put("status", "fail");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<?> getScrapSearchList(HttpServletRequest request, @RequestParam(required = false) String keyword, @RequestParam(required = false) Integer page) {
+        if (keyword == null || page == null) {
+            throw new IllegalArgumentException("파라미터가 비어있습니다.");
         }
-    }
+        Long userId = tokenService.getUserId(request);
+        Page<BaseNewsThumbnailDTO> scrapSearchPage = profileService.getScrapSearchList(userId, keyword, page);
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("user_id", userId);
+        response.put("searchList", scrapSearchPage.getContent());
+        response.put("totalPage", scrapSearchPage.getTotalPages());
+        response.put("totalElement", scrapSearchPage.getTotalElements());
+
+        return ResponseEntity.ok(ApiResponseDTO.success("스크랩 목록 검색 조회 성공", response));
+    }
 }
