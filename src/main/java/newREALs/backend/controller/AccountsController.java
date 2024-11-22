@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.dto.*;
+import newREALs.backend.repository.UserKeywordRepository;
 import newREALs.backend.repository.UserRepository;
 import newREALs.backend.service.AttendanceService;
 import newREALs.backend.service.KakaoService;
@@ -16,6 +17,7 @@ import newREALs.backend.service.TokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -34,6 +36,7 @@ public class AccountsController {
     private final ProfileService profileService;
     private final AttendanceService attendanceService;
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
+    private final UserKeywordRepository userKeywordRepository;
 
     //[patch] 출석 체크 버튼 누르기
     @PatchMapping("/attendance/mark")
@@ -68,13 +71,22 @@ public class AccountsController {
         }
 
         Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
+        Long userId = (Long) kakaoResponse.get("userId");
         // 플래그로 확인
         // 여기서 바로 findByEmail하면 이미 DB에 들어가있는 상태라 구분이 안됨
         String redirectUrl;
         if ((boolean) kakaoResponse.get("isNewAccount")) {
             redirectUrl = "/register";
         } else {
-            redirectUrl = "/home";
+            // 디비에 userKeyword가 없으면 /register로 리다이렉트
+            boolean hasKeywords = userKeywordRepository.existsByUserId(userId);
+            if(hasKeywords){
+                redirectUrl = "/home";
+            }
+            else {
+                redirectUrl = "/register";
+            }
+
         }
 
         // 응답 객체 생성
