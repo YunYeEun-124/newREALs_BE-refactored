@@ -36,8 +36,10 @@ public class MainNewsController {
     @GetMapping("/daily")
     public ResponseEntity<?> viewDailynewsList(HttpServletRequest userInfo){
 
-        List<DailyNewsThumbnailDTO> result = newsService.getDailynewsList();
-        if(result.size() != 5){ //error
+        List<DailyNewsThumbnailDTO> list = newsService.getDailynewsList();
+        HashMap<String,List<DailyNewsThumbnailDTO>> result= new HashMap<>();
+        result.put("dailynewsList",list);
+        if(list.size() != 5){ //error
             throw new IllegalStateException("dailynews 5개 조회 실패. 서버 문제");
         }else  return ResponseEntity.ok(
                 ApiResponseDTO.success( "main/daily 뉴스 5개 조회 성공", result)
