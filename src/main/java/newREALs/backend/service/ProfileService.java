@@ -172,8 +172,6 @@ public class ProfileService {
     }
 
     // 지금은 저장위치를 로컬로 해놓음..
-    @Value("${file.upload-dir}")
-    private String uploadDir;
     public void editProfile(Long userId, String newName, MultipartFile file) throws IOException {
         Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
