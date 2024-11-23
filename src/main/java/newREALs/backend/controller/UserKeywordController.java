@@ -17,7 +17,7 @@ import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/register")
+@RequestMapping("/accounts/register")
 public class UserKeywordController {
 
     private final UserKeywordService userKeywordService;
