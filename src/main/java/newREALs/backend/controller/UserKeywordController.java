@@ -47,7 +47,7 @@ public class UserKeywordController {
         keys.put("keywords",updateUserKeywods);
 
         return ResponseEntity.ok(
-                ApiResponseDTO.success( "유저 관심 키워드 변경 성공", keys.get("keywords"))
+                ApiResponseDTO.success( "유저 관심 키워드 변경 성공", keys)
         );
     }
 
@@ -63,18 +63,18 @@ public class UserKeywordController {
         }
         for(String key : keywords){
             if(key.isEmpty())  throw new IllegalArgumentException("매개변수 is null ");
-
         }
 
         List<String> createdUserKeywords = userKeywordService.createUserKeywords(keywords,userid);
         Map<String,List<String>> keys = new LinkedHashMap<>();
 
         keys.put("keywords",createdUserKeywords);
+
         if(createdUserKeywords.isEmpty())
           throw new IllegalStateException("유저 관심 키워드 저장 실패");
 
         return ResponseEntity.ok(
-                ApiResponseDTO.success( "유저 관심 키워드 저장 성공", keys.get("keywords"))
+                ApiResponseDTO.success( "유저 관심 키워드 저장 성공", keys)
         );
 
     }
