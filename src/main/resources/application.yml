@@ -74,7 +74,7 @@ cloud:
     region:
       static: ap-northeast-2  #리전 (사용 중인 리전에 맞게 설정)
     s3:
-      bucket: newreals-profile  # 생성한 S3 버킷 이름
+      bucket: newreals-profile-image  # 생성한 S3 버킷 이름
 
 
 
