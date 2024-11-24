@@ -58,7 +58,6 @@ public class AccountsController {
         throw new IllegalStateException("출석 체크 실패 ");
 
     }
-    //[post] 유저 로그인
     @PostMapping("/login")
     public ResponseEntity<ApiResponseDTO<?>> kakaoLogin(@RequestParam Map<String, String> request) {
         String authorizationCode = request.get("code");
@@ -66,37 +65,31 @@ public class AccountsController {
             throw new IllegalArgumentException("인가코드가 비어있습니다.");
         }
 
+        // 카카오 로그인 처리
         Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
         Long userId = (Long) kakaoResponse.get("userId");
-        // 플래그로 확인
-        // 여기서 바로 findByEmail하면 이미 DB에 들어가있는 상태라 구분이 안됨
-        String redirectUrl;
-        if ((boolean) kakaoResponse.get("isNewAccount")) {
-            redirectUrl = "/register";
-        } else {
-            // 디비에 userKeyword가 없으면 /register로 리다이렉트
-            boolean hasKeywords = userKeywordRepository.existsByUserId(userId);
-            if(hasKeywords){
-                redirectUrl = "/home";
-            }
-            else {
-                redirectUrl = "/register";
-            }
+        boolean isNewAccount = (boolean) kakaoResponse.get("isNewAccount");
+        boolean isProfileCompleted = (boolean) kakaoResponse.get("isProfileCompleted");
 
+        // 리다이렉트 URL 결정
+        String redirectUrl;
+        if (isNewAccount || !isProfileCompleted) {
+            redirectUrl = "/accounts/register"; // 추가정보 입력 필요
+        } else {
+            redirectUrl = "/home"; // 추가정보 입력 완료
         }
 
         // 응답 객체 생성
         Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("access_token", kakaoResponse.get("accessToken"));
-        responseBody.put("refresh_token", kakaoResponse.get("refreshToken")); // Refresh Token 추가
+        responseBody.put("token", kakaoResponse.get("token")); // 임시 또는 최종 토큰
         responseBody.put("redirect_url", redirectUrl);
         responseBody.put("name", kakaoResponse.get("name"));
         responseBody.put("email", kakaoResponse.get("email"));
         responseBody.put("user_id", kakaoResponse.get("userId"));
 
         return ResponseEntity.ok(ApiResponseDTO.success("로그인 성공", responseBody));
-
     }
+
 
     @PostMapping("/token/refresh")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {

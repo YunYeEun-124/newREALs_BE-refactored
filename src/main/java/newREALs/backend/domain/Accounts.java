@@ -44,11 +44,15 @@ public class Accounts {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
+    @Column(name="is_keyword_registered")
+    private Boolean isKeywordRegistered;
+
     @Builder
-    public Accounts(String name, String profilePath, String email) {
+    public Accounts(String name, String profilePath, String email, Boolean isKeywordRegistered) {
         this.name = name;
         this.profilePath = profilePath;
         this.email = email;
+        this.isKeywordRegistered=isKeywordRegistered;
         this.point = 0;
     }
 

@@ -42,47 +42,84 @@ KakaoService {
     private String userInfoUri;
 
     // 프론트엔드에서 받은 인가 코드 -> 카카오에서 AccessToken 받아와 -> 이걸로 사용자 정보 가져와 구현
+//    public Map<String, Object> processKakaoLogin(String authorizationCode) {
+//        // 인가코드로 AccessToken 받아와
+//        String accessToken = getAccessToken(authorizationCode);
+//        // 그걸로 사용자 정보 가져와
+//        Map<String, Object> userInfo = getUserInfo(accessToken);
+//
+//        // 받아온 userInfo에서 필요한 정보 가져오기
+//        String email = Optional.ofNullable((String) ((Map<String, Object>) userInfo.get("kakao_account")).get("email"))
+//                .orElseThrow(() -> new IllegalArgumentException("이메일 정보가 없습니다."));
+//
+//        String name = (String) ((Map<String, Object>) userInfo.get("properties")).get("nickname");
+//        String profilePath = (String) ((Map<String, Object>) userInfo.get("properties")).get("profile_image");
+//
+//        // 리다이렉트 다르게 하기 위해 플래그 설정
+//        // findByEmail이 반환하는 객체가 비어있으면 true
+//        // => 신규계정(객체 비어있으면) true, 아니면 false
+//        boolean isNewAccount = userRepository.findByEmail(email).isEmpty();
+//
+//        Optional<Accounts> existingAccount = userRepository.findByEmail(email);
+//        Accounts account = existingAccount
+//                // 없으면 생성
+//                .orElseGet(() -> userRepository.save(
+//                        Accounts.builder()
+//                                .name(name)
+//                                .email(email)
+//                                .profilePath(profilePath)
+//                                .build()
+//                ));
+//
+//        // JWT 토큰 생성한 거 맵에 넣어서 계정 정보랑 같이 전달
+//        String jwtToken = tokenService.generateAccessToken(account);
+//        String refreshToken = tokenService.generateRefreshToken(account);
+//
+//        Map<String, Object> response = new HashMap<>();
+//        response.put("accessToken", jwtToken);
+//        response.put("refreshToken", refreshToken);
+//        response.put("isNewAccount", isNewAccount);
+//        response.put("name", account.getName());
+//        response.put("email", account.getEmail());
+//        response.put("userId", account.getId());
+//        log.info("jwt 토큰 생성한 거 : {}", jwtToken);
+//        return response;
+//    }
+
     public Map<String, Object> processKakaoLogin(String authorizationCode) {
-        // 인가코드로 AccessToken 받아와
         String accessToken = getAccessToken(authorizationCode);
-        // 그걸로 사용자 정보 가져와
         Map<String, Object> userInfo = getUserInfo(accessToken);
 
-        // 받아온 userInfo에서 필요한 정보 가져오기
         String email = Optional.ofNullable((String) ((Map<String, Object>) userInfo.get("kakao_account")).get("email"))
                 .orElseThrow(() -> new IllegalArgumentException("이메일 정보가 없습니다."));
 
         String name = (String) ((Map<String, Object>) userInfo.get("properties")).get("nickname");
         String profilePath = (String) ((Map<String, Object>) userInfo.get("properties")).get("profile_image");
 
-        // 리다이렉트 다르게 하기 위해 플래그 설정
-        // findByEmail이 반환하는 객체가 비어있으면 true
-        // => 신규계정(객체 비어있으면) true, 아니면 false
-        boolean isNewAccount = userRepository.findByEmail(email).isEmpty();
-
         Optional<Accounts> existingAccount = userRepository.findByEmail(email);
-        Accounts account = existingAccount
-                // 없으면 생성
-                .orElseGet(() -> userRepository.save(
+        Accounts account = existingAccount.orElseGet(() -> userRepository.save(
                 Accounts.builder()
                         .name(name)
                         .email(email)
                         .profilePath(profilePath)
+                        .isKeywordRegistered(false) // 신규 유저는 추가정보 미완료
                         .build()
         ));
 
-        // JWT 토큰 생성한 거 맵에 넣어서 계정 정보랑 같이 전달
-        String jwtToken = tokenService.generateAccessToken(account);
-        String refreshToken = tokenService.generateRefreshToken(account);
+        boolean isNewAccount = existingAccount.isEmpty();
+        boolean isProfileCompleted = account.getIsKeywordRegistered();
+
+        String token = isProfileCompleted
+                ? tokenService.generateAccessToken(account) // 최종 토큰 발급
+                : tokenService.generateTemporaryToken(account); // 임시 토큰 발급
 
         Map<String, Object> response = new HashMap<>();
-        response.put("accessToken", jwtToken);
-        response.put("refreshToken", refreshToken);
+        response.put("token", token);
         response.put("isNewAccount", isNewAccount);
+        response.put("isProfileCompleted", isProfileCompleted);
         response.put("name", account.getName());
         response.put("email", account.getEmail());
         response.put("userId", account.getId());
-        log.info("jwt 토큰 생성한 거 : {}", jwtToken);
         return response;
     }
 
