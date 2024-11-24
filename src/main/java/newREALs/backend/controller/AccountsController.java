@@ -67,27 +67,19 @@ public class AccountsController {
 
         // 카카오 로그인 처리
         Map<String, Object> kakaoResponse = kakaoService.processKakaoLogin(authorizationCode);
-        Long userId = (Long) kakaoResponse.get("userId");
         boolean isNewAccount = (boolean) kakaoResponse.get("isNewAccount");
-        boolean isProfileCompleted = (boolean) kakaoResponse.get("isProfileCompleted");
 
         // 리다이렉트 URL 결정
         String redirectUrl;
-        if (isNewAccount || !isProfileCompleted) {
+        if (isNewAccount) {
             redirectUrl = "/accounts/register"; // 추가정보 입력 필요
         } else {
             redirectUrl = "/home"; // 추가정보 입력 완료
         }
 
-        // 응답 객체 생성
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("token", kakaoResponse.get("token")); // 임시 또는 최종 토큰
-        responseBody.put("redirect_url", redirectUrl);
-        responseBody.put("name", kakaoResponse.get("name"));
-        responseBody.put("email", kakaoResponse.get("email"));
-        responseBody.put("user_id", kakaoResponse.get("userId"));
+        kakaoResponse.put("redirect_url",redirectUrl);
 
-        return ResponseEntity.ok(ApiResponseDTO.success("로그인 성공", responseBody));
+        return ResponseEntity.ok(ApiResponseDTO.success("로그인 성공", kakaoResponse));
     }
 
 

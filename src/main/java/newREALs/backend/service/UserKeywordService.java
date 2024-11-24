@@ -96,15 +96,6 @@ public class UserKeywordService {
         return keywords;
     }
 
-    public void completeUserProfile(Long userId) {
-        Accounts user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
-        user.setIsKeywordRegistered(true); // 추가정보 등록 완료 상태로 업데이트
-        userRepository.save(user);
-    }
-
-
-
 
 
 }

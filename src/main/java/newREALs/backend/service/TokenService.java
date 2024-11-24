@@ -62,15 +62,7 @@ public class TokenService {
                 .compact();
     }
 
-//    public boolean validateToken(String token) {
-//        try {
-//            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-//            return true;
-//        } catch (Exception e) {
-//            log.error("잘못된 JWT 토큰이에요: {}", e.getMessage());
-//            return false;
-//        }
-//    }
+
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -115,16 +107,17 @@ public class TokenService {
         return userId;
     }
 
-    public String generateTemporaryToken(Accounts account) {
-        Date now = new Date();
-        return Jwts.builder()
-                .setSubject(String.valueOf(account.getId()))
-                .claim("email", account.getEmail())
-                .claim("type", "temporary") // 임시 토큰 타입 추가
-                .setExpiration(new Date(now.getTime() + 30 * 60 * 1000)) // 30분 유효
-                .setIssuedAt(now)
-                .signWith(key, SignatureAlgorithm.HS512)
+
+    public String generateTemporaryToken(String email,String name, String profilePath){
+        String temporaryToken = Jwts.builder()
+                .setSubject(email) // 이메일을 Subject로 사용
+                .claim("name", name)
+                .claim("profilePath", profilePath)
+                .claim("type", "temporary") // 임시 토큰 타입
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 30분 유효
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS512)
                 .compact();
+        return temporaryToken;
     }
 
     public String getTokenType(String token) {
@@ -135,6 +128,32 @@ public class TokenService {
                 .getBody();
         return claims.get("type", String.class); // 클레임에서 'type' 추출
     }
+
+    public Claims validateAndParseToken(String token, String expectedType) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        String tokenType = claims.get("type", String.class);
+        if (!expectedType.equals(tokenType)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰 타입입니다.");
+        }
+
+        return claims;
+    }
+
+    public String extractEmailFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject(); // 이메일 반환
+    }
+
+
 
 
 }

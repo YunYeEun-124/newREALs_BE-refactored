@@ -1,5 +1,6 @@
 package newREALs.backend.controller;
 
+import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -61,14 +62,17 @@ public class UserKeywordController {
 
         // 헤더에서 토큰 추출
         String tempToken = tokenService.extractTokenFromHeader(request);
-        if (tempToken == null || !tokenService.validateToken(tempToken) || !"temporary".equals(tokenService.getTokenType(tempToken))) {
-            throw new IllegalArgumentException("유효하지 않은 임시 토큰입니다.");
+        if (tempToken == null) {
+            throw new IllegalArgumentException("Authorization 헤더가 비어 있습니다.");
         }
 
-        // 유저 ID 추출 및 처리
-        Long userId = tokenService.extractUserIdFromToken(tempToken);
-        Accounts user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당 토큰과 일치하는 유저가 없습니다"));
+        // 임시 토큰 검증
+        Claims claims = tokenService.validateAndParseToken(tempToken, "temporary");
+        String email = claims.getSubject(); // 토큰에서 이메일 추출
+        String name = claims.get("name", String.class);
+        String profilePath = claims.get("profilePath", String.class);
+
+
 
         // 키워드 유효성 검증
         if (keywords.isEmpty() || keywords.size() > 6) {
@@ -77,7 +81,15 @@ public class UserKeywordController {
         for (String key : keywords) {
             if (key.isEmpty()) throw new IllegalArgumentException("매개변수에 비어있는 키워드가 포함되어 있습니다.");
         }
+        // Accounts 생성 및 데이터베이스에 저장
+        Accounts user = Accounts.builder()
+                .email(email)
+                .name(name)
+                .profilePath(profilePath)
+                .build();
+        userRepository.saveAndFlush(user);  //바로 데이터베이스에 저장되도록
 
+        Long userId=user.getId();
         // 키워드 저장
         List<String> createdUserKeywords = userKeywordService.createUserKeywords(keywords, userId);
         if (createdUserKeywords.isEmpty()) {
@@ -85,7 +97,6 @@ public class UserKeywordController {
         }
 
         // 유저 상태 업데이트 및 최종 토큰 발급
-        userKeywordService.completeUserProfile(userId); // 유저 추가정보 등록 완료 처리
         String accessToken = tokenService.generateAccessToken(user);
         String refreshToken = tokenService.generateRefreshToken(user);
 
@@ -94,9 +105,12 @@ public class UserKeywordController {
         responseBody.put("access_token", accessToken);
         responseBody.put("refresh_token", refreshToken);
         responseBody.put("keywords", createdUserKeywords);
+        responseBody.put("name",user.getName());
+        responseBody.put("email",user.getEmail());
+        responseBody.put("profilePath",user.getProfilePath());
 
         return ResponseEntity.ok(
-                ApiResponseDTO.success("유저 관심 키워드 저장 성공", responseBody)
+                ApiResponseDTO.success("유저 키워드 저장 및 회원가입 완료", responseBody)
         );
     }
 
