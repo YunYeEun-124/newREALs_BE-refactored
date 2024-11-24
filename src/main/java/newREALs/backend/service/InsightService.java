@@ -20,6 +20,8 @@ public class InsightService {
     public List<InsightDTO> getInsight(){
 
         List<InsightDTO> result = insightRepository.findAllBy();
+
+
         if(result.size() != 5){
             System.out.println("sth wrong. insight size is not 5");
             return null;
