@@ -47,7 +47,7 @@ public class Accounts {
 
 
     @Builder
-    public Accounts(String name, String profilePath, String email, Boolean isKeywordRegistered) {
+    public Accounts(String name, String profilePath, String email) {
         this.name = name;
         this.profilePath = profilePath;
         this.email = email;
