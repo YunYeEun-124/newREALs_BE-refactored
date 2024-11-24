@@ -25,8 +25,6 @@ public class TokenService {
     // JWT_SECRET_KEY는 .env 파일에서 가져오기
     @PostConstruct
     public void init() {
-//        Dotenv dotenv = Dotenv.load();
-//        String secretKey = dotenv.get("JWT_SECRET_KEY");
 
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
@@ -46,6 +44,7 @@ public class TokenService {
                 .claim("email", account.getEmail())
                 .claim("name", account.getName())
                 .claim("profilePath", account.getProfilePath())
+                .claim("type", "access")
                 .setExpiration(new Date(date.getTime() + accessExpirationTime))
                 .setIssuedAt(date)
                 .signWith(key, SignatureAlgorithm.HS512) // 암호화 알고리즘
@@ -58,19 +57,23 @@ public class TokenService {
                 .setSubject(String.valueOf(account.getId()))
                 .setExpiration(new Date(now.getTime() + refreshExpirationTime))
                 .setIssuedAt(now)
+                .claim("type", "refresh")
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
-        public boolean validateToken(String token) {
+
+    public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            log.debug("TokenService - 토큰 유효함: {}", token);
             return true;
         } catch (Exception e) {
-            log.error("잘못된 JWT 토큰이에요: {}", e.getMessage());
+            log.error("잘못된 JWT 토큰이에요: {}, 예외: {}", token, e.getMessage());
             return false;
         }
     }
+
 
     // 헤더에서 토큰 추출
     public String extractTokenFromHeader(HttpServletRequest request) {
@@ -103,6 +106,54 @@ public class TokenService {
         log.debug("TokenService - 헤더에서 추출한 토큰의 user Id: {}", userId);
         return userId;
     }
+
+
+    public String generateTemporaryToken(String email,String name, String profilePath){
+        String temporaryToken = Jwts.builder()
+                .setSubject(email) // 이메일을 Subject로 사용
+                .claim("name", name)
+                .claim("profilePath", profilePath)
+                .claim("type", "temporary") // 임시 토큰 타입
+                .setExpiration(new Date(System.currentTimeMillis() + 30 * 60 * 1000)) // 30분 유효
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS512)
+                .compact();
+        return temporaryToken;
+    }
+
+    public String getTokenType(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("type", String.class); // 클레임에서 'type' 추출
+    }
+
+    public Claims validateAndParseToken(String token, String expectedType) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        String tokenType = claims.get("type", String.class);
+        if (!expectedType.equals(tokenType)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰 타입입니다.");
+        }
+
+        return claims;
+    }
+
+    public String extractEmailFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.getSubject(); // 이메일 반환
+    }
+
+
 
 
 }

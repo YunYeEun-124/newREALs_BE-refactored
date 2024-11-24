@@ -33,16 +33,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화 (주로 API 서버에 적용)
-                .cors(Customizer.withDefaults()) //CORS 설정 활성화
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // JWT를 사용 -> 세션은 사용하지 않음
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/accounts/login").permitAll()
-                        // 권한 상관없이 다 접근 가능해야 -> 아직 권한설정은 안했지만 추후 할 수도 있으니..
-                        // .anyRequest().authenticated()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/accounts/login", "/accounts/register").permitAll() // 로그인 및 관심사 등록 API는 모든 유저 접근 가능
+                        .requestMatchers("/**").authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -55,7 +53,9 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://127.0.0.1:3000"); // 프론트엔드 로컬 개발 환경 허용
         configuration.addAllowedOrigin("http://localhost:5173"); // 프론트엔드 로컬 개발 환경 허용
 
-        //configuration.addAllowedOrigin("https://frontend.myapp.com"); // 배포된 프론트엔드 도메인 허용
+        // 배포 환경의 도메인을 추가해야 함
+        // configuration.addAllowedOrigin("https://frontend.myapp.com");
+
         configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
         configuration.addAllowedHeader("*"); // 모든 헤더 허용
         configuration.setAllowCredentials(true); // 인증 정보를 포함한 요청 허용

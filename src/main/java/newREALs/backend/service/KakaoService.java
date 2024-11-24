@@ -41,48 +41,43 @@ KakaoService {
     @Value("${spring.security.oauth2.client.provider.kakao.user-info-uri}")
     private String userInfoUri;
 
-    // 프론트엔드에서 받은 인가 코드 -> 카카오에서 AccessToken 받아와 -> 이걸로 사용자 정보 가져와 구현
+
+
     public Map<String, Object> processKakaoLogin(String authorizationCode) {
-        // 인가코드로 AccessToken 받아와
         String accessToken = getAccessToken(authorizationCode);
-        // 그걸로 사용자 정보 가져와
         Map<String, Object> userInfo = getUserInfo(accessToken);
 
-        // 받아온 userInfo에서 필요한 정보 가져오기
+
         String email = Optional.ofNullable((String) ((Map<String, Object>) userInfo.get("kakao_account")).get("email"))
                 .orElseThrow(() -> new IllegalArgumentException("이메일 정보가 없습니다."));
 
         String name = (String) ((Map<String, Object>) userInfo.get("properties")).get("nickname");
         String profilePath = (String) ((Map<String, Object>) userInfo.get("properties")).get("profile_image");
 
-        // 리다이렉트 다르게 하기 위해 플래그 설정
-        // findByEmail이 반환하는 객체가 비어있으면 true
-        // => 신규계정(객체 비어있으면) true, 아니면 false
-        boolean isNewAccount = userRepository.findByEmail(email).isEmpty();
-
         Optional<Accounts> existingAccount = userRepository.findByEmail(email);
-        Accounts account = existingAccount
-                // 없으면 생성
-                .orElseGet(() -> userRepository.save(
-                Accounts.builder()
-                        .name(name)
-                        .email(email)
-                        .profilePath(profilePath)
-                        .build()
-        ));
-
-        // JWT 토큰 생성한 거 맵에 넣어서 계정 정보랑 같이 전달
-        String jwtToken = tokenService.generateAccessToken(account);
-        String refreshToken = tokenService.generateRefreshToken(account);
-
+        Accounts account = null;
         Map<String, Object> response = new HashMap<>();
-        response.put("accessToken", jwtToken);
-        response.put("refreshToken", refreshToken);
-        response.put("isNewAccount", isNewAccount);
+
+
+        if (existingAccount.isPresent()) {
+            //유저 존재 (관심사 등록까지 마침) - accessToken,refreshToken 전달
+            account = existingAccount.get();
+        } else {
+            //임시토큰만 발급해서 리턴. 유저정보 저장X
+            response.put("isNewAccount",true);
+            response.put("tempToken",tokenService.generateTemporaryToken(email,name,profilePath));
+            return response;
+        }
+
+        String jwtToken = tokenService.generateAccessToken(account);
+        String refreshToken=tokenService.generateRefreshToken(account);
+        response.put("isNewAccount",false);
         response.put("name", account.getName());
         response.put("email", account.getEmail());
         response.put("userId", account.getId());
-        log.info("jwt 토큰 생성한 거 : {}", jwtToken);
+        response.put("accessToken", jwtToken);
+        response.put("refreshToken", refreshToken);
+
         return response;
     }
 

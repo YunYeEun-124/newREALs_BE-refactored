@@ -2,6 +2,7 @@ package newREALs.backend.security;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -22,25 +24,57 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final TokenService tokenService;
 
     @Override
-    public void doFilterInternal(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain filterChain) throws IOException, jakarta.servlet.ServletException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws IOException, ServletException {
 
-        // 헤더에서 토큰을 추출 (tokenService에 정의되어있음)
         String token = tokenService.extractTokenFromHeader(request);
 
-        if (token != null && tokenService.validateToken(token)) {
-            // 유효한 토큰 -> userId를 추출하고 인증 정보 설정
-            Long userId = tokenService.extractUserIdFromToken(token);
-            log.debug("JwtAuthFilter - 헤더에서 추출한 토큰의 user Id: {}", userId);
+        try {
+            if (token != null && tokenService.validateToken(token)) {
+                String tokenType = tokenService.getTokenType(token);
 
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userId, null, null);
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if ("temporary".equals(tokenType)) {
+                    log.debug("JwtAuthFilter - 임시 토큰으로 요청");
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else {
-            log.debug("JwtAuthFilter - 토큰 정보 잘못됨");
+                    // 임시 토큰일 경우 SecurityContext에 인증 정보 설정
+                    String email = tokenService.extractEmailFromToken(token);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            email, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // `/accounts/register` 외의 API는 접근 차단
+                    if (!request.getRequestURI().startsWith("/accounts/register")) {
+                        log.warn("JwtAuthFilter - 임시 토큰으로 접근이 차단된 API 요청: {}", request.getRequestURI());
+                        sendForbiddenResponse(response, "임시 토큰으로는 접근할 수 없습니다.");
+                        return;
+                    }
+                } else if ("access".equals(tokenType)) {
+                    log.debug("JwtAuthFilter - 정식 토큰으로 요청");
+                    Long userId = tokenService.extractUserIdFromToken(token); // 정식 토큰일 경우만 userId 추출
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userId, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    log.warn("JwtAuthFilter - 알 수 없는 토큰 타입: {}", tokenType);
+                    sendForbiddenResponse(response, "잘못된 토큰입니다.");
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            log.error("JwtAuthFilter - 토큰 검증 중 예외 발생: {}", e.getMessage());
+            sendForbiddenResponse(response, "유효하지 않은 토큰입니다.");
+            return;
         }
 
         filterChain.doFilter(request, response);
     }
+
+    private void sendForbiddenResponse(HttpServletResponse response, String message) throws IOException {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
+
+
 }

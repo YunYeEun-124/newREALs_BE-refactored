@@ -44,6 +44,8 @@ public class Accounts {
     @ElementCollection(fetch = FetchType.LAZY)
     private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
+
+
     @Builder
     public Accounts(String name, String profilePath, String email) {
         this.name = name;
