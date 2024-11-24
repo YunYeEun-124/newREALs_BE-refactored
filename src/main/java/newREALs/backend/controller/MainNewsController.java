@@ -76,11 +76,14 @@ public class MainNewsController {
     @GetMapping("/insight")
     public ResponseEntity<?> viewInsightList(){
 
-       List<InsightDTO> result = insightService.getInsight();
+       List<InsightDTO> list = insightService.getInsight();
 
-        if(result.isEmpty()){
+        if(list.isEmpty()){
             throw new IllegalStateException("insight 리스트 조회 실패. 서버 문제");
         }
+
+        HashMap<String,List<InsightDTO>> result = new HashMap<>();
+        result.put("insightList",list);
 
         return ResponseEntity.ok(
                 ApiResponseDTO.success( "main/insight 리스트 조회 성공 ", result)

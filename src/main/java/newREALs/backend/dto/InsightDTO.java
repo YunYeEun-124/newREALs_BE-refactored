@@ -10,7 +10,7 @@ public class InsightDTO {
 
     private String topic;
     private String category;
-    private String newsUrl;
+    private Long basenewsId;
 
 
 }

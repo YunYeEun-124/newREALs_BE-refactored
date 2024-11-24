@@ -11,7 +11,7 @@ public interface InsightRepository extends JpaRepository<ThinkComment,Long> {
 
 
 
-    @Query("SELECT new newREALs.backend.dto.InsightDTO(tc.topic, tc.basenews.category.name, tc.basenews.newsUrl) " +
+    @Query("SELECT new newREALs.backend.dto.InsightDTO(tc.topic, tc.basenews.category.name, tc.basenews.id) " +
             "FROM ThinkComment tc " +
             "WHERE tc.basenews.isDailyNews = true")
     List<InsightDTO> findAllBy();
