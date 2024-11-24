@@ -3,11 +3,14 @@ package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import newREALs.backend.domain.ThinkComment;
 import newREALs.backend.domain.UserKeyword;
 import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.DailyNewsThumbnailDTO;
+import newREALs.backend.dto.InsightDTO;
 import newREALs.backend.dto.KeywordNewsDTO;
 import newREALs.backend.repository.UserKeywordRepository;
+import newREALs.backend.service.InsightService;
 import newREALs.backend.service.NewsService;
 import newREALs.backend.service.NewsService2;
 import newREALs.backend.service.TokenService;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +35,7 @@ public class MainNewsController {
     private final NewsService2 newsService;
     private final TokenService tokenService;
     private final UserKeywordRepository userKeywordRepository;
+    private final InsightService insightService;
 
     //main news list
     @GetMapping("/daily")
@@ -65,6 +70,20 @@ public class MainNewsController {
 
         return ResponseEntity.ok(
                 ApiResponseDTO.success( "main/keyword 뉴스 리스트 조회 성공 ", keywordnewsList)
+        );
+    }
+
+    @GetMapping("/insight")
+    public ResponseEntity<?> viewInsightList(){
+
+       List<InsightDTO> result = insightService.getInsight();
+
+        if(result.isEmpty()){
+            throw new IllegalStateException("insight 리스트 조회 실패. 서버 문제");
+        }
+
+        return ResponseEntity.ok(
+                ApiResponseDTO.success( "main/insight 리스트 조회 성공 ", result)
         );
     }
 
