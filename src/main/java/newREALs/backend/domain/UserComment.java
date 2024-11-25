@@ -1,10 +1,7 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -30,4 +27,11 @@ public class UserComment {
 
     @Column
     private String userComment;
+
+    @Builder
+    public UserComment(String userComment,Accounts user,ThinkComment thinkComment){
+        this.userComment = userComment;
+        this.thinkComment = thinkComment;
+        this.user = user;
+    }
 }

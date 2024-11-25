@@ -98,7 +98,12 @@ public class ProfileController {
         }
 
         profileService.editProfile(userId, name, file);
-        return ResponseEntity.ok(ApiResponseDTO.success("프로필 변경 성공", null));
+
+        Map<String, Object> response = new HashMap<>();
+        if(name != null && !name.isBlank()) {
+            response.put("name", name);
+        }
+        return ResponseEntity.ok(ApiResponseDTO.success("프로필 변경 성공", response));
     }
 
     @DeleteMapping("/unscrap")
