@@ -2,14 +2,20 @@ package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import newREALs.backend.domain.UserComment;
 import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.NewsDetailDto;
+import newREALs.backend.dto.RequestUserCommentDTO;
+import newREALs.backend.repository.UserCommentRepository;
+import newREALs.backend.service.InsightService;
 import newREALs.backend.service.NewsDetailService;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserActionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +24,7 @@ public class NewsDetailController {
     private final NewsDetailService newsDetailService;
     private final UserActionService userActionService;
     private final TokenService tokenService;
-
+    private final InsightService insightService;
     //[get] 뉴스 상세 페이지
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<NewsDetailDto>> getNewsDetail(
@@ -56,6 +62,24 @@ public class NewsDetailController {
             @RequestParam int reactionType) {
         Long userId = tokenService.getUserId(request);
         String message=userActionService.getLikes(id, userId, reactionType);
+        return ResponseEntity.ok(
+                ApiResponseDTO.success(message,null));
+    }
+
+    @PostMapping("/insight/{id}")
+    public ResponseEntity<?> getInsight(   @PathVariable Long id, //newsid
+                                           @RequestBody(required = false) RequestUserCommentDTO userComment,
+                                           HttpServletRequest request){
+        Long userId = tokenService.getUserId(request);
+
+        if(userComment.getComment().isEmpty() || userComment == null)
+            throw new IllegalArgumentException("user의 Comment가 비어있습니다.");
+
+        String message = insightService.saveUserInsight(userComment.getComment(), userId, id);
+        if (message == null) {
+            throw  new IllegalStateException("user comment 저장 실패",null);
+        }
+
         return ResponseEntity.ok(
                 ApiResponseDTO.success(message,null));
     }

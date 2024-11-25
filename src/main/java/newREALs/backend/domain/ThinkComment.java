@@ -26,6 +26,8 @@ public class ThinkComment {
     @Column
     private String AIComment;
 
+    //배열로 관리 ?
+
 
 
 }

@@ -21,6 +21,7 @@ public class UserActionService {
     private final LikesRepository likesRepository;
     private final SubInterestRepository subInterestRepository;
     private final ScrapRepository scrapRepository;
+ //   private final
 
     //스크랩 처리 메서드
     @Transactional
@@ -156,5 +157,7 @@ public class UserActionService {
         basenewsRepository.save(basenews);
         return message;
     }
+
+
 
 }
