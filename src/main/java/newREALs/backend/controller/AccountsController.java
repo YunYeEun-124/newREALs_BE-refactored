@@ -76,8 +76,7 @@ public class AccountsController {
         } else {
             redirectUrl = "/home"; // 추가정보 입력 완료
         }
-
-        kakaoResponse.put("redirect_url",redirectUrl);
+        kakaoResponse.put("redirect_url", redirectUrl);
 
         return ResponseEntity.ok(ApiResponseDTO.success("로그인 성공", kakaoResponse));
     }
