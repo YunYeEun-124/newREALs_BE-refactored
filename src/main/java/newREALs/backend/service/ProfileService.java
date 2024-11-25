@@ -257,8 +257,6 @@ public class ProfileService {
         return percentages;
     }
 
-
-    // 지금은 저장위치를 로컬로 해놓음..
     public void editProfile(Long userId, String newName, MultipartFile file) throws IOException {
         Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
