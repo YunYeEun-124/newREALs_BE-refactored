@@ -69,9 +69,6 @@ KakaoService {
             response.put("email", email);
             response.put("isNewAccount",true);
             response.put("tempToken",tokenService.generateTemporaryToken(email,name,profilePath));
-            response.put("email",email);
-            response.put("name",name);
-            response.put("profilePath",profilePath);
             return response;
         }
 

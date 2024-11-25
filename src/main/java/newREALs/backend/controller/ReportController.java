@@ -6,6 +6,7 @@ import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.ProfileInterestDto;
 import newREALs.backend.dto.ReportInterestDto;
 import newREALs.backend.service.ProfileService;
+import newREALs.backend.service.ReportService;
 import newREALs.backend.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,11 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/accounts/profile/report")
+@RequestMapping("/accounts/report")
 public class ReportController {
     private final TokenService tokenService;
     private final ProfileService profileService;
+    private final ReportService reportService;
     //[get] 프로필 페이지 - 유저 관심사
     @GetMapping("/interest")
     public ResponseEntity<?> getInterest(HttpServletRequest request) {
@@ -35,4 +37,15 @@ public class ReportController {
         response.put("interest", interestMap);
         return ResponseEntity.ok(ApiResponseDTO.success("분석 레포트 - 유저 관심도 조회 성공", response));
     }
+
+    @GetMapping("/keyword")
+    public ResponseEntity<ApiResponseDTO<?>> getRecommendKeyword(HttpServletRequest request){
+        Long userId=tokenService.getUserId(request);
+        List<String> keywords=reportService.recommendNewKeyword(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("추천 키워드 조회 성공", keywords));
+    }
+
+
+
+
 }

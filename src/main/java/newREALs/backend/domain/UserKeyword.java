@@ -37,4 +37,8 @@ public class UserKeyword {
         this.user = user;
         this.subCategory =sub;
     }
+
+    public Long getKeywordId() {
+        return keyword.getId();
+    }
 }
