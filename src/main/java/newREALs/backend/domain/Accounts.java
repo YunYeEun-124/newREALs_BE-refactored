@@ -34,17 +34,17 @@ public class Accounts {
     @ColumnDefault("0")
     private int point;
 
-    @Column(name = "attendanceList")
+
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
-    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "keywordInterest")
+
     @ElementCollection(fetch = FetchType.LAZY)
-    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
 
