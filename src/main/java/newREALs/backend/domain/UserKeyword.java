@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -19,6 +20,7 @@ public class UserKeyword {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name= "user_id", nullable = false)
+    @OnDelete(action= OnDeleteAction.CASCADE)
     private Accounts  user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

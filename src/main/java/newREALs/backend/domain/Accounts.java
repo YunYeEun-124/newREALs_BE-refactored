@@ -2,6 +2,7 @@ package newREALs.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ public class Accounts {
 
     @Column(name = "attendanceList")
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
+    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
     final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
     @Column(name = "email", nullable = false, unique = true)
@@ -42,6 +44,7 @@ public class Accounts {
 
     @Column(name = "keywordInterest")
     @ElementCollection(fetch = FetchType.LAZY)
+    @Cascade(org.hibernate.annotations.CascadeType.REMOVE)
     private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
 
