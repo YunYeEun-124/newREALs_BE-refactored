@@ -64,6 +64,9 @@ KakaoService {
             account = existingAccount.get();
         } else {
             //임시토큰만 발급해서 리턴. 유저정보 저장X
+            response.put("name", name);
+            response.put("profile_path", profilePath);
+            response.put("email", email);
             response.put("isNewAccount",true);
             response.put("tempToken",tokenService.generateTemporaryToken(email,name,profilePath));
             return response;
