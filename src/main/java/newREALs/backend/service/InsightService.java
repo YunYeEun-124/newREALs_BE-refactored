@@ -35,31 +35,16 @@ public class InsightService {
         Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
         Optional<ThinkComment> thinkComment = insightRepository.findByBasenews_Id(newsId);
 
-        if( thinkComment.isPresent()){
+        if( thinkComment.isPresent() && subInterest.isPresent()){
             //해당 뉴스의 소카테고리 관심도 카운트 올리기.
-
-
             userCommentRepository.save(
                     UserComment.builder().
                     userComment(userComment).
                     user(user).
                     thinkComment(thinkComment.get()).
                     build());
-            if(subInterest.isPresent()){
-                subInterest.get().updateCommentCount();
-            }else{
 
-                SubInterest s = SubInterest.builder()
-                        .user(user)
-                        .subCategory(basenews.getSubCategory())
-                        .count(0)
-                        .scrapCount(0)
-                        .quizCount(0)
-                        .commentCount(1)
-                        .build();
-                subInterestRepository.save(s);
-
-            }
+            subInterest.get().updateCommentCount();
 
             return "user insight 저장 성공";
 
