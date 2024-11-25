@@ -5,11 +5,9 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import newREALs.backend.domain.Accounts;
-import newREALs.backend.domain.UserKeyword;
+import newREALs.backend.domain.*;
 import newREALs.backend.dto.ApiResponseDTO;
-import newREALs.backend.repository.UserKeywordRepository;
-import newREALs.backend.repository.UserRepository;
+import newREALs.backend.repository.*;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserKeywordService;
 import org.springframework.http.HttpStatus;
@@ -27,6 +25,9 @@ public class UserKeywordController {
     private final UserKeywordService userKeywordService;
     private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final SubCategoryRepository subCategoryRepository;
+    private final SubInterestRepository subInterestRepository;
+    private final PreSubInterestRepository preSubInterestRepository;
 
 
     @PutMapping("/edit")
@@ -113,6 +114,33 @@ public class UserKeywordController {
         if (createdUserKeywords.isEmpty()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponseDTO.failure("E500","유저 관심 키워드를 저장하는 중 문제가 발생했습니다."));
+        }
+
+        try {
+            List<SubCategory> subCategories = subCategoryRepository.findAll();
+            for(SubCategory subCategory : subCategories) {
+                PreSubInterest preSubInterest = PreSubInterest.builder()
+                        .user(user)
+                        .subCategory(subCategory)
+                        .count(0)
+                        .quizCount(0)
+                        .scrapCount(0)
+                        .commentCount(0)
+                        .build();
+                preSubInterestRepository.save(preSubInterest);
+                SubInterest subInterest = SubInterest.builder()
+                        .user(user)
+                        .subCategory(subCategory)
+                        .count(0)
+                        .quizCount(0)
+                        .scrapCount(0)
+                        .commentCount(0)
+                        .build();
+                subInterestRepository.save(subInterest);
+            }
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponseDTO.failure("E500", "유저 저장 중 오류가 발생했습니다."));
         }
 
         // 토큰 생성

@@ -16,6 +16,8 @@ import java.util.HashMap;
 @Entity
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
+@Builder
 public class PreSubInterest {
 
     @Id
