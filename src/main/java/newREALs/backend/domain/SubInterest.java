@@ -10,8 +10,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.HashMap;
-
 @Getter
 @Entity
 @Setter
@@ -58,6 +56,12 @@ public class SubInterest {
         this.scrapCount = scrapCount;
         this.commentCount = commentCount;
     }
+
+
+    public void updateCommentCount(){
+        this.commentCount ++;
+    }
+
 
 
 }

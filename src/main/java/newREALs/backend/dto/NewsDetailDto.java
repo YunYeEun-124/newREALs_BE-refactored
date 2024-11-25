@@ -31,6 +31,9 @@ public class NewsDetailDto {
     private Long viewCount; //조회수
     private List<TermDetailDto> termList;
 
+    //
+    private String insightTopic;
+
     private SimpleNewsDto prevNews;
     private SimpleNewsDto nextNews;
     private String wherePageFrom;
@@ -54,6 +57,9 @@ public class NewsDetailDto {
         this.keyword=basenews.getKeyword().getName();
     }
 
+    public void setInsightTopic(String insightTopic) {
+        this.insightTopic = insightTopic;
+    }
 
 
     public void setTermList(List<TermDetailDto> termList) {

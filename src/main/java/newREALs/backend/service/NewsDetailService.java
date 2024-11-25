@@ -66,6 +66,7 @@ public class NewsDetailService {
         Basenews prevNews=findPrevNews(sortedNews,basenewsId);
         Basenews nextNews=findNextNews(sortedNews,basenewsId);
 
+        //insight 있으면 넣고 없으면 null값으로
 
         if(prevNews!=null){
             newsDetailDto.setPrevNews(new SimpleNewsDto(prevNews.getId(),prevNews.getTitle()));
