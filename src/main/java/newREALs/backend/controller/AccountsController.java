@@ -72,7 +72,7 @@ public class AccountsController {
         // 리다이렉트 URL 결정
         String redirectUrl;
         if (isNewAccount) {
-            redirectUrl = "/accounts/register"; // 추가정보 입력 필요
+            redirectUrl = "/register"; // 추가정보 입력 필요
         } else {
             redirectUrl = "/home"; // 추가정보 입력 완료
         }
