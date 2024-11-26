@@ -8,7 +8,7 @@ public class ResponseUserCommentDTO {
     private String userComment;
 
     //response 1. 사용자 댓글 안 모아짐
-    private String AIComment;
+    private String aiComment;
 
 
     //response 2. 사용자 댓글 모아짐.
@@ -21,7 +21,7 @@ public class ResponseUserCommentDTO {
     }
 
     public ResponseUserCommentDTO(String topic, String userComment, String AIComment){
-        this.AIComment = AIComment;
+        this.aiComment = AIComment;
         this.topic= topic;
         this.userComment = userComment;
     }

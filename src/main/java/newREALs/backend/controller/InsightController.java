@@ -26,6 +26,7 @@ public class InsightController {
     public ResponseEntity<?> getUserInsight(@PathVariable Long id, HttpServletRequest request){
         Long userId = tokenService.getUserId(request);
         ResponseUserCommentDTO result = insightService.getUserInsight(userId,id);
+
         if(result == null){
             return ResponseEntity.ok(
                     ApiResponseDTO.success("해당 뉴스에는 인사이트 기능이 없습니다.",null));
