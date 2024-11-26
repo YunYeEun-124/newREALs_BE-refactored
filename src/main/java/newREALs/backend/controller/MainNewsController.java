@@ -38,6 +38,7 @@ public class MainNewsController {
     private final InsightService insightService;
 
     //main news list
+
     @GetMapping("/daily")
     public ResponseEntity<?> viewDailynewsList(HttpServletRequest userInfo){
 
@@ -76,7 +77,7 @@ public class MainNewsController {
     @GetMapping("/insight")
     public ResponseEntity<?> viewInsightList(){
 
-       List<InsightDTO> list = insightService.getInsight();
+       List<InsightDTO> list = insightService.getInsightList();
 
         if(list.isEmpty()){
             throw new IllegalStateException("insight 리스트 조회 실패. 서버 문제");

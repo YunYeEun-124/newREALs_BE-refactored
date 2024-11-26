@@ -22,8 +22,5 @@ public interface InsightRepository extends JpaRepository<ThinkComment,Long> {
     @Query("select tc from ThinkComment tc where tc.basenews.id = :newsId")
     Optional<ThinkComment> findByBasenews_Id(@Param("newsId") Long newsId);
 
-    boolean existsByBasenews_Id(Long newsId);
-
-    //query : id가 있으면 토픽만 받아온다.
 
 }

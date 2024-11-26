@@ -26,6 +26,13 @@ public class ThinkComment {
     @Column
     private String AIComment;
 
+    @Column
+    private String pros;
+    @Column
+    private String cons;
+    @Column
+    private String neutral;
+
     //배열로 관리 ?
 
 
