@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.dto.InsightDTO;
+import newREALs.backend.dto.ResponseUserCommentDTO;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,42 @@ public class InsightService {
     private final SubInterestRepository subInterestRepository;
     private final BaseNewsRepository baseNewsRepository;
 
+    //해당 뉴스의 인사이트가 없으면 200-null
+    //g코멘트가 없으면 200-topic
+    //해당 뉴스의 유저코멘트가 잇어면 200- topic, usercomment,aicomment
+
+    public ResponseUserCommentDTO getUserInsight(Long userId,Long newsId){
+        Basenews basenews = baseNewsRepository.findById(newsId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+
+        ResponseUserCommentDTO result;
+
+        ThinkComment thinkComment = insightRepository.findByBasenews_Id(newsId)
+                .orElse(null);
+        if(thinkComment == null) return null ; //해당 뉴스에 인사이트 기능이 없음.
+
+        String userComment =  userCommentRepository.findByThinkComment_IdAndUser_Id(thinkComment.getId(),userId);
+
+        if(userComment == null){ //response 1. topic : userComment가 없는경우
+            result = new ResponseUserCommentDTO(thinkComment.getTopic());
+        }else{
+           if(thinkComment.getPros() == null){//response 2. 댓글이 안 모인 경우
+                result = new ResponseUserCommentDTO(thinkComment.getTopic(),userComment, thinkComment.getAIComment());
+           }else {//response 3. 댓글이 모여서 찬,반,중으로 나눈 경우
+               result = new ResponseUserCommentDTO(
+                       thinkComment.getTopic(),
+                       userComment,
+                       thinkComment.getPros(),
+                       thinkComment.getCons(),
+                       thinkComment.getNeutral());
+           }
+
+        }
+
+       return result;
+    }
 
     @Transactional
     public String saveUserInsight(String userComment,Long userId, Long newsId){
@@ -53,7 +90,7 @@ public class InsightService {
     }
 
 
-    public List<InsightDTO> getInsight(){
+    public List<InsightDTO> getInsightList(){
 
         List<InsightDTO> result = insightRepository.findAllBy();
 

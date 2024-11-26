@@ -24,7 +24,6 @@ public class NewsDetailController {
     private final NewsDetailService newsDetailService;
     private final UserActionService userActionService;
     private final TokenService tokenService;
-    private final InsightService insightService;
     //[get] 뉴스 상세 페이지
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<NewsDetailDto>> getNewsDetail(
@@ -66,23 +65,6 @@ public class NewsDetailController {
                 ApiResponseDTO.success(message,null));
     }
 
-    @PostMapping("/insight/{id}")
-    public ResponseEntity<?> getInsight(   @PathVariable Long id, //newsid
-                                           @RequestBody(required = false) RequestUserCommentDTO userComment,
-                                           HttpServletRequest request){
-        Long userId = tokenService.getUserId(request);
-
-        if(userComment.getComment().isEmpty() || userComment == null)
-            throw new IllegalArgumentException("user의 Comment가 비어있습니다.");
-
-        String message = insightService.saveUserInsight(userComment.getComment(), userId, id);
-        if (message == null) {
-            throw  new IllegalStateException("user comment 저장 실패",null);
-        }
-
-        return ResponseEntity.ok(
-                ApiResponseDTO.success(message,null));
-    }
 
 
 }
