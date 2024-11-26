@@ -58,8 +58,16 @@ public class SubInterest {
     }
 
 
+
     public void updateCommentCount(){
         this.commentCount ++;
+    }
+
+    public void updateTotalCount(int change){
+        setCount(getCount()+change);
+    }
+    public void updateScrapCount(int change){
+        setScrapCount(getScrapCount()+change);
     }
 
 
