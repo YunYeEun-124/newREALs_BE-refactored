@@ -48,15 +48,20 @@ public class SubInterest {
     @ColumnDefault("0")
     private int commentCount;
 
+    @Column
+    @ColumnDefault("0")
+    private int attCount;
+
 
     @Builder
-    public SubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount) {
+    public SubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
         this.quizCount = quizCount;
         this.scrapCount = scrapCount;
         this.commentCount = commentCount;
+        this.attCount = attCount;
     }
 
 
