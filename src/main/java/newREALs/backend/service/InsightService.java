@@ -6,7 +6,13 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
 import newREALs.backend.dto.InsightDTO;
 import newREALs.backend.dto.ResponseUserCommentDTO;
+import newREALs.backend.dto.ResponseUserCommentListDTO;
+import newREALs.backend.dto.UserCommentListDTO;
 import newREALs.backend.repository.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -30,9 +36,6 @@ public class InsightService {
     public ResponseUserCommentDTO getUserInsight(Long userId,Long newsId){
         Basenews basenews = baseNewsRepository.findById(newsId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
-        Accounts user=userRepository.findById(userId)
-                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-
         ResponseUserCommentDTO result;
 
         ThinkComment thinkComment = insightRepository.findByBasenews_Id(newsId)
@@ -101,5 +104,20 @@ public class InsightService {
         }
 
         return result;
+    }
+
+    //사용자가 쓴 코멘트, 해당 토픽, 토픽에 대한 뉴스의 아이디
+    public ResponseUserCommentListDTO getUserInsightList(Long userid, int page){
+        Pageable pageable = getPageInfo(page);
+        Slice<UserCommentListDTO> slice = userCommentRepository.findAllByUserId(userid,pageable);
+        return new ResponseUserCommentListDTO(slice.getContent(),slice.hasNext(),slice.hasContent(),slice.getNumber()+1);
+
+    }
+
+    //common code 1
+    public Pageable getPageInfo(int page){
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("id"));
+        return  PageRequest.of(page-1,3,Sort.by(sorts));
     }
 }
