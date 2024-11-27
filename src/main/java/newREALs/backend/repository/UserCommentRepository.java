@@ -1,6 +1,9 @@
 package newREALs.backend.repository;
 
 import newREALs.backend.domain.UserComment;
+import newREALs.backend.dto.UserCommentListDTO;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +22,9 @@ public interface UserCommentRepository extends JpaRepository<UserComment,Long> {
     UserComment findUserCommentByThinkComment_IdAndUser_Id(@Param("newsId") Long newsId, @Param("userId") Long userId);
 
     Optional<UserComment> findByUser_Id(Long userid);
+
+    @Query("select new newREALs.backend.dto.UserCommentListDTO(uc.thinkComment.topic, uc.userComment, uc.thinkComment.basenews.id) " +
+            "from UserComment uc " +
+            "WHERE uc.user.id = :userid")
+    Slice<UserCommentListDTO> findAllByUserId(@Param("userid")Long userid, Pageable pageable);
 }
