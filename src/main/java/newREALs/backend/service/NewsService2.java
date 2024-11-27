@@ -153,9 +153,11 @@ public class NewsService2 {
 
     public List<DailyNewsThumbnailDTO> getDailynewsList(){
         List<Basenews> dailynewsList = baseNewsRepository.findAllByIsDailyNews(true);
+
         List<DailyNewsThumbnailDTO> dailydtoList = new ArrayList<>();
 
         for(Basenews dnews : dailynewsList) {
+            String quizQuestion = quizRepository.findProblemByBasenewsId(dnews.getId()).orElseThrow(null);
             dailydtoList.add(
                     new DailyNewsThumbnailDTO(
                             dnews.getId(),
@@ -164,7 +166,7 @@ public class NewsService2 {
                             dnews.getCategory().getName(),
                             dnews.getSubCategory().getName(),
                             dnews.getKeyword().getName(),
-                            "dd" //추후 수정
+                            quizQuestion
                     )
             );
         }

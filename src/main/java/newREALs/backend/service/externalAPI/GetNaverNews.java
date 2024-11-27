@@ -63,7 +63,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 3 06 ? * *")
+    @Scheduled(cron = "0 40 02 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -75,9 +75,8 @@ public class GetNaverNews {
 
         int count =0;
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            if(count == 2 ) break;
-
-            count++;
+          //  if(count == 2 ) break;
+            //count++;
             ProcessNews(keyword.getName(), keyword, false,1);
         }
 
@@ -87,7 +86,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 00 6 ? * *")
+    @Scheduled(cron = "0 43 2 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -266,7 +265,6 @@ public class GetNaverNews {
                                 .newsUrl(item.getLink())
                                 .imageUrl(origin.get(0))
                                 .uploadDate(item.getPubDate())
-                               // .description(origin.get(1))
                                 .description(origin.get(1))
                                 .keyword(keyword)
                                 .subCategory(sub)
@@ -311,7 +309,8 @@ public class GetNaverNews {
                 if(imageElements != null){
                     imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
                 }else{ //default image
-                   imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
+                    imagePath = null;
+                   //imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
                 }
 
                 set.add(imagePath);
