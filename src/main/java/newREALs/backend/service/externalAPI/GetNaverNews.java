@@ -63,7 +63,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 7 01 ? * *")
+    @Scheduled(cron = "0 3 06 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -87,7 +87,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 24 1 ? * *")
+    @Scheduled(cron = "0 00 6 ? * *")
     @Transactional
     public void getDailynews(){
 
