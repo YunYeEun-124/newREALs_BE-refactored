@@ -25,7 +25,6 @@ public class NewsService {
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
-    //@Scheduled(cron = "0 7 20 ? * *")
     @Scheduled(cron="0 55 05 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticBaseProcess(){
@@ -101,14 +100,12 @@ public class NewsService {
         ));
 
         String result = (String) chatGPTService.generateContent(Messages).get("text");
-        System.out.println("gpt result");
-        System.out.println(result);
+
 
         // 처리 완료 시간 기록
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
 
-        System.out.println("Execution time for processArticle: " + duration + " ms");
 
         return parseBasenews(result,basenews);
     }
@@ -171,9 +168,7 @@ public class NewsService {
         String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
         StringTokenizer st = new StringTokenizer(quizContent,":");
         st.nextToken();
-        System.out.println(st.nextToken()+" is this topic of "+news.getTitle());
-        System.out.println("think comment result");
-        System.out.println(news.getTitle()+" : "+quizContent);
+
 
     }
 
@@ -222,9 +217,6 @@ public class NewsService {
             }
 
         }
-        System.out.println("descrip "+description);
-        System.out.println("descrip "+summary);
-        System.out.println("descrip "+termDetails.get(0));
 
 
         basenews.setDescription(description);

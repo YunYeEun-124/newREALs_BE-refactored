@@ -28,6 +28,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -61,7 +62,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 00 06 ? * *")
+    @Scheduled(cron = "0 05 20 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -71,14 +72,24 @@ public class GetNaverNews {
             return;
         }
 
-        for (Keyword keyword : keywords)  //검색 for문으로 키워드 돌아가면서 실행시키
-            ProcessNews(keyword.getName(), keyword, false,1);
+
+        for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
+            ProcessNews(keyword.getName(), keyword, false, 1);
+        }
+
+    }
+
+
+    @Scheduled(cron = "0 21 20 ? * *")
+    public void testBasenews(){
+        Keyword keyword = keywordRepository.findByName("교통사고").orElse(null);
+        ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
 
     }
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 43 2 ? * *")
+    @Scheduled(cron = "0 00 06 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -250,14 +261,19 @@ public class GetNaverNews {
                     //item.getTitle()
                     SubCategory sub = keyword.getSubCategory();
                     Category category = keyword.getCategory();
-                    System.out.println("origin is "+origin.get(1));
+                    //DATE 형식변환
+                    SimpleDateFormat date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z",Locale.ENGLISH);
+                    SimpleDateFormat outputdate = new SimpleDateFormat("yyyy-MM-dd");
+                    Date parseDate = date.parse(item.getPubDate());
+
+
 
                     try {
                         Basenews bnews = Basenews.builder()
                                 .title(item.getTitle().replaceAll("<[^>]*>?","")) //태그제거
                                 .newsUrl(item.getLink())
                                 .imageUrl(origin.get(0))
-                                .uploadDate(item.getPubDate())
+                                .uploadDate(outputdate.format(parseDate))
                                 .description(origin.get(1))
                                 .keyword(keyword)
                                 .subCategory(sub)
