@@ -50,15 +50,20 @@ public class PreSubInterest {
     @ColumnDefault("0")
     private int commentCount;
 
+    @Column
+    @ColumnDefault("0")
+    private int attCount; // 출석수
+
 
     @Builder
-    public PreSubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount) {
+    public PreSubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
         this.quizCount = quizCount;
         this.scrapCount = scrapCount;
         this.commentCount = commentCount;
+        this.attCount = attCount;
     }
 
 

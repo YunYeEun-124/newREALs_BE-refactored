@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.dto.*;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -26,6 +24,7 @@ public class ProfileService {
     private final SubInterestRepository subInterestRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final S3Service s3Service;
+    private final PreSubInterestRepository preSubInterestRepository;
 
 
     //[get] 프로필 정보
@@ -151,14 +150,16 @@ public class ProfileService {
             int count = item.getCount();
 
             int percentage = (int) Math.round((count * 100.0) / total);
-            ProfileInterestDto dto = ProfileInterestDto.builder()
-                    .category(category)
-                    .subCategory(subCategory)
-                    .percentage(percentage)
-                    .build();
-            interestDTOList.add(dto);
+            if (percentage > 0) {
+                ProfileInterestDto dto = ProfileInterestDto.builder()
+                        .category(category)
+                        .subCategory(subCategory)
+                        .percentage(percentage)
+                        .build();
+                interestDTOList.add(dto);
 
-            percentageSum += percentage;
+                percentageSum += percentage;
+            }
 
         }
         int difference = 100 - percentageSum;
@@ -170,98 +171,13 @@ public class ProfileService {
         }
         return interestDTOList;
     }
-    public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
-        Map<String, List<ReportInterestDto>> result = new HashMap<>();
-
-        result.put("society", new ArrayList<>());
-        result.put("politics", new ArrayList<>());
-        result.put("economy", new ArrayList<>());
-
-        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
-        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
-        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
-
-        List<Integer> categoryCount = new ArrayList<>();
-        categoryCount.add(societyCount);
-        categoryCount.add(politicsCount);
-        categoryCount.add(economyCount);
-
-        int totalCount = societyCount + politicsCount + economyCount;
-
-        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "society");
-        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "society");
-        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "society");
-
-        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "politics");
-        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "politics");
-        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "politics");
-
-        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "economy");
-        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "economy");
-        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "economy");
-
-        List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
-
-        result.get("society").add(ReportInterestDto.builder()
-                .percentage(percentage.get(0))
-                .quizCount(societyQuiz)
-                .insightCount(societyComment)
-                .scrapCount(societyScrap)
-                .build());
-
-        result.get("politics").add(ReportInterestDto.builder()
-                .percentage(percentage.get(1))
-                .quizCount(politicsQuiz)
-                .insightCount(politicsComment)
-                .scrapCount(politicsScrap)
-                .build());
-
-        result.get("economy").add(ReportInterestDto.builder()
-                .percentage(percentage.get(2))
-                .quizCount(economyQuiz)
-                .insightCount(economyComment)
-                .scrapCount(economyScrap)
-                .build());
-
-        return result;
-    }
-
-    List<Integer> getReportPercentage(List<Integer> catCount, int totCount) {
-        List<Integer> percentages = new ArrayList<>();
-        if (totCount == 0) {
-            return List.of(0, 0, 0);
-        }
-
-        int percentageSum = 0;
-        int maxIndex = -1;
-        int maxValue = 0;
-
-        for (int i = 0; i < catCount.size(); i++) {
-            int count = catCount.get(i);
-            int percentage = (int) Math.round((count * 100.0) / totCount);
-            percentages.add(percentage);
-            percentageSum += percentage;
-
-            if (count > maxValue) {
-                maxValue = count;
-                maxIndex = i;
-            }
-        }
-
-        // 퍼센트 합 100 안되면 제일 큰 항목에 그 차이만큼 더해주기
-        int difference = 100 - percentageSum;
-        if (difference != 0 && maxIndex != -1) {
-            percentages.set(maxIndex, percentages.get(maxIndex) + difference);
-        }
-
-        return percentages;
-    }
 
     public void editProfile(Long userId, String newName, MultipartFile file) throws IOException {
         Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         // 이름 변경
+
         if (newName != null && !newName.isEmpty()) {
             user.setName(newName);
         }

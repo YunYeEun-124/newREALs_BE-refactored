@@ -41,4 +41,22 @@ public interface SubInterestRepository extends JpaRepository<SubInterest,Long> {
             "JOIN si.subCategory sc " +
             "WHERE si.user.id = :userId AND sc.category.name = :category")
     Integer findCountByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category);
+
+    // quizCount 총합
+    @Query("SELECT COALESCE(SUM(si.quizCount), 0) " +
+            "FROM SubInterest si " +
+            "WHERE si.user.id = :userId")
+    Integer findTotalQuizCountByUserId(@Param("userId") Long userId);
+
+    //  commentCount 총합
+    @Query("SELECT COALESCE(SUM(si.commentCount), 0) " +
+            "FROM SubInterest si " +
+            "WHERE si.user.id = :userId")
+    Integer findTotalCommentCountByUserId(@Param("userId") Long userId);
+
+    // 출석수
+    @Query("SELECT COALESCE(SUM(si.attCount), 0) " +
+            "FROM SubInterest si " +
+            "WHERE si.user.id = :userId")
+    Integer findTotalAttCountByUserId(@Param("userId") Long userId);
 }
