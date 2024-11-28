@@ -24,8 +24,7 @@ public class NewsDetailDto {
     private String imageUrl;
     private String newsUrl;
     private String uploadDate;
-    @JsonProperty("isScrapped")
-    private boolean isScrapped;
+    private boolean scrapped;
     private String category;
     private String subCategory;
     private String keyword;
@@ -67,7 +66,7 @@ public class NewsDetailDto {
     }
 
     public void setScrapped(boolean isScrapped) {
-        this.isScrapped=isScrapped;
+        this.scrapped=isScrapped;
     }
 
     public Map<String,String> termMap;

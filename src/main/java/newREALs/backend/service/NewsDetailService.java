@@ -37,11 +37,11 @@ public class NewsDetailService {
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
-        //cate, subCate, keyword중 하나는 무조건 받아야함
-        if(cate==null&&subCate==null&&keyword==null){
-           //오류 던짐
-            throw new IllegalArgumentException("카테고리, 서브카테고리, 키워드 중 하나를 입력해야 합니다.");
-        }
+//        //cate, subCate, keyword중 하나는 무조건 받아야함
+//        if(cate==null&&subCate==null&&keyword==null){
+//           //오류 던짐
+//            throw new IllegalArgumentException("카테고리, 서브카테고리, 키워드 중 하나를 입력해야 합니다.");
+//        }
 
         //조회수 증가
         increaseViewCount(basenews,user);
@@ -60,13 +60,18 @@ public class NewsDetailService {
         boolean b=isScrapped.isPresent();
         newsDetailDto.setScrapped(b);
 
+        //param아무것도 안들어옴 : 이전이후뉴스 안줘도됨
+        if(cate==null&&subCate==null&&keyword==null){
+            newsDetailDto.setPrevNews(null);
+            newsDetailDto.setNextNews(null);
+            newsDetailDto.setWherePageFrom(null);
+            return newsDetailDto;
+        }
 
         //이전, 다음 뉴스 받아오기~!~!
         List<Basenews> sortedNews=fetchSortedNews(cate,subCate,keyword,basenews);
         Basenews prevNews=findPrevNews(sortedNews,basenewsId);
         Basenews nextNews=findNextNews(sortedNews,basenewsId);
-
-        //insight 있으면 넣고 없으면 null값으로
 
         if(prevNews!=null){
             newsDetailDto.setPrevNews(new SimpleNewsDto(prevNews.getId(),prevNews.getTitle()));
@@ -152,7 +157,5 @@ public class NewsDetailService {
             c.setCount(c.getCount()+1);
         }
     }
-
-
 
 }

@@ -73,34 +73,34 @@ public class ReportService {
 
     }
 
-        //미완성임
-//    @Transactional
-//    public void processReport(Long userId) throws Throwable{
-//        //시작시간
-//        long startTime = System.nanoTime();
-//        System.out.println("processReport in ");
-//        Accounts user=userRepository.findById(userId)
-//                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-//
-//        //1. 서현언니 분석 + 2.
-//        List<Map<String,String>> Messages=new ArrayList<>();
-//        Messages.add(Map.of("role","system","content",
-//                "..."));
-//
-//        Messages.add(Map.of("role", "user", "content",
-//                "해야할 일이 크게 2가지이다. "
-//        ));
-//
-//        String result=(String) chatGPTService.generateContent(Messages).get("text");
-//        System.out.println("gpt result");
-//        System.out.println(result);
-//
-//        //처이 완료 시간
-//        long endTime = System.nanoTime();
-//        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
-//
-//        System.out.println("Execution time for processArticle: " + duration + " ms");
-//    }
+
+    @Transactional
+    public void processReport(Long userId) throws Throwable{
+        //시작시간
+        long startTime = System.nanoTime();
+        System.out.println("processReport in ");
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+
+        //1. 서현언니 분석 + 2.
+        List<Map<String,String>> Messages=new ArrayList<>();
+        Messages.add(Map.of("role","system","content",
+                "..."));
+
+        Messages.add(Map.of("role", "user", "content",
+                "해야할 일이 크게 2가지이다. "
+        ));
+
+        String result=(String) chatGPTService.generateContent(Messages).get("text");
+        System.out.println("gpt result");
+        System.out.println(result);
+
+        //처이 완료 시간
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
+
+        System.out.println("Execution time for processArticle: " + duration + " ms");
+    }
 
     // 레포트 - 관심도 분석 부분
     public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
