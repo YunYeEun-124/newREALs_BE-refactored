@@ -16,6 +16,7 @@ import newREALs.backend.service.NewsService2;
 import newREALs.backend.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,17 +58,22 @@ public class MainNewsController {
 
     //keyword newsList, 사용자 키워드 리스트
     @GetMapping("/keyword")
-    public ResponseEntity<?> viewKeywordnewsList(HttpServletRequest userInfo, @RequestParam int keywordIndex,@RequestParam int page){
+    public ResponseEntity<?> viewKeywordnewsList(HttpServletRequest userInfo,
+                                                 @RequestParam(value = "keywordIndex", required = false) Integer keywordIndex,
+                                                 @RequestParam int page){
+
         Long userid = tokenService.getUserId(userInfo);
+        KeywordNewsDTO keywordnewsList;
 
-        if(userKeywordRepository.findAllByUserId(userid).size() <= keywordIndex || keywordIndex < 0 ){
-            throw  new IllegalArgumentException("keywordIndex 범위 오류");
+        if(keywordIndex == null){ //다 골라오기.
+            keywordnewsList =  newsService.getKeywordnewsList(userid,-1,page);
+        }else{
+            if(userKeywordRepository.findAllByUserId(userid).size() <= keywordIndex || keywordIndex < 0 )
+                throw  new IllegalArgumentException("keywordIndex 범위 오류");
+            keywordnewsList =  newsService.getKeywordnewsList(userid,keywordIndex,page);
+            if (page <= 0 ||page > keywordnewsList.getTotalPage())
+                throw  new IllegalArgumentException("페이지 범위 오류");
         }
-        KeywordNewsDTO keywordnewsList =  newsService.getKeywordnewsList(userid,keywordIndex,page);
-        if (page <= 0 ||page > keywordnewsList.getTotalPage())
-            throw  new IllegalArgumentException("페이지 범위 오류");
-
-
 
         return ResponseEntity.ok(
                 ApiResponseDTO.success( "main/keyword 뉴스 리스트 조회 성공 ", keywordnewsList)
