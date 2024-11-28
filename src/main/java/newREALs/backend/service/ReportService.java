@@ -8,6 +8,8 @@ import newREALs.backend.dto.ReportCompareDto;
 import newREALs.backend.dto.ReportInterestDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
