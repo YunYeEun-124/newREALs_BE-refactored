@@ -1,7 +1,9 @@
 package newREALs.backend.dto;
 
+import lombok.Getter;
 import newREALs.backend.domain.TermDetail;
 
+@Getter
 public class TermDetailDto {
 
     private String term;
