@@ -49,6 +49,10 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
     @Query("SELECT b FROM Basenews b WHERE b.title LIKE %:searchword% OR b.description LIKE %:searchword%")
     Page<Basenews> findAllByTitleContainingOrDescriptionContaining(String searchword, Pageable pageable);
 
+    @Query("SELECT bn FROM Basenews bn  WHERE bn.keyword.name IN :keywordsName")
+    Page<Basenews> findAllByKeywords(@Param("keywordsName") List<String> keywordsId, Pageable pageable);
+
+
     Optional<Basenews> findFirstByTitle(String title);
 
     @Query("SELECT n FROM Basenews n WHERE n.uploadDate LIKE :today%")
@@ -59,4 +63,8 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
     Optional<Basenews> findFirstBySummaryIsNull();
 
     Optional<Basenews> findFirstByCategoryAndIsDailyNews(Category category, boolean b);
+
+    Optional<Basenews> findFirstByNewsUrl(String link);
+
+
 }

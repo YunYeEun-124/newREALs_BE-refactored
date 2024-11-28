@@ -177,21 +177,24 @@ public class NewsService2 {
 
 
     //keywordIndex : 유저마다 최소 1개 최대 5개의 키워드를 리스트로 반환. 기본값은 keywordIndex =0으로 시작
-    public KeywordNewsDTO getKeywordnewsList(Long userid, @RequestParam int keywordIndex, @RequestParam int page){
+    // case 2 : index = -1일 경우 전체 다 보여주는 로직
+    public KeywordNewsDTO getKeywordnewsList(Long userid,  int keywordIndex,  int page){
 
-        //사용자의 키워드 list
-        List<String> keywords = userKeywordRepository.findAllByUser_Id(userid);
-
-        //키워드 뉴스 리스트
-        String currentKeyword = keywords.get(keywordIndex);
-
+        List<String> keywords = userKeywordRepository.findAllByUser_Id(userid);  //사용자의 키워드 list
         Pageable pageable = getPageInfo(page);
-        Page<Basenews> pageNews = baseNewsRepository.findAllByKeywordName(currentKeyword,pageable);
-        List<BaseNewsThumbnailDTO> keywordNewsList = getBaseNewsList(pageNews,userid);
+        Page<Basenews> pageNews;
 
-        KeywordNewsDTO result = new KeywordNewsDTO(keywords,keywordNewsList,pageNews.getTotalPages(),pageNews.getTotalElements());
+        if(keywordIndex == -1){ //모든 키워드에 대한 기사 뽑아온다.
+            pageNews = baseNewsRepository.findAllByKeywords(keywords, pageable);
+        }else{
+            String currentKeyword = keywords.get(keywordIndex);
+            //키워드 뉴스 리스트
+            pageNews = baseNewsRepository.findAllByKeywordName(currentKeyword, pageable);
 
-        return result;
+        }
+
+        List<BaseNewsThumbnailDTO> keywordNewsList = getBaseNewsList(pageNews, userid);
+        return new KeywordNewsDTO(keywords, keywordNewsList, pageNews.getTotalPages(), pageNews.getTotalElements());
 
     }
 
