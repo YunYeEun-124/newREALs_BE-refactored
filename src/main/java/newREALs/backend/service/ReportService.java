@@ -4,9 +4,9 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.Accounts;
 import newREALs.backend.domain.UserKeyword;
-import newREALs.backend.repository.KeywordRepository;
-import newREALs.backend.repository.UserKeywordRepository;
-import newREALs.backend.repository.UserRepository;
+import newREALs.backend.dto.ReportCompareDto;
+import newREALs.backend.dto.ReportInterestDto;
+import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +20,8 @@ public class ReportService {
     private final UserKeywordRepository userKeywordRepository;
     private final KeywordRepository keywordRepository;
     private final ChatGPTService chatGPTService;
+    private final SubInterestRepository subInterestRepository;
+    private final PreSubInterestRepository preSubInterestRepository;
 
 
     public String getAnalysisSummary(Long userId){
@@ -82,4 +84,179 @@ public class ReportService {
 //
 //        System.out.println("Execution time for processArticle: " + duration + " ms");
 //    }
+
+    // 레포트 - 관심도 분석 부분
+    public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
+        Map<String, List<ReportInterestDto>> result = new HashMap<>();
+
+        result.put("society", new ArrayList<>());
+        result.put("politics", new ArrayList<>());
+        result.put("economy", new ArrayList<>());
+
+        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+
+        List<Integer> categoryCount = new ArrayList<>();
+        categoryCount.add(societyCount);
+        categoryCount.add(politicsCount);
+        categoryCount.add(economyCount);
+
+        int totalCount = societyCount + politicsCount + economyCount;
+
+        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "society");
+        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "society");
+        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "society");
+
+        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "politics");
+        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "politics");
+        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "politics");
+
+        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "economy");
+        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "economy");
+        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "economy");
+
+        List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
+
+        result.get("society").add(ReportInterestDto.builder()
+                .percentage(percentage.get(0))
+                .quiz(societyQuiz)
+                .insight(societyComment)
+                .scrap(societyScrap)
+                .build());
+
+        result.get("politics").add(ReportInterestDto.builder()
+                .percentage(percentage.get(1))
+                .quiz(politicsQuiz)
+                .insight(politicsComment)
+                .scrap(politicsScrap)
+                .build());
+
+        result.get("economy").add(ReportInterestDto.builder()
+                .percentage(percentage.get(2))
+                .quiz(economyQuiz)
+                .insight(economyComment)
+                .scrap(economyScrap)
+                .build());
+
+        return result;
+    }
+
+    private List<Integer> getReportPercentage(List<Integer> catCount, int totCount) {
+        List<Integer> percentages = new ArrayList<>();
+        if (totCount == 0) {
+            return List.of(0, 0, 0);
+        }
+
+        int percentageSum = 0;
+        int maxIndex = -1;
+        int maxValue = 0;
+
+        for (int i = 0; i < catCount.size(); i++) {
+            int count = catCount.get(i);
+            int percentage = (int) Math.round((count * 100.0) / totCount);
+            percentages.add(percentage);
+            percentageSum += percentage;
+
+            if (count > maxValue) {
+                maxValue = count;
+                maxIndex = i;
+            }
+        }
+
+        // 퍼센트 합 100 안되면 제일 큰 항목에 그 차이만큼 더해주기
+        int difference = 100 - percentageSum;
+        if (difference != 0 && maxIndex != -1) {
+            percentages.set(maxIndex, percentages.get(maxIndex) + difference);
+        }
+
+        return percentages;
+    }
+    // 지난 달 데이터 0이면 null로
+    public Map<String, Object> getReportChange(Long userId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("GPTComment", "GPT 응답 넣을게요");
+
+        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+
+        boolean hasLastSocietyData = lastSociety != null && lastSociety > 0;
+        boolean hasLastPoliticsData = lastPolitics != null && lastPolitics > 0;
+        boolean hasLastEconomyData = lastEconomy != null && lastEconomy > 0;
+
+        boolean hasNoLastData = !hasLastSocietyData && !hasLastPoliticsData && !hasLastEconomyData;
+        result.put("hasNoLastData", hasNoLastData);
+
+        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+
+        Map<String, Integer> changeMap = new HashMap<>();
+        changeMap.put("society", hasLastSocietyData ? getChangeInt(lastSociety, thisSociety) : null);
+        changeMap.put("politics", hasLastPoliticsData ? getChangeInt(lastPolitics, thisPolitics) : null);
+        changeMap.put("economy", hasLastEconomyData ? getChangeInt(lastEconomy, thisEconomy) : null);
+
+        String biggest = null;
+        Integer maxChange = null;
+
+        for (Map.Entry<String, Integer> entry : changeMap.entrySet()) {
+            Integer value = entry.getValue();
+            if (value != null && (maxChange == null || value > maxChange)) {
+                maxChange = value;
+                biggest = entry.getKey();
+            }
+        }
+        if (biggest != null) {
+            result.put("biggest", biggest);
+        }
+
+        result.putAll(changeMap);
+        return result;
+    }
+
+    // 증가율 계산
+    private int getChangeInt(int lastMonth, int thisMonth) {
+        if (thisMonth == 0) {
+            if (lastMonth == 0) {
+                return 0;
+            } else {
+                return -100;
+            }
+        }
+
+        if (lastMonth == 0) {
+            return 100;
+        }
+        int difference = thisMonth - lastMonth;
+        double percentageChange = ((double) difference / lastMonth) * 100;
+        return (int) Math.round(percentageChange);
+    }
+
+    // 지난 달이랑 활동 비교
+    public Map<String, List<ReportCompareDto>> getReportCompareLast(Long userId) {
+        Map<String, List<ReportCompareDto>> result = new HashMap<>();
+        result.put("lastMonth", new ArrayList<>());
+        result.put("thisMonth", new ArrayList<>());
+
+        int lastQuiz = preSubInterestRepository.findTotalQuizCountByUserId(userId);
+        int lastComment = preSubInterestRepository.findTotalCommentCountByUserId(userId);
+        int lastAtt = preSubInterestRepository.findTotalAttCountByUserId(userId);
+
+        int thisQuiz = subInterestRepository.findTotalQuizCountByUserId(userId);
+        int thisComment = subInterestRepository.findTotalCommentCountByUserId(userId);
+        int thisAtt = subInterestRepository.findTotalAttCountByUserId(userId);
+
+        result.get("lastMonth").add(ReportCompareDto.builder()
+                .quiz(lastQuiz)
+                .insight(lastComment)
+                .attendance(lastAtt)
+                .build());
+        result.get("thisMonth").add(ReportCompareDto.builder()
+                .quiz(thisQuiz)
+                .insight(thisComment)
+                .attendance(thisAtt)
+                .build());
+        return result;
+    }
 }

@@ -28,9 +28,9 @@ public class ReportController {
     public ResponseEntity<?> getInterest(HttpServletRequest request) {
         Long userId = tokenService.getUserId(request);
 
-        Map<String, List<ReportInterestDto>> interest = profileService.getReportInterest(userId);
-        Map<String, Object> change = profileService.getReportChange(userId);
-        Map<String, List<ReportCompareDto>> compare = profileService.getReportCompareLast(userId);
+        Map<String, List<ReportInterestDto>> interest = reportService.getReportInterest(userId);
+        Map<String, Object> change = reportService.getReportChange(userId);
+        Map<String, List<ReportCompareDto>> compare = reportService.getReportCompareLast(userId);
 
         Map<String, List<ReportDto>> result = new HashMap<>();
 //        response.put("user_id", userId);
