@@ -33,6 +33,7 @@ public class NewsDetailDto {
     private int interesting;
     private int totalLikes;
     private Long viewCount; //조회수
+    @JsonIgnore
     private List<TermDetailDto> termList;
     private String insightTopic;
 
