@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.dto.*;
 import newREALs.backend.domain.*;
 import newREALs.backend.repository.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -26,6 +24,7 @@ public class ProfileService {
     private final SubInterestRepository subInterestRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final S3Service s3Service;
+    private final PreSubInterestRepository preSubInterestRepository;
 
 
     //[get] 프로필 정보
@@ -151,14 +150,16 @@ public class ProfileService {
             int count = item.getCount();
 
             int percentage = (int) Math.round((count * 100.0) / total);
-            ProfileInterestDto dto = ProfileInterestDto.builder()
-                    .category(category)
-                    .subCategory(subCategory)
-                    .percentage(percentage)
-                    .build();
-            interestDTOList.add(dto);
+            if (percentage > 0) {
+                ProfileInterestDto dto = ProfileInterestDto.builder()
+                        .category(category)
+                        .subCategory(subCategory)
+                        .percentage(percentage)
+                        .build();
+                interestDTOList.add(dto);
 
-            percentageSum += percentage;
+                percentageSum += percentage;
+            }
 
         }
         int difference = 100 - percentageSum;
@@ -204,29 +205,29 @@ public class ProfileService {
 
         result.get("society").add(ReportInterestDto.builder()
                 .percentage(percentage.get(0))
-                .quizCount(societyQuiz)
-                .insightCount(societyComment)
-                .scrapCount(societyScrap)
+                .quiz(societyQuiz)
+                .insight(societyComment)
+                .scrap(societyScrap)
                 .build());
 
         result.get("politics").add(ReportInterestDto.builder()
                 .percentage(percentage.get(1))
-                .quizCount(politicsQuiz)
-                .insightCount(politicsComment)
-                .scrapCount(politicsScrap)
+                .quiz(politicsQuiz)
+                .insight(politicsComment)
+                .scrap(politicsScrap)
                 .build());
 
         result.get("economy").add(ReportInterestDto.builder()
                 .percentage(percentage.get(2))
-                .quizCount(economyQuiz)
-                .insightCount(economyComment)
-                .scrapCount(economyScrap)
+                .quiz(economyQuiz)
+                .insight(economyComment)
+                .scrap(economyScrap)
                 .build());
 
         return result;
     }
 
-    List<Integer> getReportPercentage(List<Integer> catCount, int totCount) {
+    private List<Integer> getReportPercentage(List<Integer> catCount, int totCount) {
         List<Integer> percentages = new ArrayList<>();
         if (totCount == 0) {
             return List.of(0, 0, 0);
@@ -262,6 +263,7 @@ public class ProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         // 이름 변경
+
         if (newName != null && !newName.isEmpty()) {
             user.setName(newName);
         }
@@ -338,5 +340,96 @@ public class ProfileService {
                 .date(basenews.getUploadDate())
                 .isScrapped(true)
                 .build());
+    }
+    // 지난 달 데이터 0이면 null로
+    public Map<String, Object> getReportChange(Long userId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("GPTComment", "GPT 응답 넣을게요");
+
+        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+
+        boolean hasLastSocietyData = lastSociety != null && lastSociety > 0;
+        boolean hasLastPoliticsData = lastPolitics != null && lastPolitics > 0;
+        boolean hasLastEconomyData = lastEconomy != null && lastEconomy > 0;
+
+        boolean hasNoLastData = !hasLastSocietyData && !hasLastPoliticsData && !hasLastEconomyData;
+        result.put("hasNoLastData", hasNoLastData);
+
+        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+
+        Map<String, Integer> changeMap = new HashMap<>();
+        changeMap.put("society", hasLastSocietyData ? getChangeInt(lastSociety, thisSociety) : null);
+        changeMap.put("politics", hasLastPoliticsData ? getChangeInt(lastPolitics, thisPolitics) : null);
+        changeMap.put("economy", hasLastEconomyData ? getChangeInt(lastEconomy, thisEconomy) : null);
+
+        String biggest = null;
+        Integer maxChange = null;
+
+        for (Map.Entry<String, Integer> entry : changeMap.entrySet()) {
+            Integer value = entry.getValue();
+            if (value != null && (maxChange == null || value > maxChange)) {
+                maxChange = value;
+                biggest = entry.getKey();
+            }
+        }
+
+        if (biggest != null) {
+            result.put("biggest", biggest);
+        }
+
+        result.putAll(changeMap);
+        return result;
+    }
+
+    // 증가율 계산
+    private int getChangeInt(int lastMonth, int thisMonth) {
+        if (thisMonth == 0) {
+            if (lastMonth == 0) {
+                return 0;
+            } else {
+                return -100;
+            }
+        }
+
+        if (lastMonth == 0) {
+            return 100;
+        }
+
+        int difference = thisMonth - lastMonth;
+        double percentageChange = ((double) difference / lastMonth) * 100;
+
+        return (int) Math.round(percentageChange);
+    }
+
+    // 지난 달이랑 비교
+    public Map<String, List<ReportCompareDto>> getReportCompareLast(Long userId) {
+        Map<String, List<ReportCompareDto>> result = new HashMap<>();
+        result.put("lastMonth", new ArrayList<>());
+        result.put("thisMonth", new ArrayList<>());
+
+        int lastQuiz = preSubInterestRepository.findTotalQuizCountByUserId(userId);
+        int lastComment = preSubInterestRepository.findTotalCommentCountByUserId(userId);
+        int lastAtt = preSubInterestRepository.findTotalAttCountByUserId(userId);
+
+        int thisQuiz = subInterestRepository.findTotalQuizCountByUserId(userId);
+        int thisComment = subInterestRepository.findTotalCommentCountByUserId(userId);
+        int thisAtt = subInterestRepository.findTotalAttCountByUserId(userId);
+
+        result.get("lastMonth").add(ReportCompareDto.builder()
+                        .quiz(lastQuiz)
+                        .insight(lastComment)
+                        .attendance(lastAtt)
+                .build());
+        result.get("thisMonth").add(ReportCompareDto.builder()
+                .quiz(thisQuiz)
+                .insight(thisComment)
+                .attendance(thisAtt)
+                .build());
+        return result;
+
     }
 }

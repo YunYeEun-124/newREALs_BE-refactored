@@ -47,5 +47,4 @@ public interface AccountsRepository extends JpaRepository<Accounts, Long> {
             "WHERE a.id = :userId")
     List<Object[]> findNameAndProfilePathById(Long userId);
 
-
 }

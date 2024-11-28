@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class ReportInterestDto {
-    private int percentage;
-    private int quiz;
-    private int insight;
-    private int scrap;
+public class ReportCompareDto {
+    int quiz;
+    int attendance;
+    int insight;
 }
