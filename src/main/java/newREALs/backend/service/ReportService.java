@@ -110,9 +110,9 @@ public class ReportService {
         result.put("politics", new ArrayList<>());
         result.put("economy", new ArrayList<>());
 
-        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
 
         List<Integer> categoryCount = new ArrayList<>();
         categoryCount.add(societyCount);
@@ -121,17 +121,17 @@ public class ReportService {
 
         int totalCount = societyCount + politicsCount + economyCount;
 
-        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "사회");
-        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "사회");
-        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "사회");
+        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "society");
+        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "society");
+        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "society");
 
-        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "정치");
-        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "정치");
-        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "정치");
+        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "politics");
+        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "politics");
+        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "politics");
 
-        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "경제");
-        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "경제");
-        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "경제");
+        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "economy");
+        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "economy");
+        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "economy");
 
         List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
 
@@ -196,9 +196,9 @@ public class ReportService {
         Map<String, Object> result = new HashMap<>();
         result.put("GPTComment", "GPT 응답 넣을게요");
 
-        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "economy");
 
         boolean hasLastSocietyData = lastSociety != null && lastSociety > 0;
         boolean hasLastPoliticsData = lastPolitics != null && lastPolitics > 0;
@@ -207,9 +207,9 @@ public class ReportService {
         boolean hasNoLastData = !hasLastSocietyData && !hasLastPoliticsData && !hasLastEconomyData;
         result.put("hasNoLastData", hasNoLastData);
 
-        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
+        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
+        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
 
         Map<String, Integer> changeMap = new HashMap<>();
         if (hasLastSocietyData) {
