@@ -8,11 +8,9 @@ import newREALs.backend.repository.KeywordRepository;
 import newREALs.backend.repository.UserKeywordRepository;
 import newREALs.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +19,13 @@ public class ReportService {
     private final UserRepository userRepository;
     private final UserKeywordRepository userKeywordRepository;
     private final KeywordRepository keywordRepository;
+    private final ChatGPTService chatGPTService;
 
+
+    public String getAnalysisSummary(Long userId){
+        String summary=null;
+        return summary;
+    }
     public List<String> recommendNewKeyword(Long userId){
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
@@ -49,4 +53,33 @@ public class ReportService {
                 .collect(Collectors.toList());
 
     }
+
+        //미완성임
+//    @Transactional
+//    public void processReport(Long userId) throws Throwable{
+//        //시작시간
+//        long startTime = System.nanoTime();
+//        System.out.println("processReport in ");
+//        Accounts user=userRepository.findById(userId)
+//                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+//
+//        //1. 서현언니 분석 + 2.
+//        List<Map<String,String>> Messages=new ArrayList<>();
+//        Messages.add(Map.of("role","system","content",
+//                "..."));
+//
+//        Messages.add(Map.of("role", "user", "content",
+//                "해야할 일이 크게 2가지이다. "
+//        ));
+//
+//        String result=(String) chatGPTService.generateContent(Messages).get("text");
+//        System.out.println("gpt result");
+//        System.out.println(result);
+//
+//        //처이 완료 시간
+//        long endTime = System.nanoTime();
+//        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
+//
+//        System.out.println("Execution time for processArticle: " + duration + " ms");
+//    }
 }
