@@ -8,7 +8,6 @@ import newREALs.backend.dto.ReportCompareDto;
 import newREALs.backend.dto.ReportInterestDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,6 +21,24 @@ public class ReportService {
     private final ChatGPTService chatGPTService;
     private final SubInterestRepository subInterestRepository;
     private final PreSubInterestRepository preSubInterestRepository;
+    private final InsightService insightService;
+
+    public Map<String, Object> generateReportData(Long userId) {
+        // 서현
+        Map<String, List<ReportInterestDto>> interest = getReportInterest(userId);
+        Map<String, Object> change = getChangeGPT(userId);
+        Map<String, List<ReportCompareDto>> compare = getReportCompareLast(userId);
+        // 현진 - GPT 추가해야됨
+        List<String> keyword = recommendNewKeyword(userId);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("interest", interest);
+        data.put("change", change);
+        data.put("compare", compare);
+        data.put("keyword", keyword);
+
+        return data;
+    }
 
 
     public String getAnalysisSummary(Long userId){
@@ -93,9 +110,9 @@ public class ReportService {
         result.put("politics", new ArrayList<>());
         result.put("economy", new ArrayList<>());
 
-        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
-        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
-        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+        int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+        int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+        int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
         List<Integer> categoryCount = new ArrayList<>();
         categoryCount.add(societyCount);
@@ -104,17 +121,17 @@ public class ReportService {
 
         int totalCount = societyCount + politicsCount + economyCount;
 
-        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "society");
-        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "society");
-        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "society");
+        int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "사회");
+        int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "사회");
+        int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "사회");
 
-        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "politics");
-        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "politics");
-        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "politics");
+        int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "정치");
+        int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "정치");
+        int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "정치");
 
-        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "economy");
-        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "economy");
-        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "economy");
+        int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "경제");
+        int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "경제");
+        int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "경제");
 
         List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
 
@@ -172,14 +189,16 @@ public class ReportService {
 
         return percentages;
     }
+
+    // 관심 변화 트렌드
     // 지난 달 데이터 0이면 null로
     public Map<String, Object> getReportChange(Long userId) {
         Map<String, Object> result = new HashMap<>();
         result.put("GPTComment", "GPT 응답 넣을게요");
 
-        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "society");
-        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "politics");
-        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+        Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+        Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+        Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
         boolean hasLastSocietyData = lastSociety != null && lastSociety > 0;
         boolean hasLastPoliticsData = lastPolitics != null && lastPolitics > 0;
@@ -188,14 +207,31 @@ public class ReportService {
         boolean hasNoLastData = !hasLastSocietyData && !hasLastPoliticsData && !hasLastEconomyData;
         result.put("hasNoLastData", hasNoLastData);
 
-        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "society");
-        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "politics");
-        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "economy");
+        Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+        Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+        Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
         Map<String, Integer> changeMap = new HashMap<>();
-        changeMap.put("society", hasLastSocietyData ? getChangeInt(lastSociety, thisSociety) : null);
-        changeMap.put("politics", hasLastPoliticsData ? getChangeInt(lastPolitics, thisPolitics) : null);
-        changeMap.put("economy", hasLastEconomyData ? getChangeInt(lastEconomy, thisEconomy) : null);
+        if (hasLastSocietyData) {
+            changeMap.put("society", getChangeInt(lastSociety, thisSociety));
+        }
+        else {
+            changeMap.put("society", null);
+        }
+
+        if (hasLastPoliticsData) {
+            changeMap.put("politics", getChangeInt(lastPolitics, thisPolitics));
+        }
+        else {
+            changeMap.put("politics", null);
+        }
+
+        if (hasLastEconomyData) {
+            changeMap.put("economy", getChangeInt(lastEconomy, thisEconomy));
+        }
+        else {
+            changeMap.put("economy", null);
+        }
 
         String biggest = null;
         Integer maxChange = null;
@@ -258,5 +294,39 @@ public class ReportService {
                 .attendance(thisAtt)
                 .build());
         return result;
+    }
+
+    public Map<String, Object> getChangeGPT(Long userId) {
+        long startTime = System.nanoTime();
+        System.out.println("분석 레포트 Change GPT 호출 시작");
+
+        Map<String, Object> changeData = getReportChange(userId);
+        String stringChangeData = changeData.toString();
+
+        List<Map<String, String>> message = new ArrayList<>();
+        message.add(Map.of("role", "system", "content",
+                "유저의 지난 달과 이번 달의 활동을 비교한 결과를 보고 유저가 이해하기 쉽게 3문장 정도로 분석해줘."));
+        message.add(Map.of("role", "system", "content",
+                "다음은 유저의 지난 달, 이번 달의 활동을 비교한 데이터야: \n"
+                        + stringChangeData
+                        + "데이터는 다음과 같은 필드로 구성되어 있어: \n"
+                        + "**politics**, **society**, **economy** : 해당 카테고리에서의 뉴스 활동 변화율.\n 값이 양수면 그만큼 활동 증가, 음수면 그만큼 활동 감소, null이면 해당 카테고리는 지난 달 활동이 없는 거야.\n"
+                        + "**biggest** : 유저의 활동량 변화량이 큰 카테고리야.\n"
+                        + "**hasNoLastData** : 지난 달에 세 카테고리 모두 지난 달 활동이 없었는지를 보여주는 boolean형 데이터야.\n"
+                        + "너가 해야하는 건 다음과 같아.\n"
+                        + "1. 만약 모든 카테고리가 null이라면 지난 달에 활동이 없었던거라 의미있는 분석이 어렵다는 걸 언급해줘.\n"
+                        + "2. 분석에는 가장 변화가 컸던 카테고리, 지난 달 데이터가 없었다면 그거에 대한 언급도 되어있으면 좋겠어.\n"
+                        + "3. 결과를 바탕으로 유저에게 활동 변화에 대한 간략한 분석을 해줘.\n"
+                        + "4. '~했어요'와 같은 말투로 분석 결과를 3줄로 알려줘.\n"
+                        + "5. 분석 예시: 이번 11월, 뉴스님은 사회 분야에 가장 큰 관심을 보였어요. 특히, 전세사기와 같은 주거 안정 문제와 강력 범죄 관련 이슈에 대해 높은 참여을 보였어요. 경제 분야에서도 일부 관심이 있었지만, 생활과 직접적으로 연관된 사회적 문제에 대한 관심이 가장 두드러졌어요."));
+
+        String result = (String) chatGPTService.generateContent(message).get("text");
+        changeData.put("GPTComment", result);
+
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1_000_000;
+        System.out.println("GPT 실행 시간: " + duration + "ms");
+
+        return changeData;
     }
 }

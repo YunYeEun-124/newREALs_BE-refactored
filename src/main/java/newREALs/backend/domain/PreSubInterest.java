@@ -65,6 +65,4 @@ public class PreSubInterest {
         this.commentCount = commentCount;
         this.attCount = attCount;
     }
-
-
 }
