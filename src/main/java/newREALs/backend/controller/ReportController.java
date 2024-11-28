@@ -55,6 +55,13 @@ public class ReportController {
         return ResponseEntity.ok(ApiResponseDTO.success("추천 키워드 조회 성공", keywords));
     }
 
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponseDTO<?>> getReportSummary(HttpServletRequest request){
+        Long userId=tokenService.getUserId(request);
+        String summary=reportService.getAnalysisSummary(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("분석 요약 조회 성공", summary));
+    }
+
 
 
 

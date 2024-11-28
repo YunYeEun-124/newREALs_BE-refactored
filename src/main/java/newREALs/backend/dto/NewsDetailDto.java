@@ -9,7 +9,11 @@ import newREALs.backend.domain.Basenews;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Getter
+@Setter
 public class NewsDetailDto {
 
     private Long id;
@@ -30,8 +34,6 @@ public class NewsDetailDto {
     private int totalLikes;
     private Long viewCount; //조회수
     private List<TermDetailDto> termList;
-
-    //
     private String insightTopic;
 
     private SimpleNewsDto prevNews;
@@ -57,18 +59,6 @@ public class NewsDetailDto {
         this.keyword=basenews.getKeyword().getName();
     }
 
-    public void setInsightTopic(String insightTopic) {
-        this.insightTopic = insightTopic;
-    }
-
-
-    public void setTermList(List<TermDetailDto> termList) {
-        this.termList = termList;
-    }
-
-    public List<TermDetailDto> getTermList() {
-        return termList;
-    }
 
     public int getTotalLikes() {
         return good+bad+interesting;
@@ -78,15 +68,20 @@ public class NewsDetailDto {
         this.isScrapped=isScrapped;
     }
 
-    public void setPrevNews(SimpleNewsDto prevNews) {
-        this.prevNews = prevNews;
+    public Map<String,String> termMap;
+    public void setTermList(List<TermDetailDto> termList) {
+        this.termList = termList;
+        // termList를 Map<String, String>으로 변환
+        this.termMap = termList.stream()
+                .collect(Collectors.toMap(TermDetailDto::getTerm, TermDetailDto::getTermInfo));
     }
 
-    public void setNextNews(SimpleNewsDto nextNews) {
-        this.nextNews = nextNews;
+    public Map<String,String> getTermMap(){
+        return termMap;
     }
 
-    public void setWherePageFrom(String wherePageFrom) {
-        this.wherePageFrom = wherePageFrom;
-    }
+
+
+
+
 }
