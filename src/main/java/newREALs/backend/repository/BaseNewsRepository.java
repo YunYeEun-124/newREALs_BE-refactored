@@ -27,6 +27,8 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
 
     List<Basenews> findBySubCategoryOrderByIdAsc(SubCategory subCategory);
 
+
+    @Query("SELECT b FROM Basenews b WHERE b.summary IS NULL")
     List<Basenews> findBySummaryIsNull();
 
     

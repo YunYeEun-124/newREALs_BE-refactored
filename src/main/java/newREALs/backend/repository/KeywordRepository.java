@@ -11,6 +11,9 @@ import java.util.Optional;
 @Repository
 public interface KeywordRepository extends JpaRepository<Keyword,Long> {
 
+    @Query("SELECT k.name FROM Keyword k WHERE k.id = :id")
+    String findNameById(@Param("id") Long id);
+
     Keyword getByName(String keywordName);
     Optional<Keyword> findByName(String key);
     @Query("SELECT k.name FROM Keyword k JOIN k.category c WHERE c.name = :categoryname")

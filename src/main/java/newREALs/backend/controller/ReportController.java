@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.*;
 import newREALs.backend.service.ProfileService;
+import newREALs.backend.service.ReportService;
 import newREALs.backend.service.TokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +22,7 @@ import java.util.Map;
 public class ReportController {
     private final TokenService tokenService;
     private final ProfileService profileService;
+    private final ReportService reportService;
     //[get] 프로필 페이지 - 유저 관심사
     @GetMapping
     public ResponseEntity<?> getInterest(HttpServletRequest request) {
@@ -45,4 +47,15 @@ public class ReportController {
 
         return ResponseEntity.ok(ApiResponseDTO.success("분석 레포트 - 유저 관심도 조회 성공", result));
     }
+
+    @GetMapping("/keyword")
+    public ResponseEntity<ApiResponseDTO<?>> getRecommendKeyword(HttpServletRequest request){
+        Long userId=tokenService.getUserId(request);
+        List<String> keywords=reportService.recommendNewKeyword(userId);
+        return ResponseEntity.ok(ApiResponseDTO.success("추천 키워드 조회 성공", keywords));
+    }
+
+
+
+
 }

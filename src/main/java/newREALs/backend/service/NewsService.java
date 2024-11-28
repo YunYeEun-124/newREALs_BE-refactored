@@ -26,29 +26,32 @@ public class NewsService {
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
     //@Scheduled(cron = "0 7 20 ? * *")
-    @Scheduled(cron="0 36 11 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 49 2 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
-    @Async
     public void automaticBaseProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
+        List<Basenews> resultList = new ArrayList<>();
 
-        //병렬처리
-        newBasenews.parallelStream().forEach(
+        newBasenews.forEach(
                 news -> {
                     try{
-                        processArticle(news.getId());
+                        resultList.add( processArticle(news.getId()));
+
                     } catch (Throwable e){
                         log.error("Failed to process article ID: {}", news.getId(), e);
                     }
                 }
         );
 
+        basenewsRepository.saveAll(resultList);
+        System.out.println(resultList +" is saved");
+
+
     }
 
-    @Scheduled(cron="0 36 11 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 21 03 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
-    @Async
     public void automaticDailyProcess(){
         // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
         List<Basenews> dailyNews = basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc();
@@ -59,6 +62,7 @@ public class NewsService {
                 log.error("Failed to generate quiz for article ID: {}", news.getId(), e);
             }
         }
+
     }
 
 
@@ -67,14 +71,11 @@ public class NewsService {
 
     //요약, 설명, 용어 생성 메서드
     @Transactional
-    @Async
-    public void processArticle(Long basenewsId) throws Throwable {
+    public Basenews processArticle(Long basenewsId) throws Throwable {
         long startTime = System.nanoTime(); // 시작 시간 기록
         System.out.println("processArticle in ");
-        List<Basenews> basenewsList = new ArrayList<>();
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
-
 
         //생성 통합하기
         List<Map<String,String>> Messages = new ArrayList<>();
@@ -107,17 +108,14 @@ public class NewsService {
         long endTime = System.nanoTime();
         long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
 
-        basenewsList.add(parseBasenews(result,basenews));
         System.out.println("Execution time for processArticle: " + duration + " ms");
 
-        //basenewsRepository.save(basenews);
-        basenewsRepository.saveAll(basenewsList);
+        return parseBasenews(result,basenews);
     }
 
 
     //퀴즈 생성하는 메서드
     @Transactional
-    @Async
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
 
         System.out.println("generate quiz in ");
@@ -224,6 +222,10 @@ public class NewsService {
             }
 
         }
+        System.out.println("descrip "+description);
+        System.out.println("descrip "+summary);
+        System.out.println("descrip "+termDetails.get(0));
+
 
         basenews.setDescription(description);
         basenews.setSummary(summary);

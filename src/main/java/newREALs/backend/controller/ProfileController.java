@@ -5,11 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.dto.*;
 import newREALs.backend.repository.AccountsRepository;
+import newREALs.backend.service.InsightService;
 import newREALs.backend.service.ProfileService;
 import newREALs.backend.service.QuizService;
 import newREALs.backend.service.TokenService;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +28,7 @@ public class ProfileController {
     private final TokenService tokenService;
     private final ProfileService profileService;
     private final AccountsRepository accountsRepository;
-
+    private final InsightService insightService;
     //[get] 프로필 페이지 - 퀴즈 정보
     @GetMapping("/quiz")
     public ResponseEntity<ApiResponseDTO<List<QuizStatusDto>>> getQuizStatus(HttpServletRequest request) {
@@ -137,5 +138,14 @@ public class ProfileController {
         response.put("totalElement", scrapSearchPage.getTotalElements());
 
         return ResponseEntity.ok(ApiResponseDTO.success("스크랩 목록 검색 조회 성공", response));
+    }
+
+
+    @GetMapping("/insight")
+    public ResponseEntity<?> getUserInsightList(HttpServletRequest request,@RequestParam int page){
+        Long userId = tokenService.getUserId(request);
+        ResponseUserCommentListDTO result = insightService.getUserInsightList(userId,page);
+
+        return ResponseEntity.ok(ApiResponseDTO.success("유저 인사이트 목록 조회 성공",result ));
     }
 }

@@ -2,6 +2,7 @@ package newREALs.backend.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
@@ -33,15 +34,17 @@ public class Accounts {
     @ColumnDefault("0")
     private int point;
 
-    @Column(name = "attendanceList")
+
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "keywordInterest")
+
     @ElementCollection(fetch = FetchType.LAZY)
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
     private List<Integer> keywordInterest = new ArrayList<>(Collections.nCopies(50, 0));
 
 
@@ -65,11 +68,21 @@ public class Accounts {
     }
 
 
-    public void updateKeywordInterest(int keywordId, int change) {
+    public synchronized void updateKeywordInterest(int keywordId, int change) {
         if(keywordId<1 || keywordId>keywordInterest.size()) {
             throw new IllegalArgumentException("keywordId는 1에서 50까지 입니다");
         }
+        if(keywordInterest.get(keywordId-1)+change<0){
+            keywordInterest.set(keywordId-1,0);
+        }
         keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
+    }
+
+    public int getKeywordInterest(int keywordId){
+        if(keywordId<1 || keywordId>keywordInterest.size()) {
+            throw new IllegalArgumentException("keywordId는 1에서 50까지 입니다");
+        }
+        return keywordInterest.get(keywordId-1);
     }
 
 }

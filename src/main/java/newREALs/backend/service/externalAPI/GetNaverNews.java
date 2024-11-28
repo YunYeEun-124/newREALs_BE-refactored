@@ -49,9 +49,7 @@ public class GetNaverNews {
 
     private final ChatGPTService chatGPTService;
 
-//    private static final Dotenv dotenv=Dotenv.load();
-//    private static final String clientId=dotenv.get("NAVER_API_CLIENTID");
-//    private static final String clientSecret=dotenv.get("NAVER_API_SECRETKEY");
+
     @Value("${naver.api.client-id}")
     private String clientId;
 
@@ -65,7 +63,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 26 11 ? * *")
+    @Scheduled(cron = "0 40 02 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -75,20 +73,26 @@ public class GetNaverNews {
             return;
         }
 
+        int count =0;
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            ProcessNews(keyword.getName(), keyword, false,5);
+          //  if(count == 2 ) break;
+            //count++;
+            ProcessNews(keyword.getName(), keyword, false,1);
         }
+
+
 
     }
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 26 11 ? * *")
+    @Scheduled(cron = "0 43 2 ? * *")
     @Transactional
     public void getDailynews(){
 
         //전날 데일리 뉴스 되돌리기
         List<Basenews> previousDailynews = baseNewsRepository.findAllByIsDailyNews(true);
+
         if(!previousDailynews.isEmpty()) {
             for (Basenews basenews : previousDailynews) basenews.cancelDailyNews();
         }
@@ -123,7 +127,7 @@ public class GetNaverNews {
 
                 if(keyword.isPresent()){
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
-                    ProcessNews(title,keyword.get(),true,4);
+                    ProcessNews(title,keyword.get(),true,3);
                 }else{
                     System.out.println("can't find daily news keyword");
 
@@ -235,14 +239,13 @@ public class GetNaverNews {
                 return;
             }
 
-            System.out.println("=====================newsinfo 사이즈 =============================:"+newsinfo.getItems().size());
-
             for (newsInfo.Item item : newsinfo.getItems()) {
 
                 if (!item.getLink().contains("n.news.naver.com")) {
                     System.out.println("this is not naver news.");
                     continue;
                 }
+
                 Optional<Basenews> basenews = baseNewsRepository.findFirstByTitle(item.getTitle());
 
                 if(basenews.isPresent()){
@@ -255,7 +258,7 @@ public class GetNaverNews {
                     List<String> origin = getArticle(item.getLink(),"#dic_area","#img1"); //newsinfo 원문,이미지링크 필드 채우기.
                     SubCategory sub = keyword.getSubCategory();
                     Category category = keyword.getCategory();
-
+                    System.out.println("origin is "+origin.get(1));
                     try {
                         Basenews bnews = Basenews.builder()
                                 .title(item.getTitle())
@@ -269,7 +272,7 @@ public class GetNaverNews {
                                 .isDailyNews(isDailyNews)
                                 .build();
                         baseNewsRepository.save(bnews);
-                        System.out.println(item.getLink());
+                        System.out.println("news result : "+ bnews.getDescription());
                         if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -306,7 +309,8 @@ public class GetNaverNews {
                 if(imageElements != null){
                     imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
                 }else{ //default image
-                   imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
+                    imagePath = null;
+                   //imagePath = "https://imgnews.pstatic.net/image/469/2024/11/05/0000831587_001_20241105174007220.jpg?type=w860";
                 }
 
                 set.add(imagePath);

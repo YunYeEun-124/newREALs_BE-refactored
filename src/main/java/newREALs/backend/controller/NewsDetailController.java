@@ -2,14 +2,20 @@ package newREALs.backend.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import newREALs.backend.domain.UserComment;
 import newREALs.backend.dto.ApiResponseDTO;
 import newREALs.backend.dto.NewsDetailDto;
+import newREALs.backend.dto.RequestUserCommentDTO;
+import newREALs.backend.repository.UserCommentRepository;
+import newREALs.backend.service.InsightService;
 import newREALs.backend.service.NewsDetailService;
 import newREALs.backend.service.TokenService;
 import newREALs.backend.service.UserActionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +24,6 @@ public class NewsDetailController {
     private final NewsDetailService newsDetailService;
     private final UserActionService userActionService;
     private final TokenService tokenService;
-
     //[get] 뉴스 상세 페이지
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponseDTO<NewsDetailDto>> getNewsDetail(
@@ -59,6 +64,7 @@ public class NewsDetailController {
         return ResponseEntity.ok(
                 ApiResponseDTO.success(message,null));
     }
+
 
 
 }
