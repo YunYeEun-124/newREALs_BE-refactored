@@ -113,9 +113,9 @@ public class ProfileService {
         result.put("전체", totalInterestDTO); // key를 total로
 
         // 카테고리 별로 3개 가져오기
-        List<ProfileInterestProjection> societyInterest = accountsRepository.findCategoryInterestById(userId, "society");
-        List<ProfileInterestProjection> politicsInterest = accountsRepository.findCategoryInterestById(userId, "politics");
-        List<ProfileInterestProjection> economyInterest = accountsRepository.findCategoryInterestById(userId, "economy");
+        List<ProfileInterestProjection> societyInterest = accountsRepository.findCategoryInterestById(userId, "사회");
+        List<ProfileInterestProjection> politicsInterest = accountsRepository.findCategoryInterestById(userId, "정치");
+        List<ProfileInterestProjection> economyInterest = accountsRepository.findCategoryInterestById(userId, "경제");
 
         List<ProfileInterestDto> societyInterestDTO = getPercentage(societyInterest);
         List<ProfileInterestDto> politicsInterestDTO = getPercentage(politicsInterest);
