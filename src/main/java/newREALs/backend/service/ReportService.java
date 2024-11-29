@@ -140,23 +140,23 @@ public class ReportService {
 
         result.get("사회").add(ReportInterestDto.builder()
                 .percentage(percentage.get(0))
-                .quiz(societyQuiz)
-                .insight(societyComment)
-                .scrap(societyScrap)
+                .퀴즈(societyQuiz)
+                .인사이트(societyComment)
+                .스크랩(societyScrap)
                 .build());
 
         result.get("정치").add(ReportInterestDto.builder()
                 .percentage(percentage.get(1))
-                .quiz(politicsQuiz)
-                .insight(politicsComment)
-                .scrap(politicsScrap)
+                .퀴즈(politicsQuiz)
+                .인사이트(politicsComment)
+                .스크랩(politicsScrap)
                 .build());
 
         result.get("경제").add(ReportInterestDto.builder()
                 .percentage(percentage.get(2))
-                .quiz(economyQuiz)
-                .insight(economyComment)
-                .scrap(economyScrap)
+                .퀴즈(economyQuiz)
+                .인사이트(economyComment)
+                .스크랩(economyScrap)
                 .build());
 
         return result;
