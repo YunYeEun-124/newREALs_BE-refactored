@@ -40,8 +40,40 @@ public class ReportService {
         data.put("compare", compare);
         data.put("keyword", keyword);
 
+        String finalSummary=generateFinalSummary(userId,new HashMap<>(data));
+        data.put("finalSummary",finalSummary);
         return data;
+
+
     }
+
+    public String generateFinalSummary(Long userId, Map<String, Object> reportData) {
+        // OpenAI ChatGPT 요청 메시지 생성
+        List<Map<String, String>> message = new ArrayList<>();
+        message.add(Map.of("role", "system", "content",
+                "아래의 데이터를 기반으로 유저의 이번 달 관심도 분석을 요약해줘. "
+                        + "친절하고 이해하기 쉽게 3-4문장으로 요약하고, '~했어요'라는 말투로 작성해줘. "
+                        + "분석 결과는 관심도, 관심 변화, 활동 비교 등의 내용을 포함해야 해. "
+                        + "주요 내용은 아래 데이터야:"));
+
+        // 전달할 데이터 구성
+        String dataSummary = reportData.toString();
+        message.add(Map.of("role", "user", "content", dataSummary));
+
+        // ChatGPT API 호출
+        String result;
+        try {
+            result = (String) chatGPTService.generateContent(message).get("text");
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = "분석 내용을 생성하는데 문제가 발생했어요.";
+        }
+
+        return result;
+    }
+
+
+
 
 
     public String getAnalysisSummary(Long userId){
