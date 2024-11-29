@@ -87,7 +87,10 @@ public class UserActionService {
                 likesRepository.delete(like);
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
-                message="이미 다른 공감버튼을 눌렀어요.";
+                message="공감 변경 완료";
+                if(like.getReactionType()==2)subInterest.get().updateTotalCount(-1);
+                else if(reactionType==2)subInterest.get().updateTotalCount(1);
+                like.setReactionType(reactionType);
             }
         }else{//Likes 객체 없음 : 공감 버튼 안눌려있음
             basenews.getLikesCounts()[reactionType]++; //공감수 증가
