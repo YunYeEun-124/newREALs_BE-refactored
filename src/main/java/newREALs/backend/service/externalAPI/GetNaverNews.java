@@ -80,7 +80,8 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 55 20 ? * *")
+
+    @Scheduled(cron = "0 59 19 ? * *")
     public void testBasenews(){
         Keyword keyword = keywordRepository.findByName("환경").orElse(null);
         ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
