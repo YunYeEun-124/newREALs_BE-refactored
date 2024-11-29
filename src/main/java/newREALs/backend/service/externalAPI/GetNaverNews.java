@@ -73,9 +73,8 @@ public class GetNaverNews {
         }
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            if(keyword.getName().equals("입시")){
-                ProcessNews(keyword.getName(), keyword, false,15);
-            }else ProcessNews(keyword.getName(), keyword, false,2);
+           
+            ProcessNews(keyword.getName(), keyword, false,2);
         }
 
     }
