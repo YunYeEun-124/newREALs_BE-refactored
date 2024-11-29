@@ -91,7 +91,6 @@ public class UserActionService {
                 if(like.getReactionType()==2)subInterest.get().updateTotalCount(-1);
                 else if(reactionType==2)subInterest.get().updateTotalCount(1);
                 like.setReactionType(reactionType);
-
             }
         }else{//Likes 객체 없음 : 공감 버튼 안눌려있음
             basenews.getLikesCounts()[reactionType]++; //공감수 증가
