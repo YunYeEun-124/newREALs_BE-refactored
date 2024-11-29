@@ -118,6 +118,6 @@ public class InsightService {
     public Pageable getPageInfo(int page){
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("id"));
-        return  PageRequest.of(page-1,3,Sort.by(sorts));
+        return  PageRequest.of(page-1,4,Sort.by(sorts));
     }
 }

@@ -28,7 +28,7 @@ public class NewsService {
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
-    @Scheduled(cron="0 03 20 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 48 21 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticBaseProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
@@ -52,7 +52,7 @@ public class NewsService {
 
     }
 
-    @Scheduled(cron="0 55 20 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 25 21 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticDailyProcess(){
         // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
