@@ -172,23 +172,23 @@ public class ReportService {
 
         result.get("사회").add(ReportInterestDto.builder()
                 .percentage(percentage.get(0))
-                .퀴즈(societyQuiz)
-                .인사이트(societyComment)
-                .스크랩(societyScrap)
+                .quiz(societyQuiz)
+                .insight(societyComment)
+                .scrap(societyScrap)
                 .build());
 
         result.get("정치").add(ReportInterestDto.builder()
                 .percentage(percentage.get(1))
-                .퀴즈(politicsQuiz)
-                .인사이트(politicsComment)
-                .스크랩(politicsScrap)
+                .quiz(politicsQuiz)
+                .insight(politicsComment)
+                .scrap(politicsScrap)
                 .build());
 
         result.get("경제").add(ReportInterestDto.builder()
                 .percentage(percentage.get(2))
-                .퀴즈(economyQuiz)
-                .인사이트(economyComment)
-                .스크랩(economyScrap)
+                .quiz(economyQuiz)
+                .insight(economyComment)
+                .scrap(economyScrap)
                 .build());
 
         return result;
@@ -229,7 +229,7 @@ public class ReportService {
     // 지난 달 데이터 0이면 null로
     public Map<String, Object> getReportChange(Long userId) {
         Map<String, Object> result = new HashMap<>();
-        result.put("GPTComment", "GPT 응답 넣을게요");
+        result.put("GPTComment", "");
 
         Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
         Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
@@ -358,8 +358,9 @@ public class ReportService {
                         + "2. 분석에는 가장 변화가 컸던 카테고리, 지난 달 데이터가 없었다면 그거에 대한 언급도 되어있으면 좋겠어.\n"
                         + "3. 결과를 바탕으로 유저에게 활동 변화에 대한 간략한 분석을 해줘.\n"
                         + "4. '~했어요'와 같은 말투로 분석 결과를 3줄로 알려줘.\n"
-                        + "5. 단순히 숫자 전달만 하는 게 아니라 그 숫자에 대한 해석이 필요하고, 다음 줄에 있는 예시처럼 분석을 시작할 때 유저의 이름을 언급해줘.\n"
-                        + "6. 분석 예시: 이번 11월, 뉴스님은 사회 분야에 가장 큰 관심을 보였어요. 특히, 전세사기와 같은 주거 안정 문제와 강력 범죄 관련 이슈에 대해 높은 참여을 보였어요. 경제 분야에서도 일부 관심이 있었지만, 생활과 직접적으로 연관된 사회적 문제에 대한 관심이 가장 두드러졌어요."));
+                        + "5. 단순히 숫자 전달만 하는 게 아니라 그 숫자에 대한 분석이 필요해.\n"
+                        + "6. 사용자의 각 카테고리에 대한 활동 변화가 어땠는지 간략하게 서술하고, 이를 통해 어떤 걸 알 수 있는지 말해줬으면 좋겠어.\n"
+                        + "7. 분석 예시: 이번 11월, 서현님은 사회 분야에 가장 큰 관심을 보였어요. 특히, 전세사기와 같은 주거 안정 문제와 강력 범죄 관련 이슈에 대해 높은 참여을 보였어요. 경제 분야에서도 일부 관심이 있었지만, 생활과 직접적으로 연관된 사회적 문제에 대한 관심이 가장 두드러졌어요."));
 
         String result = (String) chatGPTService.generateContent(message).get("text");
         changeData.put("GPTComment", result);

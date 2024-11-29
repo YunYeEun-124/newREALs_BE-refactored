@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -46,7 +47,6 @@ public class Likes {
         this.reactionType=reactionType;
         //this.createdDate = createdDate;
     }
-
 
     public void setReactionType(int reactionType) {
         this.reactionType=reactionType;
