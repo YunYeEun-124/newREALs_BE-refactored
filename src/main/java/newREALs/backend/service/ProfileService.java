@@ -102,15 +102,15 @@ public class ProfileService {
     public Map<String, List<ProfileInterestDto>> getInterest(Long userId) {
         Map<String, List<ProfileInterestDto>> result = new HashMap<>();
 
-        result.put("total", new ArrayList<>());
-        result.put("politics", new ArrayList<>());
-        result.put("economy", new ArrayList<>());
-        result.put("society", new ArrayList<>());
+        result.put("전체", new ArrayList<>());
+        result.put("정치", new ArrayList<>());
+        result.put("경제", new ArrayList<>());
+        result.put("사회", new ArrayList<>());
 
         // 카테고리 상관 없이 전체에서 3개 가져오기
         List<ProfileInterestProjection> totalInterest = accountsRepository.findTotalInterestById(userId);
         List<ProfileInterestDto> totalInterestDTO = getPercentage(totalInterest);
-        result.put("total", totalInterestDTO); // key를 total로
+        result.put("전체", totalInterestDTO); // key를 total로
 
         // 카테고리 별로 3개 가져오기
         List<ProfileInterestProjection> societyInterest = accountsRepository.findCategoryInterestById(userId, "society");
@@ -121,9 +121,9 @@ public class ProfileService {
         List<ProfileInterestDto> politicsInterestDTO = getPercentage(politicsInterest);
         List<ProfileInterestDto> economyInterestDTO = getPercentage(economyInterest);
 
-        result.put("society", societyInterestDTO);
-        result.put("politics", politicsInterestDTO);
-        result.put("economy", economyInterestDTO);
+        result.put("사회", societyInterestDTO);
+        result.put("정치", politicsInterestDTO);
+        result.put("경제", economyInterestDTO);
 
         return result;
     }

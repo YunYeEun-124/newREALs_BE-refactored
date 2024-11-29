@@ -15,7 +15,7 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 public class ReportDto {
-    Map<String, Object> change = new HashMap<>();
-    Map<String, List<ReportInterestDto>> interest = new HashMap<>();
-    Map<String, List<ReportCompareDto>> compare = new HashMap<>();
+    Map<String, Object> change;
+    Map<String, List<ReportInterestDto>> interest;
+    Map<String, List<ReportCompareDto>> compare;
 }

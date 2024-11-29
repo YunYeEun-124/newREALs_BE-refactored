@@ -44,7 +44,7 @@ public class QuizService {
                 int keywordId = basenews.getKeyword().getId().intValue();
                 user.updateKeywordInterest(keywordId, 2);
             }
-            user.setPoint(user.getPoint() + 5);
+            
             userRepository.save(user);
 
             SubInterest subInterest = subInterestRepository.findByUserAndSubCategory(user, basenews.getSubCategory())
@@ -68,7 +68,7 @@ public class QuizService {
                 int keywordId = basenews.getKeyword().getId().intValue();
                 user.updateKeywordInterest(keywordId, 2);
             }
-            user.setPoint(user.getPoint() + 5);
+            
             userRepository.save(user);
 
             SubInterest subInterest = subInterestRepository.findByUserAndSubCategory(user, basenews.getSubCategory())

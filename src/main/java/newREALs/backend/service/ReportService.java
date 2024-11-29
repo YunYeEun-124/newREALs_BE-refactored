@@ -8,6 +8,8 @@ import newREALs.backend.dto.ReportCompareDto;
 import newREALs.backend.dto.ReportInterestDto;
 import newREALs.backend.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class ReportService {
         List<String> keyword = recommendNewKeyword(userId);
 
         Map<String, Object> data = new HashMap<>();
+        data.put("user_id", userId);
         data.put("interest", interest);
         data.put("change", change);
         data.put("compare", compare);
@@ -73,34 +76,34 @@ public class ReportService {
 
     }
 
-        //미완성임
-//    @Transactional
-//    public void processReport(Long userId) throws Throwable{
-//        //시작시간
-//        long startTime = System.nanoTime();
-//        System.out.println("processReport in ");
-//        Accounts user=userRepository.findById(userId)
-//                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-//
-//        //1. 서현언니 분석 + 2.
-//        List<Map<String,String>> Messages=new ArrayList<>();
-//        Messages.add(Map.of("role","system","content",
-//                "..."));
-//
-//        Messages.add(Map.of("role", "user", "content",
-//                "해야할 일이 크게 2가지이다. "
-//        ));
-//
-//        String result=(String) chatGPTService.generateContent(Messages).get("text");
-//        System.out.println("gpt result");
-//        System.out.println(result);
-//
-//        //처이 완료 시간
-//        long endTime = System.nanoTime();
-//        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
-//
-//        System.out.println("Execution time for processArticle: " + duration + " ms");
-//    }
+
+    @Transactional
+    public void processReport(Long userId) throws Throwable{
+        //시작시간
+        long startTime = System.nanoTime();
+        System.out.println("processReport in ");
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+
+        //1. 서현언니 분석 + 2.
+        List<Map<String,String>> Messages=new ArrayList<>();
+        Messages.add(Map.of("role","system","content",
+                "..."));
+
+        Messages.add(Map.of("role", "user", "content",
+                "해야할 일이 크게 2가지이다. "
+        ));
+
+        String result=(String) chatGPTService.generateContent(Messages).get("text");
+        System.out.println("gpt result");
+        System.out.println(result);
+
+        //처이 완료 시간
+        long endTime = System.nanoTime();
+        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
+
+        System.out.println("Execution time for processArticle: " + duration + " ms");
+    }
 
     // 레포트 - 관심도 분석 부분
     public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
@@ -302,6 +305,7 @@ public class ReportService {
 
         Map<String, Object> changeData = getReportChange(userId);
         String stringChangeData = changeData.toString();
+        String userName = userRepository.findById(userId).get().getName();
 
         List<Map<String, String>> message = new ArrayList<>();
         message.add(Map.of("role", "system", "content",
@@ -309,8 +313,12 @@ public class ReportService {
         message.add(Map.of("role", "system", "content",
                 "다음은 유저의 지난 달, 이번 달의 활동을 비교한 데이터야: \n"
                         + stringChangeData
+                        + userName
                         + "데이터는 다음과 같은 필드로 구성되어 있어: \n"
+
                         + "**정치**, **사회**, **경제** : 해당 카테고리에서의 뉴스 활동 변화율.\n 값이 양수면 그만큼 활동 증가, 음수면 그만큼 활동 감소, null이면 해당 카테고리는 지난 달 활동이 없는 거야.\n"
+                        + "**userName** : 유저의 이름"
+                  
                         + "**biggest** : 유저의 활동량 변화량이 큰 카테고리야.\n"
                         + "**hasNoLastData** : 지난 달에 세 카테고리 모두 지난 달 활동이 없었는지를 보여주는 boolean형 데이터야.\n"
                         + "너가 해야하는 건 다음과 같아.\n"
@@ -318,7 +326,8 @@ public class ReportService {
                         + "2. 분석에는 가장 변화가 컸던 카테고리, 지난 달 데이터가 없었다면 그거에 대한 언급도 되어있으면 좋겠어.\n"
                         + "3. 결과를 바탕으로 유저에게 활동 변화에 대한 간략한 분석을 해줘.\n"
                         + "4. '~했어요'와 같은 말투로 분석 결과를 3줄로 알려줘.\n"
-                        + "5. 분석 예시: 이번 11월, 뉴스님은 사회 분야에 가장 큰 관심을 보였어요. 특히, 전세사기와 같은 주거 안정 문제와 강력 범죄 관련 이슈에 대해 높은 참여을 보였어요. 경제 분야에서도 일부 관심이 있었지만, 생활과 직접적으로 연관된 사회적 문제에 대한 관심이 가장 두드러졌어요."));
+                        + "5. 단순히 숫자 전달만 하는 게 아니라 그 숫자에 대한 해석이 필요하고, 다음 줄에 있는 예시처럼 분석을 시작할 때 유저의 이름을 언급해줘.\n"
+                        + "6. 분석 예시: 이번 11월, 뉴스님은 사회 분야에 가장 큰 관심을 보였어요. 특히, 전세사기와 같은 주거 안정 문제와 강력 범죄 관련 이슈에 대해 높은 참여을 보였어요. 경제 분야에서도 일부 관심이 있었지만, 생활과 직접적으로 연관된 사회적 문제에 대한 관심이 가장 두드러졌어요."));
 
         String result = (String) chatGPTService.generateContent(message).get("text");
         changeData.put("GPTComment", result);
