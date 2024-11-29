@@ -1,10 +1,7 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.cglib.core.Local;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Likes {
 
