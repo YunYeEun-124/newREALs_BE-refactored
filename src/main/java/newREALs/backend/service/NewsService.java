@@ -28,7 +28,7 @@ public class NewsService {
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
-    @Scheduled(cron="0 24 13 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 35 17 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticBaseProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
@@ -52,7 +52,7 @@ public class NewsService {
 
     }
 
-    @Scheduled(cron="0 30 13 ? * * ")//매일 오전 6시 10분 실행
+    @Scheduled(cron="0 35 17 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticDailyProcess(){
         // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
@@ -87,7 +87,8 @@ public class NewsService {
                 "해야할 일이 크게 3가지이다. " + basenews.getDescription() +"에 대한 "+
                         "1. 1-2줄 이내로 짧게 요약한다. " +
                         "2. 핵심 배경, 사건의 원인과 결과를 포함하여 전체 내용을 한눈에 파악할 수 있도록 작성해주세요. 설명은 너무 간략하지 않게, 명확하면서도 친절하게 작성해 주세요. " +
-                        "3. 독자가 이해하기 어려운 중요한 용어 5개를 선택한다."+
+                        "3. 독자가 이해하기 어려운 핵심 용어를 선택한다. 개수는 최소 3개 최대 5개이다."+
+                        "이 용어는 1,2번에서 생성한 요약 또는 설명에 포함되어 있어야 한다."+
                         "각 용어의 정의와 기사 내에서의 맥락을 1-2문장으로 간단히 설명해야한다." +
                         "설명은 반드시 '~해요'체를 사용하고, 친절하고 명확하게 작성한다. " +
                         "출력 결과 예시를 보여줄게" +
