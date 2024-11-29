@@ -80,9 +80,9 @@ public class GetNaverNews {
     }
 
 
-    //@Scheduled(cron = "0 48 12 ? * *")
+    @Scheduled(cron = "0 59 19 ? * *")
     public void testBasenews(){
-        Keyword keyword = keywordRepository.findByName("교통사고").orElse(null);
+        Keyword keyword = keywordRepository.findByName("환경").orElse(null);
         ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
 
     }
@@ -266,11 +266,12 @@ public class GetNaverNews {
                     SimpleDateFormat outputdate = new SimpleDateFormat("yyyy-MM-dd");
                     Date parseDate = date.parse(item.getPubDate());
 
-
+                    System.out.println("title :"+ item.getTitle());
+                    System.out.println("title no tags : "+ item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", ""));
 
                     try {
                         Basenews bnews = Basenews.builder()
-                                .title(item.getTitle().replaceAll("<[^>]*>?","")) //태그제거
+                                .title(item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", "")   ) //태그제거
                                 .newsUrl(item.getLink())
                                 .imageUrl(origin.get(0))
                                 .uploadDate(outputdate.format(parseDate))
@@ -281,7 +282,7 @@ public class GetNaverNews {
                                 .isDailyNews(isDailyNews)
                                 .build();
                         baseNewsRepository.save(bnews);
-                        System.out.println("news result : "+ bnews.getDescription());
+                        System.out.println("news result : "+ bnews.getTitle());
                         if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
                     } catch (Exception e) {
                         e.printStackTrace();
