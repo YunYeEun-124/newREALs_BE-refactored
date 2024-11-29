@@ -109,9 +109,9 @@ public class ReportService {
     public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
         Map<String, List<ReportInterestDto>> result = new HashMap<>();
 
-        result.put("society", new ArrayList<>());
-        result.put("politics", new ArrayList<>());
-        result.put("economy", new ArrayList<>());
+        result.put("사회", new ArrayList<>());
+        result.put("정치", new ArrayList<>());
+        result.put("경제", new ArrayList<>());
 
         int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
         int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
@@ -138,25 +138,25 @@ public class ReportService {
 
         List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
 
-        result.get("society").add(ReportInterestDto.builder()
+        result.get("사회").add(ReportInterestDto.builder()
                 .percentage(percentage.get(0))
-                .quiz(societyQuiz)
-                .insight(societyComment)
-                .scrap(societyScrap)
+                .퀴즈(societyQuiz)
+                .인사이트(societyComment)
+                .스크랩(societyScrap)
                 .build());
 
-        result.get("politics").add(ReportInterestDto.builder()
+        result.get("정치").add(ReportInterestDto.builder()
                 .percentage(percentage.get(1))
-                .quiz(politicsQuiz)
-                .insight(politicsComment)
-                .scrap(politicsScrap)
+                .퀴즈(politicsQuiz)
+                .인사이트(politicsComment)
+                .스크랩(politicsScrap)
                 .build());
 
-        result.get("economy").add(ReportInterestDto.builder()
+        result.get("경제").add(ReportInterestDto.builder()
                 .percentage(percentage.get(2))
-                .quiz(economyQuiz)
-                .insight(economyComment)
-                .scrap(economyScrap)
+                .퀴즈(economyQuiz)
+                .인사이트(economyComment)
+                .스크랩(economyScrap)
                 .build());
 
         return result;
@@ -216,24 +216,24 @@ public class ReportService {
 
         Map<String, Integer> changeMap = new HashMap<>();
         if (hasLastSocietyData) {
-            changeMap.put("society", getChangeInt(lastSociety, thisSociety));
+            changeMap.put("사회", getChangeInt(lastSociety, thisSociety));
         }
         else {
-            changeMap.put("society", null);
+            changeMap.put("사회", null);
         }
 
         if (hasLastPoliticsData) {
-            changeMap.put("politics", getChangeInt(lastPolitics, thisPolitics));
+            changeMap.put("정치", getChangeInt(lastPolitics, thisPolitics));
         }
         else {
-            changeMap.put("politics", null);
+            changeMap.put("정치", null);
         }
 
         if (hasLastEconomyData) {
-            changeMap.put("economy", getChangeInt(lastEconomy, thisEconomy));
+            changeMap.put("경제", getChangeInt(lastEconomy, thisEconomy));
         }
         else {
-            changeMap.put("economy", null);
+            changeMap.put("경제", null);
         }
 
         String biggest = null;
