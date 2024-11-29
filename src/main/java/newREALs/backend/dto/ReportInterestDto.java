@@ -11,7 +11,7 @@ import lombok.Setter;
 @Builder
 public class ReportInterestDto {
     private int percentage;
-    private int 퀴즈;
-    private int 인사이트;
-    private int 스크랩;
+    private int quiz;
+    private int insight;
+    private int scrap;
 }
