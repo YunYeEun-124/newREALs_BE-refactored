@@ -22,7 +22,7 @@ public class CategoriesInitializer {
             if(categoryRepository.count() == 0){  //아무것도 없을때만 실행함.
                 ////////////////사회 ///////////////////////
                 System.out.println("초기화 실행중");
-                Category society =  Category.builder().name("society").build();
+                Category society =  Category.builder().name("사회").build();
                 SubCategory society_sub1 = SubCategory.builder().name("사건사고").category(society).build();
                 SubCategory society_sub2 = SubCategory.builder().name("교육").category(society).build();
                 SubCategory society_sub3 = SubCategory.builder().name("노동").category(society).build();
@@ -82,7 +82,7 @@ public class CategoriesInitializer {
 
 
 
-                Category economy =  Category.builder().name("economy").build();
+                Category economy =  Category.builder().name("경제").build();
                 SubCategory economy_sub1 = SubCategory.builder().name("금융").category(economy).build();
                 SubCategory economy_sub2 = SubCategory.builder().name("증권").category(economy).build();
                 SubCategory economy_sub3 = SubCategory.builder().name("산업/재개").category(economy).build();
@@ -151,7 +151,7 @@ public class CategoriesInitializer {
                 ////////////////정치 ///////////////
                 //    정치: {
 
-                Category politics =  Category.builder().name("politics").build();
+                Category politics =  Category.builder().name("정치").build();
 
                 SubCategory politics_sub1 = SubCategory.builder().name("대통령실").category(politics).build();
                 Keyword politics_sub1_key1 = Keyword.builder().name("대통령 연설").subCategory(politics_sub1).category(politics).build();

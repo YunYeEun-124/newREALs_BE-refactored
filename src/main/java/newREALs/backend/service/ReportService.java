@@ -109,9 +109,9 @@ public class ReportService {
     public Map<String, List<ReportInterestDto>> getReportInterest(Long userId) {
         Map<String, List<ReportInterestDto>> result = new HashMap<>();
 
-        result.put("society", new ArrayList<>());
-        result.put("politics", new ArrayList<>());
-        result.put("economy", new ArrayList<>());
+        result.put("사회", new ArrayList<>());
+        result.put("정치", new ArrayList<>());
+        result.put("경제", new ArrayList<>());
 
         int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
         int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
@@ -138,21 +138,21 @@ public class ReportService {
 
         List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
 
-        result.get("society").add(ReportInterestDto.builder()
+        result.get("사회").add(ReportInterestDto.builder()
                 .percentage(percentage.get(0))
                 .quiz(societyQuiz)
                 .insight(societyComment)
                 .scrap(societyScrap)
                 .build());
 
-        result.get("politics").add(ReportInterestDto.builder()
+        result.get("정치").add(ReportInterestDto.builder()
                 .percentage(percentage.get(1))
                 .quiz(politicsQuiz)
                 .insight(politicsComment)
                 .scrap(politicsScrap)
                 .build());
 
-        result.get("economy").add(ReportInterestDto.builder()
+        result.get("경제").add(ReportInterestDto.builder()
                 .percentage(percentage.get(2))
                 .quiz(economyQuiz)
                 .insight(economyComment)
@@ -216,24 +216,24 @@ public class ReportService {
 
         Map<String, Integer> changeMap = new HashMap<>();
         if (hasLastSocietyData) {
-            changeMap.put("society", getChangeInt(lastSociety, thisSociety));
+            changeMap.put("사회", getChangeInt(lastSociety, thisSociety));
         }
         else {
-            changeMap.put("society", null);
+            changeMap.put("사회", null);
         }
 
         if (hasLastPoliticsData) {
-            changeMap.put("politics", getChangeInt(lastPolitics, thisPolitics));
+            changeMap.put("정치", getChangeInt(lastPolitics, thisPolitics));
         }
         else {
-            changeMap.put("politics", null);
+            changeMap.put("정치", null);
         }
 
         if (hasLastEconomyData) {
-            changeMap.put("economy", getChangeInt(lastEconomy, thisEconomy));
+            changeMap.put("경제", getChangeInt(lastEconomy, thisEconomy));
         }
         else {
-            changeMap.put("economy", null);
+            changeMap.put("경제", null);
         }
 
         String biggest = null;
@@ -315,8 +315,10 @@ public class ReportService {
                         + stringChangeData
                         + userName
                         + "데이터는 다음과 같은 필드로 구성되어 있어: \n"
+
+                        + "**정치**, **사회**, **경제** : 해당 카테고리에서의 뉴스 활동 변화율.\n 값이 양수면 그만큼 활동 증가, 음수면 그만큼 활동 감소, null이면 해당 카테고리는 지난 달 활동이 없는 거야.\n"
                         + "**userName** : 유저의 이름"
-                        + "**politics**, **society**, **economy** : 해당 카테고리에서의 뉴스 활동 변화율.\n 값이 양수면 그만큼 활동 증가, 음수면 그만큼 활동 감소, null이면 해당 카테고리는 지난 달 활동이 없는 거야.\n"
+                  
                         + "**biggest** : 유저의 활동량 변화량이 큰 카테고리야.\n"
                         + "**hasNoLastData** : 지난 달에 세 카테고리 모두 지난 달 활동이 없었는지를 보여주는 boolean형 데이터야.\n"
                         + "너가 해야하는 건 다음과 같아.\n"
