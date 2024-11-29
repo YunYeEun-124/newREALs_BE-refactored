@@ -1,7 +1,11 @@
 package newREALs.backend.domain;
 
 import jakarta.persistence.*;
-import lombok.*;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.cglib.core.Local;
@@ -11,7 +15,6 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Likes {
 
@@ -45,4 +48,7 @@ public class Likes {
     }
 
 
+    public void setReactionType(int reactionType) {
+        this.reactionType=reactionType;
+    }
 }
