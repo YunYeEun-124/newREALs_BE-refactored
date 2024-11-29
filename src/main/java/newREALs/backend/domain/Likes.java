@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Likes {
