@@ -62,7 +62,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 40 20 ? * *")
+    @Scheduled(cron = "0 52 20 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -80,16 +80,16 @@ public class GetNaverNews {
     }
 
 
-    //@Scheduled(cron = "0 48 12 ? * *")
+    @Scheduled(cron = "0 55 20 ? * *")
     public void testBasenews(){
-        Keyword keyword = keywordRepository.findByName("교통사고").orElse(null);
+        Keyword keyword = keywordRepository.findByName("환경").orElse(null);
         ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
 
     }
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 00 20 ? * *")
+    @Scheduled(cron = "0 00 06 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -254,7 +254,7 @@ public class GetNaverNews {
                 if(basenews.isPresent()){
                     System.out.println(item.getTitle() + "is already in it.");
                     if(isDailyNews){
-                       basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
+                        basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
                     }
                 }else{
                     List<String> origin = getArticle(item.getLink(),"#dic_area","#img1"); //newsinfo 원문,이미지링크 필드 채우기.
@@ -266,11 +266,12 @@ public class GetNaverNews {
                     SimpleDateFormat outputdate = new SimpleDateFormat("yyyy-MM-dd");
                     Date parseDate = date.parse(item.getPubDate());
 
-
+                    System.out.println("title :"+ item.getTitle());
+                    System.out.println("title no tags : "+ item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", ""));
 
                     try {
                         Basenews bnews = Basenews.builder()
-                                .title(item.getTitle().replaceAll("<[^>]*>?","")) //태그제거
+                                .title(item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", "")   ) //태그제거
                                 .newsUrl(item.getLink())
                                 .imageUrl(origin.get(0))
                                 .uploadDate(outputdate.format(parseDate))
@@ -281,7 +282,7 @@ public class GetNaverNews {
                                 .isDailyNews(isDailyNews)
                                 .build();
                         baseNewsRepository.save(bnews);
-                        System.out.println("news result : "+ bnews.getDescription());
+                        System.out.println("news result : "+ bnews.getTitle());
                         if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -313,7 +314,7 @@ public class GetNaverNews {
             Element imageElements = doc.selectFirst(htmlId2);
 
             if(elements != null){
-                 plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
+                plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
                 if(imageElements != null){
                     imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
                 }else{ //default image
@@ -324,7 +325,7 @@ public class GetNaverNews {
                 set.add(plainText);
 
             }else {
-              //  elements = doc.selectFirst("#_article_");
+                //  elements = doc.selectFirst("#_article_");
                 System.out.println("추출 안된 주소 : "+url);
                 throw  new RuntimeException("기사 추출 못했음. ");
             }
@@ -332,8 +333,8 @@ public class GetNaverNews {
         }catch (IOException e){
             throw new RuntimeException("뉴스 원문 못 가져왔대요~~", e);
         }
-      //  System.out.println("get article 기사 추출 성공");
-       return set;
+        //  System.out.println("get article 기사 추출 성공");
+        return set;
     }
 
     ////////////////////////////네이버 뉴스 연동 메서드///////////////////
@@ -393,3 +394,4 @@ public class GetNaverNews {
         }
     }
 }
+
