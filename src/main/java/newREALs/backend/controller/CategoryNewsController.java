@@ -39,9 +39,9 @@ public class CategoryNewsController {
         if (category.isEmpty()||subCategory.isEmpty())
              throw new IllegalArgumentException("매개변수 null");
 
-        if(!category.equals("society") && !category.equals("politics") && !category.equals("economy") )
-            throw new IllegalArgumentException("잘못된 카테고리 입력.");
-
+        if(!category.equals("사회") && !category.equals("경제") && !category.equals("정치") ){
+            throw  new IllegalArgumentException("잘못된 카테고리 입력");
+        }
 
         Optional<SubCategory> sub = subCategoryRepository.findByName(subCategory);
 
@@ -49,7 +49,9 @@ public class CategoryNewsController {
              ViewCategoryDTO result  = newsService.getSubCategory(userid,category,subCategory,page);
             // 결과가 비어 있는 경우
             if (result.getBasenewsList().isEmpty() || result.getDailynews() == null)
-               throw new IllegalStateException("뉴스 불러오기 실패");
+                return ResponseEntity.ok(
+                        ApiResponseDTO.success( "해당 뉴스가 존재하지 않습니다.", result)
+                );
             // 페이지 범위 확인
             if (page <= 0 ||page > result.getTotalPage())
                 throw  new IllegalArgumentException("페이지 범위 오류");
@@ -73,7 +75,7 @@ public class CategoryNewsController {
         if (category == null || category.isEmpty()) {
             throw  new IllegalArgumentException("매개변수 null");
         }
-        if(!category.equals("society") && !category.equals("politics") && !category.equals("economy") ){
+        if(!category.equals("사회") && !category.equals("경제") && !category.equals("정치") ){
             throw  new IllegalArgumentException("잘못된 카테고리 입력");
         }
         ViewCategoryDTO result = newsService.getCategory(userid, category, page);

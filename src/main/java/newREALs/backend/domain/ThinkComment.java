@@ -35,6 +35,13 @@ public class ThinkComment {
 
     //배열로 관리 ?
 
+    @Builder
+    public ThinkComment(String topic,String AIComment,Basenews basenews){
+        this.topic = topic;
+        this.AIComment = AIComment;
+        this.basenews= basenews;
+    }
+
 
 
 }

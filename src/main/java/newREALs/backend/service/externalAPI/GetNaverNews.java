@@ -80,7 +80,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 21 20 ? * *")
+    //@Scheduled(cron = "0 48 12 ? * *")
     public void testBasenews(){
         Keyword keyword = keywordRepository.findByName("교통사고").orElse(null);
         ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
@@ -89,7 +89,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 00 06 ? * *")
+    @Scheduled(cron = "0 23 13 ? * *")
     @Transactional
     public void getDailynews(){
 
@@ -106,10 +106,10 @@ public class GetNaverNews {
         for(int i=0;i<categoryList.size();i++){ //사회(102), 경제(101) 정치(100) 순서
 
             Category currentCategory = categoryList.get(i);
-            if(Objects.equals(currentCategory.getName(), "politics")){
+            if(Objects.equals(currentCategory.getName(), "정치")){
                 limit = 1;
                 pageNum = 100;
-            }else if(Objects.equals(currentCategory.getName(), "economy")){
+            }else if(Objects.equals(currentCategory.getName(), "사회")){
                 limit = 2;
                 pageNum = 101;
             }else {
