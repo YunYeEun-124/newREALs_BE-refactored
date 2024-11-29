@@ -18,7 +18,7 @@ public class SubInterestService {
     private final PreSubInterestRepository preSubInterestRepository;
 
     // subInterest -> preSubInterest
-    @Scheduled(cron = "0 26 21 28 * ?")
+    @Scheduled(cron = "0 06 11 29 * ?")
     @Transactional
     public void SubInterestToPreSubInterest() {
         preSubInterestRepository.deleteAll();
@@ -39,7 +39,7 @@ public class SubInterestService {
     }
 
     // subInterst 초기화
-    @Scheduled(cron = "0 27 21 28 * ?")
+    @Scheduled(cron = "0 00 11 29 * ?")
     @Transactional
     public void resetSubInterest() {
         List<SubInterest> subInterests = subInterestRepository.findAll();

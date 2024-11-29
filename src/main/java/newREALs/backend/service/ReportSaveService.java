@@ -26,7 +26,7 @@ public class ReportSaveService {
 
     // 레포트 생성
     @Transactional
-    @Scheduled(cron = "0 25 20 28 * ?")
+    @Scheduled(cron = "0 14 11 29 * ?")
     public void makeReports() throws JsonProcessingException {
         List<Accounts> users = userRepository.findAll();
         for(Accounts user : users) {
@@ -36,7 +36,7 @@ public class ReportSaveService {
             Report report = reportRepository.findByUserId(user.getId())
                     .orElse(null);
             if(report != null) {
-                report.setReport(jsonData);
+                reportRepository.updateReport(user.getId(), jsonData);
             }
             else {
                 report = new Report();
