@@ -20,6 +20,7 @@ public class Report {
     @JoinColumn(name = "user_id", nullable = false)
     private Accounts user;
 
-    @Column(columnDefinition = "json")
+    @Column(name = "report", columnDefinition = "json")
     private String report;
+
 }

@@ -62,7 +62,8 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 50 18 ? * *")
+
+    @Scheduled(cron = "0 52 18 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -72,24 +73,16 @@ public class GetNaverNews {
             return;
         }
 
-
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            ProcessNews(keyword.getName(), keyword, false, 1);
+           
+            ProcessNews(keyword.getName(), keyword, false,2);
         }
 
     }
 
 
-    @Scheduled(cron = "0 55 06 ? * *")
-    public void testBasenews(){
-        Keyword keyword = keywordRepository.findByName("환경").orElse(null);
-        ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
-
-    }
-
-
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 00 06 ? * *")
+    @Scheduled(cron = "0 55 05 ? * *")
     @Transactional
     public void getDailynews(){
 
