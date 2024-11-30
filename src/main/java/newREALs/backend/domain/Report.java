@@ -22,4 +22,5 @@ public class Report {
 
     @Column(name = "report", columnDefinition = "json")
     private String report;
+
 }
