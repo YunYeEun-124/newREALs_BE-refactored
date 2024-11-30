@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,12 +40,43 @@ public class AccountsController {
     private final Gson gson = new GsonBuilder().setPrettyPrinting().create(); // 이렇게 해야 줄바꿈됨
     private final UserKeywordRepository userKeywordRepository;
 
+    @GetMapping("/attendance/check")
+    public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
+        Long userid = tokenService.getUserId(userInfo);
+        LocalDateTime current = LocalDateTime.now();
+        int day = current.getDayOfMonth();
+        int hour = current.getHour();;
+        Map<String, Object> response = new LinkedHashMap<>();
+
+        if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
+        else day --;
+
+        boolean attendance = attendanceService.GetAttendance(userid);
+
+        response.put("day",(day+1));
+        response.put("attendance",attendance);
+
+        if(attendance){
+            return ResponseEntity.ok(
+                    ApiResponseDTO.success( (day+1)+"일 출석 했습니다. ",response)
+            );
+
+        }else {
+            return ResponseEntity.ok(
+                    ApiResponseDTO.success( (day+1)+"일 출석 하지 않았습니다.",response)
+            );
+        }
+    }
     //[patch] 출석 체크 버튼 누르기
     @PatchMapping("/attendance/mark")
-    public ResponseEntity<?> Checkattendance(HttpServletRequest userInfo){
-        Map<String, Object> response = new LinkedHashMap<>();
+    public ResponseEntity<?> Markattendance(HttpServletRequest userInfo){
+
         Long userid = tokenService.getUserId(userInfo);
+        if(userid == null) {
+            throw new SecurityException("유효하지 않은 토큰입니다");
+        }
         int day = attendanceService.UpdateAttendance(userid);
+
 
 
 
