@@ -79,10 +79,17 @@ public class GetNaverNews {
 
     }
 
+    @Scheduled(cron = "0 25 20 ? * *")
+    @Transactional
+    public void test(){
+        Optional<Keyword> keyword = keywordRepository.findByName("입시");
+        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
+    }
+
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 55 05 ? * *")
+    @Scheduled(cron = "0 57 20 ? * *")
     @Transactional
     public void getDailynews(){
 

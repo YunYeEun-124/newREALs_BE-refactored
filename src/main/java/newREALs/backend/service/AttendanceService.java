@@ -19,6 +19,24 @@ import java.util.Optional;
 public class AttendanceService {
     private final UserRepository userRepository;
 
+    public boolean GetAttendance(Long userid){
+        Optional<Accounts> user = userRepository.findById(userid);
+        LocalDateTime current = LocalDateTime.now();
+        int hour = current.getHour();
+        int day = current.getDayOfMonth();
+
+        if(user.isPresent()){
+            if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
+            else day --;
+            return user.get().getAttendanceList()[day];  //출석체크함.
+
+        } else {
+            return false;
+        }
+
+    }
+
+
     @Transactional
     public int UpdateAttendance(Long userid) {
 
@@ -28,7 +46,6 @@ public class AttendanceService {
         int day = current.getDayOfMonth();
 
         if(user.isPresent()){
-            //마지막날일때 주의 해야하는데 ...
             if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
             else day --;
 
