@@ -62,7 +62,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 52 20 ? * *")
+    @Scheduled(cron = "0 50 18 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -80,7 +80,7 @@ public class GetNaverNews {
     }
 
 
-    @Scheduled(cron = "0 55 20 ? * *")
+    @Scheduled(cron = "0 55 06 ? * *")
     public void testBasenews(){
         Keyword keyword = keywordRepository.findByName("환경").orElse(null);
         ProcessNews(Objects.requireNonNull(keyword).getName(), keyword, false, 5);
