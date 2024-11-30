@@ -62,12 +62,13 @@ public class ReportService {
 
         // ChatGPT API 호출
         String result;
-        try {
-            result = (String) chatGPTService.generateContent(message).get("text");
-        } catch (Exception e) {
-            e.printStackTrace();
-            result = "분석 내용을 생성하는데 문제가 발생했어요.";
-        }
+//        try {
+//            result = (String) chatGPTService.generateContent(message).get("text");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            result = "분석 내용을 생성하는데 문제가 발생했어요.";
+//        }
+        result = (String) chatGPTService.generateContent(message).get("text");
 
         return result;
     }
