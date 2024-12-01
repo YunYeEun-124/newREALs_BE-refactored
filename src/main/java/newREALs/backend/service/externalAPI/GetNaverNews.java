@@ -62,7 +62,7 @@ public class GetNaverNews {
         this.newsService = newsService;
     }
 
-    @Scheduled(cron = "0 32 18 ? * *")
+    @Scheduled(cron = "0 05 06 ? * *")
     @Transactional
     public void getBasenews() {
 
@@ -104,7 +104,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 57 20 ? * *")
+    @Scheduled(cron = "0 55 05 ? * *")
     @Transactional
     public void getDailynews(){
 
