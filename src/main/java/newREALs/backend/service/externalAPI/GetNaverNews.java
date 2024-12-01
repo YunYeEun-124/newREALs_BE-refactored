@@ -80,7 +80,7 @@ public class GetNaverNews {
 
     }
 
-    @Scheduled(cron = "0 25 20 ? * *")
+    @Scheduled(cron = "0 51 17 ? * *")
     @Transactional
     public void test(){
         Optional<Keyword> keyword = keywordRepository.findByName("입시");
