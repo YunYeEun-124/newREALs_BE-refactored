@@ -60,7 +60,7 @@ public class GetNaverNews {
 
 
 
-    @Scheduled(cron = "0 27 01 ? * *")
+    @Scheduled(cron = "0 32 18 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -72,10 +72,18 @@ public class GetNaverNews {
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
             ProcessNews(keyword.getName(), keyword, false,2);
+            // 딜레이 추가 (예: 1초)
+            try {
+                Thread.sleep(1000); // 1초 대기
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+                System.out.println("Thread interrupted during delay");
+            }
         }
         newsService.automaticBaseProcess();
 
     }
+
 
 
     //매일 아침마다 하루 한 번 실행
@@ -123,6 +131,14 @@ public class GetNaverNews {
                 if(keyword.isPresent()){
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
                     ProcessNews(title,keyword.get(),true,3);
+
+                    // 딜레이 추가
+                    try {
+                        Thread.sleep(1000); // 1초 대기
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Thread interrupted during delay");
+                    }
                 }else{
                     System.out.println("can't find daily news keyword");
                 }
@@ -186,7 +202,11 @@ public class GetNaverNews {
         List<String> titles = new ArrayList<>();
         try{
             String url = htmlUrl;
-            doc =  Jsoup.connect(url).get();
+            doc = Jsoup.connect(url)
+                .timeout(60000) // 타임아웃 60초
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
+                .get();
+
             Elements elements = doc.select(".sa_text_strong");
 
             for(Element element : elements){
@@ -300,7 +320,11 @@ public class GetNaverNews {
         List<String> set = new ArrayList<>();
         try{
             String url = htmlUrl;
-            doc =  Jsoup.connect(url).get();
+            doc = Jsoup.connect(url)
+                .timeout(60000) // 타임아웃 60초
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
+                .get();
+
 
             //기사 데려오기v & 기사사진
             Element elements = doc.selectFirst(htmlId1);
@@ -331,15 +355,19 @@ public class GetNaverNews {
     }
 
     ////////////////////////////네이버 뉴스 연동 메서드///////////////////
-
-    public  String get(String apiUrl, Map<String, String> requestHeaders){
+    public String get(String apiUrl, Map<String, String> requestHeaders) {
         HttpURLConnection con = connect(apiUrl);
         try {
             con.setRequestMethod("GET");
-            for(Map.Entry<String, String> header :requestHeaders.entrySet()) {
+            
+            // 기본 요청 헤더 설정
+            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
                 con.setRequestProperty(header.getKey(), header.getValue());
             }
-
+    
+            // User-Agent 추가
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+    
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
                 return readBody(con.getInputStream());
@@ -353,6 +381,8 @@ public class GetNaverNews {
             con.disconnect();
         }
     }
+
+   
 
 
     private  HttpURLConnection connect(String apiUrl){
