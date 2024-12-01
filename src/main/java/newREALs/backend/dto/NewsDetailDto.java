@@ -53,8 +53,8 @@ public class NewsDetailDto {
         this.viewCount=basenews.getViewCount();
         //공감수
         this.good=basenews.getLikesCounts()[0];
-        this.bad=basenews.getLikesCounts()[1];
-        this.interesting=basenews.getLikesCounts()[2];
+        this.bad=basenews.getLikesCounts()[2];
+        this.interesting=basenews.getLikesCounts()[1];
 
         this.category=basenews.getCategory().getName();
         this.subCategory=basenews.getSubCategory().getName();

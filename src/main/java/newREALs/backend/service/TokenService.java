@@ -63,16 +63,17 @@ public class TokenService {
     }
 
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            log.debug("TokenService - 토큰 유효함: {}", token);
-            return true;
-        } catch (Exception e) {
-            log.error("잘못된 JWT 토큰이에요: {}, 예외: {}", token, e.getMessage());
-            return false;
-        }
-    }
+   public boolean validateToken(String token) {
+       try {
+           Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+           log.debug("TokenService - 토큰 유효함: {}", token);
+           return true;
+       } catch (Exception e) {
+           log.error("잘못된 JWT 토큰이에요: {}, 예외: {}", token, e.getMessage());
+           return false;
+       }
+   }
+
 
 
     // 헤더에서 토큰 추출
