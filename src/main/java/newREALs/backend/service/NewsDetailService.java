@@ -60,6 +60,15 @@ public class NewsDetailService {
         boolean b=isScrapped.isPresent();
         newsDetailDto.setScrapped(b);
 
+        //공감 표시
+        Optional<Likes> like=likesRepository.findByUserAndBasenews(user,basenews);
+        if(like.isPresent()){
+            newsDetailDto.setReactionType(like.get().getReactionType());
+        }
+        else{
+            newsDetailDto.setReactionType(-1);
+        }
+
         //param아무것도 안들어옴 : 이전이후뉴스 안줘도됨
         if(cate==null&&subCate==null&&keyword==null){
             newsDetailDto.setPrevNews(null);
@@ -82,6 +91,8 @@ public class NewsDetailService {
 
         //이전,다음 기사 이동 버튼 눌렀을때 같이 넘겨줄 wherePageFrom 설정
         newsDetailDto.setWherePageFrom(determinWherePageFrom(keyword,subCate,cate));
+
+
 
         return newsDetailDto;
     }

@@ -88,10 +88,10 @@ public class NewsService {
                 "You are a highly skilled assistant that generates quiz questions based on news articles. "
                         + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
         quizMessages.add(Map.of("role", "user", "content",
-                "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
-                        + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
-                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. " +
-                        "해설은 한 줄만 필요합니다. "
+                "다음은 뉴스 기사의 요약이다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어라. "
+                        + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 한다. "
+                        + "정답은 반드시 true 혹은 false 중 하나로 명확하게 정해져야 한다. 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성하라. " +
+                        "해설은 한 줄로 간결하고 명확하게 작성하라."
                         + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
                         + "문제: <문제 내용>\n"
                         + "정답: <O 또는 X>\n"
