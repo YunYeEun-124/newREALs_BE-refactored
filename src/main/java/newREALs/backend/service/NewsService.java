@@ -21,6 +21,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class NewsService {
+
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
@@ -28,8 +29,6 @@ public class NewsService {
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
-
-    @Scheduled(cron="0 59 20 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticBaseProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
@@ -40,7 +39,6 @@ public class NewsService {
                 news -> {
                     try{
                         resultList.add( processArticle(news.getId()));
-
                     } catch (Throwable e){
                         log.error("Failed to process article ID: {}", news.getId(), e);
                     }
@@ -48,13 +46,9 @@ public class NewsService {
         );
 
         basenewsRepository.saveAll(resultList);
-        System.out.println(resultList +" is saved");
-
-
     }
 
 
-    @Scheduled(cron="0 05 21 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticDailyProcess(){
         // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
@@ -69,13 +63,9 @@ public class NewsService {
 
     }
 
-
-
-
     //요약, 설명, 용어 생성 메서드
     @Transactional
     public Basenews processArticle(Long basenewsId) throws Throwable {
-        long startTime = System.nanoTime(); // 시작 시간 기록
         System.out.println("processArticle in ");
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
@@ -95,7 +85,9 @@ public class NewsService {
                         "설명은 반드시 '~해요'체를 사용하고, 친절하고 명확하게 작성한다. " +
                         "출력 결과 예시를 보여줄게" +
                         "요약 : 연세대 수시 자연계 논술전형에서 문제 유출 사태로 인한 소송이 발생하고, 법정 공방으로 혼란이 커지고 있다. 합격자 발표 이후에도 사태 해결이 어려워져 수험생들의 혼란이 예상된다.\n" +
-                        "설명 : 이 기사는 연세대 수시 자연계 논술전형에서 발생한 문제 유출 사태와 이에 따른 법정 공방에 대해 다루고 있습니다. 연세대는 재시험을 치루지 않고 현재 상황을 유지하고 있어 수험생들의 불안이 높아지고 있습니다. 합격자 발표 이후에도 사태의 해결이 어려워진다는 점이 주요 포인트입니다.\n" +
+                        "설명 : 이 기사는 연세대 수시 자연계 논술전형에서 발생한 문제 유출 사태와 이에 따른 법정 공방에 대해 다루고 있습니다. " +
+                        "연세대는 재시험을 치루지 않고 현재 상황을 유지하고 있어 수험생들의 불안이 높아지고 있습니다. " +
+                        "합격자 발표 이후에도 사태의 해결이 어려워진다는 점이 주요 포인트입니다.\n" +
                         "용어 : \n" +
                         "1. 적정 난이도: 시험이나 문제의 난이도가 적절한 수준을 유지하는 것. 기사에서는 수능의 적정 난이도를 유지했다고 언급되었습니다.\n" +
                         "2. 의대 증원: 의학대학의 학생 모집 인원을 늘리는 것. 기사에서는 2025학년도 의대 증원 규모를 줄여야 한다는 주장에 대해 수용 불가 입장을 밝혔습니다.\n" +
@@ -105,23 +97,12 @@ public class NewsService {
         ));
 
         String result = (String) chatGPTService.generateContent(Messages).get("text");
-
-
-        // 처리 완료 시간 기록
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
-
-
         return parseBasenews(result,basenews);
     }
-
 
     //퀴즈 생성하는 메서드
     @Transactional
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
-
-        System.out.println("generate quiz in ");
-
         // 이미 isDailynews=true인 basenews를 전달받음
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
@@ -130,7 +111,8 @@ public class NewsService {
         quizMessages.add(Map.of("role", "user", "content",
                 "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
                         + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
-                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. "
+                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. " +
+                        "해설은 한 줄만 필요합니다. "
                         + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
                         + "문제: <문제 내용>\n"
                         + "정답: <O 또는 X>\n"
@@ -152,7 +134,6 @@ public class NewsService {
 
         quizRepository.save(quiz);
     }
-
 
     //ThinkComment generate function
     @Async
@@ -182,9 +163,6 @@ public class NewsService {
                 aiComment = line.substring(3).trim(); // "설명:" 이후 내용
         }
 
-        System.out.println("topic result : "+topic);
-        System.out.println("aiComment result : "+aiComment);
-
         insightRepository.save(
           ThinkComment.builder()
                   .topic(topic)
@@ -192,22 +170,11 @@ public class NewsService {
                   .basenews(news).build()
         );
 
-        System.out.println("insight created!");
-
-
-
-
-
-
-
         StringTokenizer st = new StringTokenizer(quizContent,":");
         st.nextToken();
-
-
     }
 
-
-    //용어 파싱 메서드
+    //용어,요약,설명 파싱 메서드
     @Async
     private Basenews parseBasenews(String termsContent,Basenews basenews) {
         List<TermDetail> termDetails = new ArrayList<>();
