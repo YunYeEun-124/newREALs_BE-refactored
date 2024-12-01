@@ -4,6 +4,14 @@ openai:
   organization-id: ${OPENAI_ORGANIZATION_ID}
 
 spring:
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 4
+        queue-capacity: 10
+      thread-name-prefix: "Async-"
+
   datasource:
     url: ${DATABASE_URL}
     username: ${DATABASE_USERNAME}

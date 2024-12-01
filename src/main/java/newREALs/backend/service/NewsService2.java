@@ -47,17 +47,15 @@ public class NewsService2 {
 
     public SearchDTO getSearch(Long userid, String searchword, int page){
         Pageable pageable = getPageInfo(page);
-
-        SearchDTO result;
         //검색어 필드 : 카테고리,소카테고리,키워드, 본문 타이틀,
         Page<Basenews> pageNews = baseNewsRepository.findAllByTitleContainingOrDescriptionContaining(searchword,pageable);
+        System.out.println("page news size :"+pageNews.get().toList().size());
         List<BaseNewsThumbnailDTO> basenewsList = getBaseNewsList(pageNews,userid);
-        result = new SearchDTO(basenewsList,pageNews.getTotalPages(),pageNews.getTotalElements());
-        return result;
+        System.out.println("list news size : "+basenewsList.size());
+        return new SearchDTO(basenewsList,pageNews.getTotalPages(),pageNews.getTotalElements());
     }
 
     //common code 0
-
     public DailyNewsThumbnailDTO getDailyNewsOne(String category) {
         DailyNewsThumbnailDTO dailynewsdto = null;
         Category dailynewsCategory=categoryRepository.findByName(category).get();
@@ -91,7 +89,6 @@ public class NewsService2 {
 
         return dailynewsdto;
     }
-
 
     //getSubCategory, getCategory 페이지에 공통으로 쓰임.
     public ViewCategoryDTO getCategoryAndSubPage(Page<Basenews> repositoryFindBy,String category,Long userid){
@@ -150,7 +147,6 @@ public class NewsService2 {
         return  PageRequest.of(page-1,12,Sort.by(sorts));
     }
 
-
     public List<DailyNewsThumbnailDTO> getDailynewsList(){
         List<Basenews> dailynewsList = baseNewsRepository.findAllByIsDailyNews(true);
 
@@ -175,7 +171,6 @@ public class NewsService2 {
 
     }
 
-
     //keywordIndex : 유저마다 최소 1개 최대 5개의 키워드를 리스트로 반환. 기본값은 keywordIndex =0으로 시작
     // case 2 : index = -1일 경우 전체 다 보여주는 로직
     public KeywordNewsDTO getKeywordnewsList(Long userid,  int keywordIndex,  int page){
@@ -197,7 +192,5 @@ public class NewsService2 {
         return new KeywordNewsDTO(keywords, keywordNewsList, pageNews.getTotalPages(), pageNews.getTotalElements());
 
     }
-
-
 
 }

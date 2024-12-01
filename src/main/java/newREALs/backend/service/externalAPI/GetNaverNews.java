@@ -11,6 +11,7 @@ import newREALs.backend.dto.newsInfo;
 import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.CategoryRepository;
 import newREALs.backend.repository.KeywordRepository;
+import newREALs.backend.service.ArticleProcessingService;
 import newREALs.backend.service.ChatGPTService;
 import newREALs.backend.service.NewsService;
 import org.jsoup.Jsoup;
@@ -21,6 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import javax.swing.text.html.Option;
 import java.io.*;
@@ -47,22 +50,23 @@ public class GetNaverNews {
 
     private final NewsService newsService;
 
+
     @Value("${naver.api.client-id}")
     private String clientId;
 
     @Value("${naver.api.secret-key}")
     private String clientSecret;
 
-    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService) {
+    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService) {
         this.chatGPTService = chatGPTService;
         this.newsService = newsService;
     }
 
-
-
     @Scheduled(cron = "0 32 18 ? * *")
     @Transactional
     public void getBasenews() {
+
+
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
 
         if (keywords.isEmpty()) {
@@ -83,6 +87,19 @@ public class GetNaverNews {
         newsService.automaticBaseProcess();
 
     }
+//
+//    @Scheduled(cron = "0 05 21 ? * *")
+//    @Transactional
+//    public void test() {
+//
+//        Optional<Keyword> keyword = keywordRepository.findByName("학비");
+//
+//        //타이틀, 원문,아읻
+//        ProcessNews(keyword.get().getName(), keyword.get(), false,5);
+//
+//        newsService.automaticBaseProcess();
+//
+//    }
 
 
 
@@ -148,46 +165,36 @@ public class GetNaverNews {
 
         }
 
-
-
-
     }
 
 
     public  List<String> mapTitleKeyword(int pageNum,int limit,Category category){
 
         String keywordList = String.join(",",keywordRepository.findAllByCategory_Name(category.getName()));
-        System.out.println("keywordlist : "+keywordList);
         //사회 2, 정치 1, 경제 2
         String titleList = String.join("\n",getDailyTitles("https://news.naver.com/section/"+pageNum));
 
         List<Map<String, String>> titleMessages = new ArrayList<>();
         titleMessages.add(Map.of("role", "system", "content", "입문자수준에서 사회면에서 중요한 기사 "+limit+"개를 선별해야해."));
         titleMessages.add(Map.of("role", "user", "content", "다음 타이틀 리스트에서 사회면에서 중요한 타이틀 "+limit+"개를 골라줘"+titleList +
-                "기준은 다음과 같다. " +
                 "0. 가장 중요하다고 생각되는 타이틀을 골라야해."+
                 "1. 평소에 뉴스를 읽지 않는 10대 20대들도 꼭 알아야하는 뉴스라고 생각되는 것을 선별해야하고" +
                 "2. "+category.getName()+" 카테고리에 적합한 걸 골라야해" +
                 "3. 해당 타이틀의 뉴스로 입문자를 위한 퀴즈 만들어야하기 때문에 이를 고려해서 골라야해" +
                 "4. 특정 지역에 관한 내용은 제외해줘 " +
-
                 "다음은 고른 타이틀과 카테고리를 한개씩 매핑해야해. 카테고리는 다음과 같아. " + keywordList
                 +"최종 결과물 형식은 " +
                 "타이틀 : 카테고리 이걸 꼭 지켜야해 " +
                 " 예시는 다음과 같아 . 대통령, 캐나다 총리와 정상회담…방산 등 포괄적 안보협력 확대 : 대통령 연설 \n "+
-                "\n 이 형식에 넘버링도 하지말고 쌍따옴표로 감싸도 안돼. 무조건 내가 말한 타이틀 : 카테고리가 한줄씩 출력만하면돼 "
+                "\n 이 형식에 넘버링도 하지말고 쌍따옴표로 감싸도 안돼. 무조건 내가 말한 타이틀 : 카테고리가 한줄씩 출력 "
         ));
 
         String titleKeyword = (String) chatGPTService.generateContent(titleMessages).get("text");
-
-        System.out.println("gpt result");
-
         StringTokenizer st = new StringTokenizer(titleKeyword,"\n");
         List<String> titleKeywordList = new ArrayList<>();
         int i=0;
         while(st.hasMoreTokens()){
             titleKeywordList.add(st.nextToken());
-            System.out.println(titleKeywordList.get(i++));
         }
 
         return titleKeywordList;
