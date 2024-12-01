@@ -85,18 +85,29 @@ public class NewsService {
         // 이미 isDailynews=true인 basenews를 전달받음
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
-                "You are a highly skilled assistant that generates quiz questions based on news articles. "
-                        + "Your goal is to create meaningful True/False questions that highlight the key points of the articles."));
+                "나는 뉴스 입문자들을 위해 뉴스를 쉽게 풀어 설명하고, 요약과 어려운 용어 설명을 제공해주는 사이트를 운영하고 있다.\n" +
+                        "You are a highly skilled assistant that generates quiz questions based on news articles. "
+                        + "Your goal is to create meaningful True/False questions that highlight the key points of the articles. "
+                        + "Make sure the questions are challenging yet clear, and directly reflect the content of the article summary provided."
+        ));
         quizMessages.add(Map.of("role", "user", "content",
-                "다음은 뉴스 기사의 요약이다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어라. "
-                        + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 한다. "
-                        + "정답은 반드시 true 혹은 false 중 하나로 명확하게 정해져야 한다. 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성하라. " +
-                        "해설은 한 줄로 간결하고 명확하게 작성하라."
-                        + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
+                "다음은 뉴스 기사에 대한 설명이다. 이 설명을 바탕으로 기사에 대한 핵심 정보를 묻는 True/False 문제를 만들어라.\n"
+                        + "문제 작성 시 아래 사항을 반드시 준수해야 한다:\n"
+                        + "1. 문제는 반드시 기사 내용의 중요한 정보를 기반으로 작성하라.\n"
+                        + "2. 각 문제의 정답은 반드시 True (O) 또는 False (X) 중 하나로 명확하게 결정되어야 한다.\n"
+                        + "3. 각 문제에 대해 간결하면서도 명확한 해설을 추가하라. 해설은 한 줄로 작성하라. '~해요'체를 사용하여 친절하게 설명하라.\n"
+                        + "4. 문제의 난이도는 뉴스 입문자가 이해할 수 있는 수준을 유지하되, 핵심 내용을 강조하라.\n\n"
+                        + "출력 형식:\n"
                         + "문제: <문제 내용>\n"
                         + "정답: <O 또는 X>\n"
                         + "해설: <해설 내용>\n\n"
-                        + "기사 요약: " + news.getDescription()));
+                        + "Example 1:\n"
+                        + "기사 설명: 최근 한국경영자총협회에서 실시한 조사에 따르면, 30인 이상의 국내 기업 중 약 50%가 내년에 긴축 경영을 실시할 계획이라고 합니다. 긴축 경영이란 비용 절감과 자원 효율화를 목표로 하는 경영 전략을 의미합니다. 이 조사는 239개의 기업 최고경영자(CEO)와 임원을 대상으로 이루어졌으며, 그 결과 대기업(300인 이상)이 중소기업(300인 미만)보다 긴축 경영을 더 많이 계획하고 있는 것으로 나타났습니다. 이러한 긴축 경영의 구체적인 방법으로는 전사적 원가 절감, 인력 운용의 합리화, 신규 투자의 축소 등이 포함되어 있습니다. 또한, 투자와 채용 계획도 축소하는 경향이 두드러졌으며, 이는 대기업에서 더욱 명확하게 나타났습니다. 한편, 도널드 트럼프 미국 대통령의 재집권이 국내 경제에 부정적 영향을 미칠 것으로 예상되며, 이는 주로 보호무역주의 강화 때문입니다.\n\n"
+                        + "문제: 긴축 경영의 구체적인 방법에는 신규 투자의 확대가 포함된다.\n"
+                        + "정답: X\n"
+                        + "해설: 긴축 경영은 비용 절감과 자원 효율화를 목표로 하며, 신규 투자 확대가 아닌 축소를 포함해요.\n\n"
+                        + "기사 요약: " + news.getDescription()
+        ));
 
         String quizContent = (String) chatGPTService.generateContent(quizMessages).get("text");
 
