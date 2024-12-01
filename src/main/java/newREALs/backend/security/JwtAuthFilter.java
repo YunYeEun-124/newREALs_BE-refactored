@@ -26,7 +26,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
-
+        String requestURI = request.getRequestURI();
+        // 특정 경로 제외 (예: 리프레시 토큰 재발급)
+        if ("/auth/refresh".equals(requestURI)) {
+            log.debug("JwtAuthFilter - 토큰 검증을 건너뛴 경로 요청: {}", requestURI);
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = tokenService.extractTokenFromHeader(request);
 
         try {
