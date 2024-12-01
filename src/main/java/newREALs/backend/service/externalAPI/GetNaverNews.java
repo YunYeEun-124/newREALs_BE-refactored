@@ -76,6 +76,13 @@ public class GetNaverNews {
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
            
             ProcessNews(keyword.getName(), keyword, false,2);
+            // 딜레이 추가 (예: 1초)
+            try {
+                Thread.sleep(1000); // 1초 대기
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+                System.out.println("Thread interrupted during delay");
+            }
         }
 
     }
@@ -131,6 +138,14 @@ public class GetNaverNews {
                 if(keyword.isPresent()){
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
                     ProcessNews(title,keyword.get(),true,3);
+
+                    // 딜레이 추가
+                    try {
+                        Thread.sleep(1000); // 1초 대기
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        System.out.println("Thread interrupted during delay");
+                    }
                 }else{
                     System.out.println("can't find daily news keyword");
 
