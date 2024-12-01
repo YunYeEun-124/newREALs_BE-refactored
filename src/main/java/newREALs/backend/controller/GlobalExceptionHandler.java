@@ -19,6 +19,8 @@ public class GlobalExceptionHandler {
     //그냥 예외 던지면 500internal error라고만 떠서 무슨문제인지 모름..
     //이걸로 에러 코드 +오류메시지 표시하는것
 
+
+
     // 400 Bad Request   - 필수 매개변수 누락.
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiResponseDTO<Object>> handleIllegalArgumentException(IllegalArgumentException ex) {
