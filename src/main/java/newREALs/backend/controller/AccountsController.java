@@ -120,7 +120,7 @@ public class AccountsController {
         String refreshToken = tokenService.extractTokenFromHeader(request);
 
         if (!tokenService.validateToken(refreshToken)) {
-            throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+            return ResponseEntity.ok(ApiResponseDTO.failure("E403","유효하지 않은 Refresh Token입니다."));
         }
 
         Long userId = tokenService.extractUserIdFromToken(refreshToken);
