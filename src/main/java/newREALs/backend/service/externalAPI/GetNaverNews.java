@@ -63,7 +63,7 @@ public class GetNaverNews {
 
 
 
-    @Scheduled(cron = "0 27 01 ? * *")
+    @Scheduled(cron = "0 32 17 ? * *")
     @Transactional
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
@@ -307,7 +307,9 @@ public class GetNaverNews {
         List<String> set = new ArrayList<>();
         try{
             String url = htmlUrl;
-            doc =  Jsoup.connect(url).get();
+            doc = Jsoup.connect(url)
+            .timeout(60000) // 타임아웃 60초(60000ms)로 설정
+            .get();
 
             //기사 데려오기v & 기사사진
             Element elements = doc.selectFirst(htmlId1);
