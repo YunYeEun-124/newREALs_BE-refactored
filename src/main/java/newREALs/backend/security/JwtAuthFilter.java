@@ -54,6 +54,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             userId, null, null);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else if ("refresh".equals(tokenType)) {
+                    log.debug("JwtAuthFilter - Refresh 토큰으로 요청");
+                    Long userId = tokenService.extractUserIdFromToken(token);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userId, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     log.warn("JwtAuthFilter - 알 수 없는 토큰 타입: {}", tokenType);
                     sendForbiddenResponse(response, "잘못된 토큰입니다.");
