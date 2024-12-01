@@ -21,6 +21,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class NewsService {
+
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
@@ -29,7 +30,6 @@ public class NewsService {
 
     //요약, 설명, 용어, 퀴즈 생성 자동화
 
-    @Scheduled(cron="0 16 18 ? * * ")//매일 오전 6시 10분 실행
     @Transactional
     public void automaticBaseProcess(){
         //basenews들 중 summary=null인 뉴스들 가져옴(새롭게 생성된 뉴스)
@@ -40,7 +40,6 @@ public class NewsService {
                 news -> {
                     try{
                         resultList.add( processArticle(news.getId()));
-
                     } catch (Throwable e){
                         log.error("Failed to process article ID: {}", news.getId(), e);
                     }
@@ -48,13 +47,10 @@ public class NewsService {
         );
 
         basenewsRepository.saveAll(resultList);
-        System.out.println(resultList +" is saved");
-
-
     }
 
 
-    @Scheduled(cron="0 00 18 ? * * ")//매일 오전 6시 10분 실행
+
     @Transactional
     public void automaticDailyProcess(){
         // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
@@ -69,13 +65,9 @@ public class NewsService {
 
     }
 
-
-
-
     //요약, 설명, 용어 생성 메서드
     @Transactional
     public Basenews processArticle(Long basenewsId) throws Throwable {
-        long startTime = System.nanoTime(); // 시작 시간 기록
         System.out.println("processArticle in ");
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
@@ -93,7 +85,6 @@ public class NewsService {
                         "이 용어는 2번에서 생성한 설명에 포함되어 있어야 한다. 또한 2번에서 생성한 설명에 등장하는 순서대로 용어를 반환해야한다."+
                         "각 용어의 정의와 기사 내에서의 맥락을 1-2문장으로 간단히 설명해야한다." +
                         "설명은 반드시 '~해요'체를 사용하고, 친절하고 명확하게 작성한다. " +
-                        "출력 결과 예시를 보여줄게" +
                         "요약 : 일제강점기 피해자들이 일본 전범 기업에 대한 손해배상 소송에서 잇따라 승소하였으며, 일본제철과 미쓰비시중공업은 각각 피해자들에게 배상금을 지급하라는 판결을 받았습니다.\n" +
                         "설명 : 이 기사는 일제강점기 강제 동원된 피해자들이 일본의 전범 기업들을 상대로 제기한 손해배상 소송의 결과에 대해 다루고 있습니다. 서울중앙지법에서는 일본제철과 미쓰비시중공업이 각각 피해자들에게 1억 원을 배상하라는 판결을 내렸습니다. 이는 대법원이 2018년에 강제동원 피해자들의 손해배상 책임을 인정한 이후, 하급심에서도 피해자들의 청구권을 인정하는 판결이 이어진 결과입니다. 일본 기업 측은 소멸시효를 주장했으나, 대법원의 판결로 인해 이 주장은 받아들여지지 않았습니다. 김영환 민족문제연구소 대외협력실장은 배상금 변제 방법에 대해 언급하며, 한국 정부의 제3자 변제에 대한 실현이 없음을 지적하고, 필요하다면 강제집행을 고려하고 있다고 밝혔습니다.\n" +
                         "용어 : \n" +
@@ -104,23 +95,12 @@ public class NewsService {
         ));
 
         String result = (String) chatGPTService.generateContent(Messages).get("text");
-
-
-        // 처리 완료 시간 기록
-        long endTime = System.nanoTime();
-        long duration = (endTime - startTime) / 1_000_000; // 밀리초로 변환
-
-
         return parseBasenews(result,basenews);
     }
-
 
     //퀴즈 생성하는 메서드
     @Transactional
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
-
-        System.out.println("generate quiz in ");
-
         // 이미 isDailynews=true인 basenews를 전달받음
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
@@ -129,7 +109,8 @@ public class NewsService {
         quizMessages.add(Map.of("role", "user", "content",
                 "다음은 뉴스 기사의 요약입니다. 이 요약을 바탕으로 기사에 대한 핵심 정보를 묻는 true/false 문제를 만들어 주세요. "
                         + "문제는 반드시 기사의 중요한 내용을 기반으로 해야 합니다. "
-                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. "
+                        + "답은 O(참) 또는 X(거짓) 중 하나여야 하며, 문제의 정답과 관련된 배경 설명(해설)을 추가로 작성해주세요. " +
+                        "해설은 한 줄만 필요합니다. "
                         + "결과는 아래 형식에 맞춰 작성해 주세요:\n\n"
                         + "문제: <문제 내용>\n"
                         + "정답: <O 또는 X>\n"
@@ -151,7 +132,6 @@ public class NewsService {
 
         quizRepository.save(quiz);
     }
-
 
     //ThinkComment generate function
     @Async
@@ -181,9 +161,6 @@ public class NewsService {
                 aiComment = line.substring(3).trim(); // "설명:" 이후 내용
         }
 
-        System.out.println("topic result : "+topic);
-        System.out.println("aiComment result : "+aiComment);
-
         insightRepository.save(
           ThinkComment.builder()
                   .topic(topic)
@@ -191,22 +168,11 @@ public class NewsService {
                   .basenews(news).build()
         );
 
-        System.out.println("insight created!");
-
-
-
-
-
-
-
         StringTokenizer st = new StringTokenizer(quizContent,":");
         st.nextToken();
-
-
     }
 
-
-    //용어 파싱 메서드
+    //용어,요약,설명 파싱 메서드
     @Async
     private Basenews parseBasenews(String termsContent,Basenews basenews) {
         List<TermDetail> termDetails = new ArrayList<>();

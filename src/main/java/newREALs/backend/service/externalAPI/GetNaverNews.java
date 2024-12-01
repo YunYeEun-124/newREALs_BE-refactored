@@ -12,13 +12,13 @@ import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.CategoryRepository;
 import newREALs.backend.repository.KeywordRepository;
 import newREALs.backend.service.ChatGPTService;
+import newREALs.backend.service.NewsService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +29,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 public class GetNaverNews {
@@ -50,6 +45,7 @@ public class GetNaverNews {
 
     private final ChatGPTService chatGPTService;
 
+    private final NewsService newsService;
 
     @Value("${naver.api.client-id}")
     private String clientId;
@@ -57,8 +53,9 @@ public class GetNaverNews {
     @Value("${naver.api.secret-key}")
     private String clientSecret;
 
-    public GetNaverNews(ChatGPTService chatGPTService) {
+    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService) {
         this.chatGPTService = chatGPTService;
+        this.newsService = newsService;
     }
 
 
@@ -74,7 +71,6 @@ public class GetNaverNews {
         }
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-           
             ProcessNews(keyword.getName(), keyword, false,2);
             // 딜레이 추가 (예: 1초)
             try {
@@ -84,15 +80,10 @@ public class GetNaverNews {
                 System.out.println("Thread interrupted during delay");
             }
         }
+        newsService.automaticBaseProcess();
 
     }
 
-    @Scheduled(cron = "0 36 18 ? * *")
-    @Transactional
-    public void test(){
-        Optional<Keyword> keyword = keywordRepository.findByName("입시");
-        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
-    }
 
 
     //매일 아침마다 하루 한 번 실행
@@ -106,6 +97,7 @@ public class GetNaverNews {
         if(!previousDailynews.isEmpty()) {
             for (Basenews basenews : previousDailynews) basenews.cancelDailyNews();
         }
+
         List<Category> categoryList = categoryRepository.findAll();
 
         int pageNum = 102; int limit = 2;
@@ -113,6 +105,7 @@ public class GetNaverNews {
         for(int i=0;i<categoryList.size();i++){ //사회(102), 경제(101) 정치(100) 순서
 
             Category currentCategory = categoryList.get(i);
+
             if(Objects.equals(currentCategory.getName(), "정치")){
                 limit = 1;
                 pageNum = 100;
@@ -148,9 +141,11 @@ public class GetNaverNews {
                     }
                 }else{
                     System.out.println("can't find daily news keyword");
-
                 }
             }
+            newsService.automaticBaseProcess(); //내용 채우기
+            newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
+
         }
 
 
@@ -226,7 +221,6 @@ public class GetNaverNews {
 
         return titles;
     }
-
 
 
 
