@@ -119,8 +119,13 @@ public class AccountsController {
 
         String refreshToken = tokenService.extractTokenFromHeader(request);
 
-        if (!tokenService.validateToken(refreshToken)) {
+        if (refreshToken==null||!tokenService.validateToken(refreshToken)) {
             throw new IllegalArgumentException("유효하지 않은 Refresh Token입니다.");
+        }
+        //타입 확인
+        String tokenType = tokenService.getTokenType(refreshToken);
+        if (!"refresh".equals(tokenType)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰 타입입니다.");
         }
 
         Long userId = tokenService.extractUserIdFromToken(refreshToken);

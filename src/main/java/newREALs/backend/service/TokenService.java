@@ -63,16 +63,30 @@ public class TokenService {
     }
 
 
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            log.debug("TokenService - 토큰 유효함: {}", token);
-            return true;
-        } catch (Exception e) {
-            log.error("잘못된 JWT 토큰이에요: {}, 예외: {}", token, e.getMessage());
-            return false;
-        }
+//    public boolean validateToken(String token) {
+//        try {
+//            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+//            log.debug("TokenService - 토큰 유효함: {}", token);
+//            return true;
+//        } catch (Exception e) {
+//            log.error("잘못된 JWT 토큰이에요: {}, 예외: {}", token, e.getMessage());
+//            return false;
+//        }
+//    }
+public boolean validateToken(String token) {
+    try {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        String tokenType = claims.get("type", String.class);
+
+        log.debug("TokenService - 유효한 토큰: {}, 타입: {}", token, tokenType);
+
+        return true; // 토큰이 유효하면 true 반환
+    } catch (Exception e) {
+        log.error("TokenService - 유효하지 않은 토큰: {}, 에러: {}", token, e.getMessage());
+        return false; // 유효하지 않은 경우 false 반환
     }
+}
+
 
 
     // 헤더에서 토큰 추출

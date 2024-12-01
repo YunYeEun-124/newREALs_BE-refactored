@@ -59,7 +59,7 @@ public class UserActionService {
     }
 
     //공감 버튼 처리
-    //reactionType : 좋아요 0 슬퍼오 1 흥미로워요 2
+    //reactionType : 좋아요 0 슬퍼오 2 흥미로워요 1
     @Transactional
     public String getLikes(Long basenewsId, Long userId, int reactionType ){
         Basenews basenews = basenewsRepository.findById(basenewsId)
@@ -88,8 +88,8 @@ public class UserActionService {
                 message="공감을 취소했습니다.";
             }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
                 message="공감 변경 완료";
-                if(like.getReactionType()==2)subInterest.get().updateTotalCount(-1);
-                else if(reactionType==2)subInterest.get().updateTotalCount(1);
+                if(like.getReactionType()==1)subInterest.get().updateTotalCount(-1);
+                else if(reactionType==1)subInterest.get().updateTotalCount(1);
                 like.setReactionType(reactionType);
                 likesRepository.save(like);
             }
@@ -98,8 +98,10 @@ public class UserActionService {
             likesRepository.save(new Likes(basenews,user,reactionType)); //인스턴스 생성
             message="공감 반영 완료";
             user.updateKeywordInterest(keywordId,1); //공감 등록 -> KeywordInterest 증가
-            if(reactionType<2)subInterest.get().updateTotalCount(1); //공감 등록 -> SubInterest 증가
-            else subInterest.get().updateTotalCount(2);
+//            if(reactionType<2)subInterest.get().updateTotalCount(1); //공감 등록 -> SubInterest 증가
+//            else subInterest.get().updateTotalCount(2);
+            if(reactionType==1)subInterest.get().updateTotalCount(2);
+            else subInterest.get().updateTotalCount(1);
         }
         basenewsRepository.save(basenews);
         return message;
