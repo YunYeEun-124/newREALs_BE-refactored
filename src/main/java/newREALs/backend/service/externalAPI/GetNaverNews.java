@@ -192,7 +192,11 @@ public class GetNaverNews {
         List<String> titles = new ArrayList<>();
         try{
             String url = htmlUrl;
-            doc =  Jsoup.connect(url).get();
+            doc = Jsoup.connect(url)
+                .timeout(60000) // 타임아웃 60초
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
+                .get();
+
             Elements elements = doc.select(".sa_text_strong");
 
             for(Element element : elements){
@@ -308,8 +312,10 @@ public class GetNaverNews {
         try{
             String url = htmlUrl;
             doc = Jsoup.connect(url)
-            .timeout(60000) // 타임아웃 60초(60000ms)로 설정
-            .get();
+                .timeout(60000) // 타임아웃 60초
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
+                .get();
+
 
             //기사 데려오기v & 기사사진
             Element elements = doc.selectFirst(htmlId1);
@@ -340,15 +346,19 @@ public class GetNaverNews {
     }
 
     ////////////////////////////네이버 뉴스 연동 메서드///////////////////
-
-    public  String get(String apiUrl, Map<String, String> requestHeaders){
+    public String get(String apiUrl, Map<String, String> requestHeaders) {
         HttpURLConnection con = connect(apiUrl);
         try {
             con.setRequestMethod("GET");
-            for(Map.Entry<String, String> header :requestHeaders.entrySet()) {
+            
+            // 기본 요청 헤더 설정
+            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
                 con.setRequestProperty(header.getKey(), header.getValue());
             }
-
+    
+            // User-Agent 추가
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+    
             int responseCode = con.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
                 return readBody(con.getInputStream());
@@ -362,6 +372,8 @@ public class GetNaverNews {
             con.disconnect();
         }
     }
+
+   
 
 
     private  HttpURLConnection connect(String apiUrl){
