@@ -63,7 +63,7 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 11 23 ? * *")
+    @Scheduled(cron = "0 00 06 ? * *")
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
 
@@ -107,7 +107,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 28 00 ? * *")
+    @Scheduled(cron = "0 50 05 ? * *")
     public void getDailynews(){
 
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
