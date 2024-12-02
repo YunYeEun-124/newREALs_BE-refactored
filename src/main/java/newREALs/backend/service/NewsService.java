@@ -34,8 +34,8 @@ public class NewsService {
 
 
 
-  //  @Scheduled(cron = "0 37 20 ? * *")
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Scheduled(cron = "0 15 23 ? * *")
+    //@Transactional(propagation = Propagation.REQUIRES_NEW)
     public void automaticBaseProcess(){
         long startTime = System.currentTimeMillis(); // 시작 시간 기록
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();

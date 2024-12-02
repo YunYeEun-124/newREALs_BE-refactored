@@ -45,25 +45,22 @@ public class AccountsController {
         Long userid = tokenService.getUserId(userInfo);
         LocalDateTime current = LocalDateTime.now();
         int day = current.getDayOfMonth();
-        int hour = current.getHour();;
         Map<String, Object> response = new LinkedHashMap<>();
-
-        if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
-        else day --;
+        //0~30까지 [0] = 1일, [1] = 2일 .. , [30] = 31일
 
         boolean attendance = attendanceService.GetAttendance(userid);
 
-        response.put("day",(day+1));
+        response.put("day",(day));
         response.put("attendance",attendance);
 
         if(attendance){
             return ResponseEntity.ok(
-                    ApiResponseDTO.success( (day+1)+"일 출석 했습니다. ",response)
+                    ApiResponseDTO.success( (day)+"일 출석 했습니다. ",response)
             );
 
         }else {
             return ResponseEntity.ok(
-                    ApiResponseDTO.success( (day+1)+"일 출석 하지 않았습니다.",response)
+                    ApiResponseDTO.success( (day)+"일 출석 하지 않았습니다.",response)
             );
         }
     }
@@ -76,10 +73,7 @@ public class AccountsController {
             throw new SecurityException("유효하지 않은 토큰입니다");
         }
         int day = attendanceService.UpdateAttendance(userid);
-
-
-
-
+        
         if(day != -1 ){
             return ResponseEntity.ok(
                     ApiResponseDTO.success( (day+1)+"일 출석 체크 성공 ",null)

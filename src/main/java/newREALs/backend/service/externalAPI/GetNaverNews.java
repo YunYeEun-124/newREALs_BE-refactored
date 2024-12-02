@@ -87,19 +87,19 @@ public class GetNaverNews {
         newsService.automaticBaseProcess();
 
     }
-//
-//    @Scheduled(cron = "0 05 21 ? * *")
-//    @Transactional
-//    public void test() {
-//
-//        Optional<Keyword> keyword = keywordRepository.findByName("학비");
-//
-//        //타이틀, 원문,아읻
-//        ProcessNews(keyword.get().getName(), keyword.get(), false,5);
-//
-//        newsService.automaticBaseProcess();
-//
-//    }
+
+    @Scheduled(cron = "0 53 22 ? * *")
+    @Transactional
+    public void test() {
+
+        Optional<Keyword> keyword = keywordRepository.findByName("학비");
+
+        //타이틀, 원문,아읻
+        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
+
+        newsService.automaticBaseProcess();
+
+    }
 
 
 
