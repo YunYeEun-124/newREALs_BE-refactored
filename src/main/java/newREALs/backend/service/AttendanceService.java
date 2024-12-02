@@ -22,12 +22,10 @@ public class AttendanceService {
     public boolean GetAttendance(Long userid){
         Optional<Accounts> user = userRepository.findById(userid);
         LocalDateTime current = LocalDateTime.now();
-        int hour = current.getHour();
         int day = current.getDayOfMonth();
 
         if(user.isPresent()){
-            if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
-            else day --;
+            day --;
             return user.get().getAttendanceList()[day];  //출석체크함.
 
         } else {
@@ -42,12 +40,10 @@ public class AttendanceService {
 
         Optional<Accounts> user = userRepository.findById(userid);
         LocalDateTime current = LocalDateTime.now();
-        int hour = current.getHour();
-        int day = current.getDayOfMonth();
+
+        int day = current.getDayOfMonth()-1;
 
         if(user.isPresent()){
-            if (hour < 6) day = current.minusDays(1).getDayOfMonth() -1; //새벽 6시 이전 : 00:00~05:59에 들어온다. -> 전날
-            else day --;
 
             if(!user.get().getAttendanceList()[day]) {
                 user.get().updateAttendance(day);
