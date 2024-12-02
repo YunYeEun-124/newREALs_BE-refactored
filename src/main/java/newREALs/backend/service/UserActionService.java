@@ -86,10 +86,12 @@ public class UserActionService {
                 user.updateKeywordInterest(keywordId, -1); //공감 해제 -> KeywordInterest 감소
                 likesRepository.delete(like);
                 message="공감을 취소했습니다.";
-            }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 아무일도 일어나지 않음
+            }else{ //화나요에 좋아요 눌러져있음 -> 좋아요 클릭한 케이스 : 공감 변경
                 message="공감 변경 완료";
                 if(like.getReactionType()==1)subInterest.get().updateTotalCount(-1);
                 else if(reactionType==1)subInterest.get().updateTotalCount(1);
+                basenews.getLikesCounts()[reactionType]++;
+                basenews.getLikesCounts()[like.getReactionType()]--;
                 like.setReactionType(reactionType);
                 likesRepository.save(like);
             }
