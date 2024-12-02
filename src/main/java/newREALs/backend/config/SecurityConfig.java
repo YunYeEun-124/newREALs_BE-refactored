@@ -39,7 +39,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/accounts/login", "/accounts/register", "/token/refresh").permitAll() // 로그인 및 관심사 등록 API는 모든 유저 접근 가능
+                        .requestMatchers("/accounts/login", "/accounts/register").permitAll() // 로그인 및 관심사 등록 API는 모든 유저 접근 가능
                         .requestMatchers("/**").authenticated() // 그 외 모든 요청은 인증 필요
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);

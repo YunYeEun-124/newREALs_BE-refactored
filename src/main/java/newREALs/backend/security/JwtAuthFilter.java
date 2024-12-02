@@ -56,14 +56,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else if ("refresh".equals(tokenType)) {
                     log.debug("JwtAuthFilter - Refresh 토큰으로 요청");
-                    // Refresh 토큰은 특정 경로에서만 허용
-                    if (!request.getRequestURI().startsWith("/token/refresh")) {
-                        log.warn("JwtAuthFilter - Refresh 토큰으로 접근이 차단된 API 요청: {}", request.getRequestURI());
-                        sendForbiddenResponse(response, "Refresh 토큰은 해당 경로에서만 사용할 수 있습니다.");
-                        return;
-                    }
-
-                }else {
+                    Long userId = tokenService.extractUserIdFromToken(token);
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                            userId, null, null);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
                     log.warn("JwtAuthFilter - 알 수 없는 토큰 타입: {}", tokenType);
                     sendForbiddenResponse(response, "잘못된 토큰입니다.");
                     return;
