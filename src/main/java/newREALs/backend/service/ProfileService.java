@@ -56,7 +56,6 @@ public class ProfileService {
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
         List<Boolean> attendanceList = accountsRepository.findAttendanceListById(userId);
-
         return ProfileAttendanceListDto.builder()
                 .user_id(user.getId())
                 .attendanceList(attendanceList)
