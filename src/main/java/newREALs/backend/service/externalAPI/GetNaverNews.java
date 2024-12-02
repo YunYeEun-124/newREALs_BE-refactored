@@ -1,6 +1,8 @@
 package newREALs.backend.service.externalAPI;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 
 import newREALs.backend.domain.Basenews;
@@ -13,6 +15,7 @@ import newREALs.backend.repository.CategoryRepository;
 import newREALs.backend.repository.KeywordRepository;
 import newREALs.backend.service.ArticleProcessingService;
 import newREALs.backend.service.ChatGPTService;
+import newREALs.backend.service.KeywordProcessingService;
 import newREALs.backend.service.NewsService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -49,71 +52,74 @@ public class GetNaverNews {
     private final ChatGPTService chatGPTService;
 
     private final NewsService newsService;
+    private final KeywordProcessingService keywordProcessingService;
 
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    @Value("${naver.api.client-id}")
-    private String clientId;
-
-    @Value("${naver.api.secret-key}")
-    private String clientSecret;
-
-    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService) {
+    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService, KeywordProcessingService keywordProcessingService) {
         this.chatGPTService = chatGPTService;
         this.newsService = newsService;
+        this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 05 06 ? * *")
-    @Transactional
+    @Scheduled(cron = "0 11 23 ? * *")
     public void getBasenews() {
-
-
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
 
         if (keywords.isEmpty()) {
             System.out.println("no keywords ");
             return;
         }
+        int count = 0;
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            ProcessNews(keyword.getName(), keyword, false,2);
-            // 딜레이 추가 (예: 1초)
+            if(count == 3) break;
             try {
+                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
                 Thread.sleep(1000); // 1초 대기
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 인터럽트 상태 복구
                 System.out.println("Thread interrupted during delay");
             }
+
+            count++;
         }
-        newsService.automaticBaseProcess();
-
-    }
-
-    @Scheduled(cron = "0 53 22 ? * *")
-    @Transactional
-    public void test() {
-
-        Optional<Keyword> keyword = keywordRepository.findByName("학비");
-
-        //타이틀, 원문,아읻
-        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
 
         newsService.automaticBaseProcess();
 
     }
 
+
+
+//    @Scheduled(cron = "0 29 11 ? * *")
+//    @Transactional
+//    public void test() {
+//
+//        Optional<Keyword> keyword = keywordRepository.findByName("학비");
+//
+//        //타이틀, 원문,아읻
+//        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
+//        entityManager.flush();
+//        newsService.automaticBaseProcess();
+//
+//    }
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 55 05 ? * *")
-    @Transactional
+    @Scheduled(cron = "0 28 00 ? * *")
     public void getDailynews(){
 
-        //전날 데일리 뉴스 되돌리기
-        List<Basenews> previousDailynews = baseNewsRepository.findAllByIsDailyNews(true);
+        List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
 
-        if(!previousDailynews.isEmpty()) {
-            for (Basenews basenews : previousDailynews) basenews.cancelDailyNews();
+        if (!previousDailyNews.isEmpty()) {
+            for (Basenews basenews : previousDailyNews) {
+                basenews.cancelDailyNews(); // 상태 변경
+            }
+            baseNewsRepository.saveAll(previousDailyNews);
         }
+        System.out.println("now daily news size :"+baseNewsRepository.findAllByIsDailyNews(true).size());
+
 
         List<Category> categoryList = categoryRepository.findAll();
 
@@ -147,10 +153,9 @@ public class GetNaverNews {
 
                 if(keyword.isPresent()){
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
-                    ProcessNews(title,keyword.get(),true,3);
-
                     // 딜레이 추가
                     try {
+                        keywordProcessingService.processKeyword(title,keyword.get(),true,3);
                         Thread.sleep(1000); // 1초 대기
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -159,7 +164,9 @@ public class GetNaverNews {
                 }else{
                     System.out.println("can't find daily news keyword");
                 }
+
             }
+
             newsService.automaticBaseProcess(); //내용 채우기
             newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
 
@@ -231,197 +238,5 @@ public class GetNaverNews {
 
 
 
-    public  void ProcessNews(String title,Keyword keyword,Boolean isDailyNews,int display) {
-
-        String text;
-        try {
-            text = URLEncoder.encode(title, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("검색어 인코딩 실패", e);
-        }
-
-        String apiURL = "https://openapi.naver.com/v1/search/news?query=" + text + "&display="+display+"&sort=sim";    // JSON 결과
-        System.out.println("naver url 검색어 : "+ title);
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("X-Naver-Client-Id", clientId);
-        requestHeaders.put("X-Naver-Client-Secret", clientSecret);
-
-        String responseBody = get(apiURL, requestHeaders);
-
-        try {
-
-            Gson gson = new GsonBuilder() //추가 필드 생겨서 예외처리해야함.
-                    .excludeFieldsWithoutExposeAnnotation()
-                    .setPrettyPrinting()
-                    .create();
-
-            newsInfo newsinfo = gson.fromJson(responseBody, newsInfo.class);
-
-            if (newsinfo == null || newsinfo.getItems().isEmpty() ) {
-                System.out.println("newsinfo or newsinfo.getItems() is null");
-                return;
-            }
-            for (newsInfo.Item item : newsinfo.getItems()) {
-
-                if (!item.getLink().contains("n.news.naver.com")) {
-                    System.out.println("this is not naver news.");
-                    continue;
-                }
-
-                //Optional<Basenews> basenews = baseNewsRepository.findFirstByTitle(item.getTitle());
-                Optional<Basenews> basenews = baseNewsRepository.findFirstByNewsUrl(item.getLink());
-
-                if(basenews.isPresent()){
-                    System.out.println(item.getTitle() + "is already in it.");
-                    if(isDailyNews){
-                        basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
-                    }
-                }else{
-                    List<String> origin = getArticle(item.getLink(),"#dic_area","#img1"); //newsinfo 원문,이미지링크 필드 채우기.
-                    //item.getTitle()
-                    SubCategory sub = keyword.getSubCategory();
-                    Category category = keyword.getCategory();
-                    //DATE 형식변환
-                    SimpleDateFormat date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z",Locale.ENGLISH);
-                    SimpleDateFormat outputdate = new SimpleDateFormat("yyyy-MM-dd");
-                    Date parseDate = date.parse(item.getPubDate());
-
-                    System.out.println("title :"+ item.getTitle());
-                    System.out.println("title no tags : "+ item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", ""));
-
-                    try {
-                        Basenews bnews = Basenews.builder()
-                                .title(item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", "")   ) //태그제거
-                                .newsUrl(item.getLink())
-                                .imageUrl(origin.get(0))
-                                .uploadDate(outputdate.format(parseDate))
-                                .description(origin.get(1))
-                                .keyword(keyword)
-                                .subCategory(sub)
-                                .category(category)
-                                .isDailyNews(isDailyNews)
-                                .build();
-                        baseNewsRepository.save(bnews);
-                        System.out.println("news result : "+ bnews.getTitle());
-                        if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException("basenews 생성 실패", e);
-                    }
-                }
-
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("json error", e);
-        }
-
-    }
-
-    //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
-    public List<String> getArticle(String htmlUrl,String htmlId1, String htmlId2){
-        Document doc;
-        String plainText = "";
-        String imagePath = "";
-        List<String> set = new ArrayList<>();
-        try{
-            String url = htmlUrl;
-            doc = Jsoup.connect(url)
-                .timeout(60000) // 타임아웃 60초
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
-                .get();
-
-
-            //기사 데려오기v & 기사사진
-            Element elements = doc.selectFirst(htmlId1);
-            Element imageElements = doc.selectFirst(htmlId2);
-
-            if(elements != null){
-                plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
-                if(imageElements != null){
-                    imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
-                }else{ //default image
-                    imagePath = null;
-                }
-
-                set.add(imagePath);
-                set.add(plainText);
-
-            }else {
-                //  elements = doc.selectFirst("#_article_");
-                System.out.println("추출 안된 주소 : "+url);
-                throw  new RuntimeException("기사 추출 못했음. ");
-            }
-
-        }catch (IOException e){
-            throw new RuntimeException("뉴스 원문 못 가져왔대요~~", e);
-        }
-        //  System.out.println("get article 기사 추출 성공");
-        return set;
-    }
-
-    ////////////////////////////네이버 뉴스 연동 메서드///////////////////
-    public String get(String apiUrl, Map<String, String> requestHeaders) {
-        HttpURLConnection con = connect(apiUrl);
-        try {
-            con.setRequestMethod("GET");
-            
-            // 기본 요청 헤더 설정
-            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
-                con.setRequestProperty(header.getKey(), header.getValue());
-            }
-    
-            // User-Agent 추가
-            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-    
-            int responseCode = con.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
-                return readBody(con.getInputStream());
-            } else { // 오류 발생
-                System.out.println("에러입");
-                return readBody(con.getErrorStream());
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("API 요청과 응답 실패", e);
-        } finally {
-            con.disconnect();
-        }
-    }
-
-   
-
-
-    private  HttpURLConnection connect(String apiUrl){
-        try {
-            URL url = new URL(apiUrl);
-            return (HttpURLConnection)url.openConnection();
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("API URL이 잘못되었습니다. : " + apiUrl, e);
-        } catch (IOException e) {
-            throw new RuntimeException("연결이 실패했습니다. : " + apiUrl, e);
-        }
-    }
-
-
-    private  String readBody(InputStream body){
-        InputStreamReader streamReader = new InputStreamReader(body);
-
-
-        try (BufferedReader lineReader = new BufferedReader(streamReader)) {
-            StringBuilder responseBody = new StringBuilder();
-
-
-            String line;
-            while ((line = lineReader.readLine()) != null) {
-                responseBody.append(line);
-            }
-
-
-            return responseBody.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("API 응답을 읽는 데 실패했습니다.", e);
-        }
-    }
 }
 
