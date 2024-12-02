@@ -34,7 +34,7 @@ public class Accounts {
     @ColumnDefault("0")
     private int point;
 
-
+    @OrderColumn(name = "attendance_list_order")
     @ElementCollection(fetch = FetchType.LAZY) //notion 참고
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
     final boolean[] attendanceList = new boolean[31]; //매달 리셋됨
