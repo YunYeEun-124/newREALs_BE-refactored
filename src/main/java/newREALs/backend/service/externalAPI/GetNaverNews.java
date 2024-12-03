@@ -63,10 +63,10 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    // @Scheduled(cron = "0 35 00 ? * *")
-    // public void getEconomyBasenewsnews(){
-    //     getBasenews("경제");
-    // }
+    @Scheduled(cron = "0 10 06 ? * *")
+    public void getEconomyBasenewsnews(){
+        getBasenews("경제");
+    }
 
 //    @Scheduled(cron = "0 15 12 ? * *")
 //    public void getSocietyBasenewsnews(){
@@ -77,21 +77,21 @@ public class GetNaverNews {
 //    public void getPoliticsBasenewsnews(){
 //        getBasenews("정치");
 //    }
-    @Scheduled(cron = "0 45 03 ? * *")
-    public void test() {
+    // @Scheduled(cron = "0 45 03 ? * *")
+    // public void test() {
 
-        Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
-        try {
-            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
-            Thread.sleep(1000); // 1초 대기
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-            System.out.println("Thread interrupted during delay");
-        }
+    //     Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
+    //     try {
+    //         keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
+    //         Thread.sleep(1000); // 1초 대기
+    //     } catch (InterruptedException e) {
+    //         Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+    //         System.out.println("Thread interrupted during delay");
+    //     }
 
-        newsService.automaticBaseProcess();
+    //     newsService.automaticBaseProcess();
 
-    }
+    // }
 
 
 
