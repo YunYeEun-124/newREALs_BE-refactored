@@ -18,4 +18,7 @@ public interface KeywordRepository extends JpaRepository<Keyword,Long> {
     Optional<Keyword> findByName(String key);
     @Query("SELECT k.name FROM Keyword k JOIN k.category c WHERE c.name = :categoryname")
     List<String> findAllByCategory_Name(@Param("categoryname") String categoryname);
+
+    @Query("SELECT k FROM Keyword k JOIN k.category c WHERE c.name = :categoryname")
+    List<Keyword> findAllByCategoryName(@Param("categoryname") String categoryname);
 }
