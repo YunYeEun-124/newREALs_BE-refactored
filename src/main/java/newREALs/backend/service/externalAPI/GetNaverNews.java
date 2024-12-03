@@ -77,22 +77,22 @@ public class GetNaverNews {
 //    public void getPoliticsBasenewsnews(){
 //        getBasenews("정치");
 //    }
-
- @Scheduled(cron = "0 12 02 ? * *")
+    @Scheduled(cron = "0 45 03 ? * *")
     public void test() {
 
-        Optional<Keyword> keyword = keywordRepository.findByName("대통령실");
+        Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
         try {
-            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,15);
+            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
             Thread.sleep(1000); // 1초 대기
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // 인터럽트 상태 복구
             System.out.println("Thread interrupted during delay");
         }
-        
+
         newsService.automaticBaseProcess();
 
     }
+
 
 
 
@@ -123,21 +123,6 @@ public class GetNaverNews {
 
     }
 
-    @Scheduled(cron = "0 40 03 ? * *")
-    public void test() {
-
-        Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
-        try {
-            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
-            Thread.sleep(1000); // 1초 대기
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-            System.out.println("Thread interrupted during delay");
-        }
-
-        newsService.automaticBaseProcess();
-
-    }
 
 
     //매일 아침마다 하루 한 번 실행
