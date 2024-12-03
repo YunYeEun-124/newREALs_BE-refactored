@@ -80,6 +80,7 @@ public class GetNaverNews {
 
 
 
+
     public void getBasenews(String category) {
         System.out.println("getBasenews in");
         List<Keyword> keywords = keywordRepository.findAllByCategoryName(category); //key word 다 불러와
@@ -106,18 +107,22 @@ public class GetNaverNews {
         newsService.automaticBaseProcess();
 
     }
-//    @Scheduled(cron = "0 29 11 ? * *")
-//    @Transactional
-//    public void test() {
-//
-//        Optional<Keyword> keyword = keywordRepository.findByName("학비");
-//
-//        //타이틀, 원문,아읻
-//        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
-//        entityManager.flush();
-//        newsService.automaticBaseProcess();
-//
-//    }
+
+    @Scheduled(cron = "0 40 03 ? * *")
+    public void test() {
+
+        Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
+        try {
+            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
+            Thread.sleep(1000); // 1초 대기
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+            System.out.println("Thread interrupted during delay");
+        }
+
+        newsService.automaticBaseProcess();
+
+    }
 
 
     //매일 아침마다 하루 한 번 실행
