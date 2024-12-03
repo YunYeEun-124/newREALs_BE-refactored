@@ -58,7 +58,7 @@ public class AttendanceService {
         return -1;
     }
 
-    @Scheduled(cron  = "0 0 6 1 * *")
+    @Scheduled(cron  = "0 0 00 1 * *")
     @Transactional
     public void resetAttendanceList() {
         List<Accounts> accounts = userRepository.findAll();

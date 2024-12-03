@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.domain.*;
+import newREALs.backend.dto.LikesDTO;
 import newREALs.backend.dto.NewsDetailDto;
 import newREALs.backend.dto.SimpleNewsDto;
 import newREALs.backend.dto.TermDetailDto;
@@ -29,6 +30,23 @@ public class NewsDetailService {
     private final KeywordRepository keywordRepository;
 
 
+    //공감 조회
+    @Transactional
+    public LikesDTO getLikesDetail(Long basenewsId, Long userId){
+        Basenews basenews = basenewsRepository.findById(basenewsId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
+        Accounts user=userRepository.findById(userId)
+                .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
+        Optional<Likes> likes=likesRepository.findByUserAndBasenews(user,basenews);
+        int reactionType=-1;
+        if(likes.isPresent()){
+            reactionType=likes.get().getReactionType();
+        }
+        LikesDTO likesDTO=new LikesDTO(basenews,reactionType);
+        return likesDTO;
+
+    }
+
     //뉴스 상세페이지 조회 메서드
     @Transactional
     public NewsDetailDto getNewsDetail(Long basenewsId, Long userId, String cate, String subCate, String keyword){
@@ -36,12 +54,6 @@ public class NewsDetailService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
-
-//        //cate, subCate, keyword중 하나는 무조건 받아야함
-//        if(cate==null&&subCate==null&&keyword==null){
-//           //오류 던짐
-//            throw new IllegalArgumentException("카테고리, 서브카테고리, 키워드 중 하나를 입력해야 합니다.");
-//        }
 
         //조회수 증가
         increaseViewCount(basenews,user);
@@ -59,15 +71,6 @@ public class NewsDetailService {
         Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
         boolean b=isScrapped.isPresent();
         newsDetailDto.setScrapped(b);
-
-        //공감 표시
-        Optional<Likes> like=likesRepository.findByUserAndBasenews(user,basenews);
-        if(like.isPresent()){
-            newsDetailDto.setReactionType(like.get().getReactionType());
-        }
-        else{
-            newsDetailDto.setReactionType(-1);
-        }
 
         //param아무것도 안들어옴 : 이전이후뉴스 안줘도됨
         if(cate==null&&subCate==null&&keyword==null){

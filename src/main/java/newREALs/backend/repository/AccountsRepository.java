@@ -14,8 +14,8 @@ import java.util.List;
 
 @Repository
 public interface AccountsRepository extends JpaRepository<Accounts, Long> {
-    @Query("SELECT n.attendanceList FROM Accounts n WHERE n.id = :userId")
-    List<Boolean> findAttendanceListById(Long userId);
+    @Query(value = "SELECT attendance_list FROM accounts_attendance_list WHERE accounts_id = :userId ORDER BY attendance_list_order ASC", nativeQuery = true)
+    List<Boolean> findAttendanceListById(@Param("userId") Long userId);
 
     // LIMIT 사용 안됨 -> Pageable로 가져오는 개수 정하기
     // 카테고리별 관심도 count 상위 3개

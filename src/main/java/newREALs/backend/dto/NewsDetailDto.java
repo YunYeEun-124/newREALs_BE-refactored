@@ -28,9 +28,7 @@ public class NewsDetailDto {
     private String category;
     private String subCategory;
     private String keyword;
-    private int good;
-    private int bad;
-    private int interesting;
+
     private int totalLikes;
     private Long viewCount; //조회수
     @JsonIgnore
@@ -40,7 +38,7 @@ public class NewsDetailDto {
     private SimpleNewsDto prevNews;
     private SimpleNewsDto nextNews;
     private String wherePageFrom;
-    private int reactionType;
+
 
     public NewsDetailDto(Basenews basenews) {
         this.id = basenews.getId();
@@ -52,9 +50,7 @@ public class NewsDetailDto {
         this.uploadDate = basenews.getUploadDate();
         this.viewCount=basenews.getViewCount();
         //공감수
-        this.good=basenews.getLikesCounts()[0];
-        this.bad=basenews.getLikesCounts()[2];
-        this.interesting=basenews.getLikesCounts()[1];
+        this.totalLikes=basenews.getLikesCounts()[0]+basenews.getLikesCounts()[1]+basenews.getLikesCounts()[2];
 
         this.category=basenews.getCategory().getName();
         this.subCategory=basenews.getSubCategory().getName();
@@ -63,9 +59,7 @@ public class NewsDetailDto {
     }
 
 
-    public int getTotalLikes() {
-        return good+bad+interesting;
-    }
+
 
     public void setScrapped(boolean isScrapped) {
         this.scrapped=isScrapped;
