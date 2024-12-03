@@ -78,19 +78,21 @@ public class GetNaverNews {
 //        getBasenews("정치");
 //    }
 
-    @Scheduled(cron = "0 55 01 ? * *")
-    @Transactional
+ @Scheduled(cron = "0 00 02 ? * *")
     public void test() {
 
         Optional<Keyword> keyword = keywordRepository.findByName("대통령실");
-
-        //타이틀, 원문,아읻
-        keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,15);
-        entityManager.flush();
+        try {
+            keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,15);
+            Thread.sleep(1000); // 1초 대기
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+            System.out.println("Thread interrupted during delay");
+        }
         
+        newsService.automaticBaseProcess();
 
     }
-
 
 
     public void getBasenews(String category) {
