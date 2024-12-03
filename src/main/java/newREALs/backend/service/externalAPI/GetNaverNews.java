@@ -78,7 +78,7 @@ public class GetNaverNews {
 //        getBasenews("정치");
 //    }
 
- @Scheduled(cron = "0 00 02 ? * *")
+ @Scheduled(cron = "0 12 02 ? * *")
     public void test() {
 
         Optional<Keyword> keyword = keywordRepository.findByName("대통령실");
