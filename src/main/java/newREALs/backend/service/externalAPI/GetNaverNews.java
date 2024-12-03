@@ -78,14 +78,14 @@ public class GetNaverNews {
 //        getBasenews("정치");
 //    }
 
-    @Scheduled(cron = "0 33 01 ? * *")
+    @Scheduled(cron = "0 55 01 ? * *")
     @Transactional
     public void test() {
 
-        Optional<Keyword> keyword = keywordRepository.findByName("학비");
+        Optional<Keyword> keyword = keywordRepository.findByName("대통령실");
 
         //타이틀, 원문,아읻
-        keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,3);
+        keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,15);
         entityManager.flush();
         
 
