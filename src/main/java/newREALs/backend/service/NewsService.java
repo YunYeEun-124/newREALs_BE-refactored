@@ -32,11 +32,16 @@ public class NewsService {
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
 
+    @Transactional
+    public void saveProcessedNews(List<Basenews> processedNews) {
+        basenewsRepository.saveAll(processedNews);
+    }
 
-
-    @Scheduled(cron = "0 15 23 ? * *")
-    //@Transactional(propagation = Propagation.REQUIRES_NEW)
+   // @Scheduled(cron = "0 15 23 ? * *")
     public void automaticBaseProcess(){
+        System.out.println("automaticBaseProcess in ");
+
+
         long startTime = System.currentTimeMillis(); // 시작 시간 기록
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
         if(newBasenews.isEmpty()) {
@@ -55,7 +60,7 @@ public class NewsService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         List<Basenews> resultList = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList();
 
-        basenewsRepository.saveAll(resultList);
+        saveProcessedNews(resultList);
 
         long endTime = System.currentTimeMillis(); // 종료 시간 기록
         System.out.println("비동기 작업 전체 처리 시간: " + (endTime - startTime) + "ms");
@@ -63,9 +68,9 @@ public class NewsService {
 
 
 
-    @Transactional
+   // @Transactional
     public void automaticDailyProcess(){
-        // 오늘의 뉴스 5개 찾아와서 퀴즈 생성 + 생각정리 같이 만들기
+        System.out.println("automaticDailyProcess in");
         for (Basenews news : basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc()) {
             try {
                 generateAndSaveQuizzesForDailyNews(news);
@@ -80,9 +85,16 @@ public class NewsService {
 
 
     //퀴즈 생성하는 메서드
-    @Transactional
+    //@Transactional
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
         // 이미 isDailynews=true인 basenews를 전달받음
+        // 1. 이미 해당 뉴스에 대한 퀴즈가 존재하는지 확인
+        if (quizRepository.existsByBasenews(news)) {
+            log.warn("Quiz already exists for Basenews ID: {}", news.getId());
+            return;
+        }
+        System.out.println("generateAndSaveQuizzesForDailyNews in");
+
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
                 "나는 뉴스 입문자들을 위해 뉴스를 쉽게 풀어 설명하고, 요약과 어려운 용어 설명을 제공해주는 사이트를 운영하고 있다.\n" +
@@ -126,8 +138,14 @@ public class NewsService {
     }
 
     //ThinkComment generate function
-    @Async
+   // @Async
     public void generateAndSaveThinkCommentForDailyNews(Basenews news){
+        System.out.println("generateAndSaveThinkCommentForDailyNews in");
+        if (insightRepository.existsByBasenews(news)) {
+            log.warn("insight already exists for Basenews ID: {}", news.getId());
+            return;
+        }
+
         List<Map<String, String>> insightMessages = new ArrayList<>();
         insightMessages.add(Map.of("role", "system", "content",
                 "You are a highly skilled assistant that generates quiz questions based on news articles. "
@@ -167,7 +185,7 @@ public class NewsService {
 
 
     //퀴즈 파싱 메서드
-    @Async
+    //@Async
     private Map<String, String> parseQuizContent(String quizContent) {
         Map<String, String> parsedQuiz = new HashMap<>();
         String[] lines = quizContent.split("\n");
