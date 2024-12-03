@@ -63,10 +63,10 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 35 00 ? * *")
-    public void getEconomyBasenewsnews(){
-        getBasenews("경제");
-    }
+    // @Scheduled(cron = "0 35 00 ? * *")
+    // public void getEconomyBasenewsnews(){
+    //     getBasenews("경제");
+    // }
 
 //    @Scheduled(cron = "0 15 12 ? * *")
 //    public void getSocietyBasenewsnews(){
@@ -77,6 +77,19 @@ public class GetNaverNews {
 //    public void getPoliticsBasenewsnews(){
 //        getBasenews("정치");
 //    }
+
+    @Scheduled(cron = "0 33 01 ? * *")
+    @Transactional
+    public void test() {
+
+        Optional<Keyword> keyword = keywordRepository.findByName("학비");
+
+        //타이틀, 원문,아읻
+        keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,3);
+        entityManager.flush();
+        
+
+    }
 
 
 
