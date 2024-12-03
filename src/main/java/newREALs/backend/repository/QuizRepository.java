@@ -19,4 +19,5 @@ public interface QuizRepository extends JpaRepository<Quiz,Long> {
     @Query("SELECT q.problem FROM Quiz q WHERE q.basenews.id = :basenewsId")
     Optional<String> findProblemByBasenewsId(@Param("basenewsId") Long basenewsId);
 
+    boolean existsByBasenews(Basenews news);
 }

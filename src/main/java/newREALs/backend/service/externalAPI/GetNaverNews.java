@@ -63,8 +63,9 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 11 23 ? * *")
+    @Scheduled(cron = "0 15 12 ? * *")
     public void getBasenews() {
+        System.out.println("getBasenews in");
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
 
         if (keywords.isEmpty()) {
@@ -89,9 +90,6 @@ public class GetNaverNews {
         newsService.automaticBaseProcess();
 
     }
-
-
-
 //    @Scheduled(cron = "0 29 11 ? * *")
 //    @Transactional
 //    public void test() {
@@ -107,9 +105,9 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 28 00 ? * *")
+    @Scheduled(cron = "0 00 12 ? * *")
     public void getDailynews(){
-
+        System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
 
         if (!previousDailyNews.isEmpty()) {
@@ -119,8 +117,6 @@ public class GetNaverNews {
             baseNewsRepository.saveAll(previousDailyNews);
         }
         System.out.println("now daily news size :"+baseNewsRepository.findAllByIsDailyNews(true).size());
-
-
         List<Category> categoryList = categoryRepository.findAll();
 
         int pageNum = 102; int limit = 2;
@@ -149,6 +145,7 @@ public class GetNaverNews {
                 st = new StringTokenizer(titleKeywordList.get(j),":");
                 String title = st.nextToken().trim(); //공백, 구분자 제거
                 String k = st.nextToken().trim();
+                System.out.println("=================== this is k ::: "+ k);
                 Optional<Keyword> keyword = keywordRepository.findByName(k);
 
                 if(keyword.isPresent()){
@@ -163,14 +160,15 @@ public class GetNaverNews {
                     }
                 }else{
                     System.out.println("can't find daily news keyword");
+                    return;
                 }
 
             }
 
-            newsService.automaticBaseProcess(); //내용 채우기
-            newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
-
         }
+
+        newsService.automaticBaseProcess(); //내용 채우기
+        newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
 
     }
 
@@ -186,11 +184,12 @@ public class GetNaverNews {
         titleMessages.add(Map.of("role", "user", "content", "다음 타이틀 리스트에서 사회면에서 중요한 타이틀 "+limit+"개를 골라줘"+titleList +
                 "0. 가장 중요하다고 생각되는 타이틀을 골라야해."+
                 "1. 평소에 뉴스를 읽지 않는 10대 20대들도 꼭 알아야하는 뉴스라고 생각되는 것을 선별해야하고" +
-                "2. "+category.getName()+" 카테고리에 적합한 걸 골라야해" +
-                "3. 해당 타이틀의 뉴스로 입문자를 위한 퀴즈 만들어야하기 때문에 이를 고려해서 골라야해" +
-                "4. 특정 지역에 관한 내용은 제외해줘 " +
+                "2. "+category.getName()+" 카테고리에 적합한 걸 골라" +
+                "3. 해당 타이틀의 뉴스로 입문자를 위한 퀴즈 만들어야하기 때문에 이를 고려해서 골라" +
+                "4. 특정 지역에 관한 내용은 제외" +
                 "다음은 고른 타이틀과 카테고리를 한개씩 매핑해야해. 카테고리는 다음과 같아. " + keywordList
-                +"최종 결과물 형식은 " +
+                +"이 카테고리 외에 다른 카테고리를 매핑시키면 안되고, 정확한 이름,띄어쓰기도 지켜야해" +
+                "최종 결과물 형식은 " +
                 "타이틀 : 카테고리 이걸 꼭 지켜야해 " +
                 " 예시는 다음과 같아 . 대통령, 캐나다 총리와 정상회담…방산 등 포괄적 안보협력 확대 : 대통령 연설 \n "+
                 "\n 이 형식에 넘버링도 하지말고 쌍따옴표로 감싸도 안돼. 무조건 내가 말한 타이틀 : 카테고리가 한줄씩 출력 "
