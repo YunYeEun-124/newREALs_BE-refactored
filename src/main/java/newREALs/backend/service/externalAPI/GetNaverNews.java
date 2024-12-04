@@ -63,49 +63,70 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 15 12 ? * *")
-    public void getBasenews() {
+    @Scheduled(cron = "0 10 06 ? * *")
+    public void getEconomyBasenewsnews(){
+        getBasenews("경제");
+    }
+
+//    @Scheduled(cron = "0 15 12 ? * *")
+//    public void getSocietyBasenewsnews(){
+//        getBasenews("사회");
+//    }
+//
+//    @Scheduled(cron = "0 15 12 ? * *")
+//    public void getPoliticsBasenewsnews(){
+//        getBasenews("정치");
+//    }
+    // @Scheduled(cron = "0 45 03 ? * *")
+    // public void test() {
+
+    //     Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
+    //     try {
+    //         keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
+    //         Thread.sleep(1000); // 1초 대기
+    //     } catch (InterruptedException e) {
+    //         Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+    //         System.out.println("Thread interrupted during delay");
+    //     }
+
+    //     newsService.automaticBaseProcess();
+
+    // }
+
+
+
+
+    public void getBasenews(String category) {
         System.out.println("getBasenews in");
-        List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
+        List<Keyword> keywords = keywordRepository.findAllByCategoryName(category); //key word 다 불러와
 
         if (keywords.isEmpty()) {
             System.out.println("no keywords ");
             return;
         }
-        int count = 0;
+       // int count = 0;
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            if(count == 3) break;
+           // if(count == 3) break;
             try {
-                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
+                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,3);
                 Thread.sleep(1000); // 1초 대기
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 인터럽트 상태 복구
                 System.out.println("Thread interrupted during delay");
             }
 
-            count++;
+           // count++;
         }
 
         newsService.automaticBaseProcess();
 
     }
-//    @Scheduled(cron = "0 29 11 ? * *")
-//    @Transactional
-//    public void test() {
-//
-//        Optional<Keyword> keyword = keywordRepository.findByName("학비");
-//
-//        //타이틀, 원문,아읻
-//        ProcessNews(keyword.get().getName(), keyword.get(), false,2);
-//        entityManager.flush();
-//        newsService.automaticBaseProcess();
-//
-//    }
+
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 20 21 ? * *")
+    @Scheduled(cron = "0 55 05 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
