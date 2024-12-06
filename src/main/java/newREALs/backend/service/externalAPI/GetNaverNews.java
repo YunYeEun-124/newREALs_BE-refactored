@@ -74,7 +74,7 @@ public class GetNaverNews {
     //        getBasenews("사회");
     //    }
     //
-       @Scheduled(cron = "0 47 00 ? * *")
+       @Scheduled(cron = "0 30 01 ? * *")
        public void getPoliticsBasenewsnews(){
            getBasenews("정치");
        }
@@ -112,7 +112,7 @@ public class GetNaverNews {
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
            // if(count == 3) break;
             try {
-                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
+                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,2);
                 Thread.sleep(1000); // 1초 대기
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); // 인터럽트 상태 복구
