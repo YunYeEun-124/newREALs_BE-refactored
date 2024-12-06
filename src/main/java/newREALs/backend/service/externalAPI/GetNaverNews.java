@@ -127,7 +127,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 35 23 ? * *")
+    @Scheduled(cron = "0 17 00 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
