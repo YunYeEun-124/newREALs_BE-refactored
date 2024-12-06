@@ -51,103 +51,10 @@ public class KeywordProcessingService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-
-//    @Transactional
-//    public void processKeyword(String title,Keyword keyword,boolean isDailyNews,int display){
-//        ProcessNews(title, keyword, isDailyNews,display);
-//        entityManager.flush();
-//    }
-//
-//
-//    public  void ProcessNews(String title,Keyword keyword,Boolean isDailyNews,int display) {
-//
-//        String text;
-//        try {
-//            text = URLEncoder.encode(title, "UTF-8");
-//        } catch (UnsupportedEncodingException e) {
-//            throw new RuntimeException("검색어 인코딩 실패", e);
-//        }
-//
-//        String apiURL = "https://openapi.naver.com/v1/search/news?query=" + text + "&display="+display+"&sort=sim";    // JSON 결과
-//        System.out.println("naver url 검색어 : "+ title);
-//        Map<String, String> requestHeaders = new HashMap<>();
-//        requestHeaders.put("X-Naver-Client-Id", clientId);
-//        requestHeaders.put("X-Naver-Client-Secret", clientSecret);
-//
-//        String responseBody = get(apiURL, requestHeaders);
-//
-//        try {
-//
-//            Gson gson = new GsonBuilder() //추가 필드 생겨서 예외처리해야함.
-//                    .excludeFieldsWithoutExposeAnnotation()
-//                    .setPrettyPrinting()
-//                    .create();
-//
-//            newsInfo newsinfo = gson.fromJson(responseBody, newsInfo.class);
-//
-//            if (newsinfo == null || newsinfo.getItems().isEmpty() ) {
-//                System.out.println("newsinfo or newsinfo.getItems() is null");
-//                return;
-//            }
-//            for (newsInfo.Item item : newsinfo.getItems()) {
-//
-//                if (!item.getLink().contains("n.news.naver.com")) {
-//                    System.out.println("this is not naver news.");
-//                    continue;
-//                }
-//
-//                //Optional<Basenews> basenews = baseNewsRepository.findFirstByTitle(item.getTitle());
-//                Optional<Basenews> basenews = baseNewsRepository.findFirstByNewsUrl(item.getLink());
-//
-//                if(basenews.isPresent()){
-//                    System.out.println(item.getTitle() + "is already in it.");
-//                    if(isDailyNews){
-//                        basenews.get().checkDailyNews();//이미 있는 뉴스를 데일리뉴스로 만든다.
-//                    }
-//                }else{
-//                    List<String> origin = getArticle(item.getLink(),"#dic_area","#img1"); //newsinfo 원문,이미지링크 필드 채우기.
-//                    SubCategory sub = keyword.getSubCategory();
-//                    Category category = keyword.getCategory();
-//                    //DATE 형식변환
-//                    SimpleDateFormat date = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-//                    SimpleDateFormat outputdate = new SimpleDateFormat("yyyy-MM-dd");
-//                    Date parseDate = date.parse(item.getPubDate());
-//
-//
-//                    try {
-//                        Basenews bnews = Basenews.builder()
-//                                .title(item.getTitle().replaceAll("<[^>]*>?","") .replace("&quot;", "")   ) //태그제거
-//                                .newsUrl(item.getLink())
-//                                .imageUrl(origin.get(0))
-//                                .uploadDate(outputdate.format(parseDate))
-//                                .description(origin.get(1))
-//                                .keyword(keyword)
-//                                .subCategory(sub)
-//                                .category(category)
-//                                .isDailyNews(isDailyNews)
-//                                .build();
-//                        baseNewsRepository.save(bnews);
-//                        System.out.println("news result : "+ bnews.getTitle());
-//                        if(isDailyNews) break; //하나씩만있으면되니까 for loop 나와~
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                        throw new RuntimeException("basenews 생성 실패", e);
-//                    }
-//                }
-//
-//
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("json error", e);
-//        }
-//
-//    }
-
     private final RateLimiter rateLimiter = RateLimiter.create(1.0); // 초당 1회 호출
 
     @Transactional
-    public void processKeyword(String title, Keyword keyword, boolean isDailyNews, int display) {
+    public List<Basenews> processKeyword(String title, Keyword keyword, boolean isDailyNews, int display) {
         rateLimiter.acquire(); // 호출 속도 제한
 
         // API 호출 후 데이터 처리
@@ -158,6 +65,8 @@ public class KeywordProcessingService {
         if (createdNews.isEmpty()) {
             System.out.println("No new Basenews created for keyword: " + keyword.getName());
         }
+
+        return createdNews;
     }
 
 
