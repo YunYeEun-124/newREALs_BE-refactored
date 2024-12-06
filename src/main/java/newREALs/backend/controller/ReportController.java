@@ -33,17 +33,25 @@ public class ReportController {
     //[get] 프로필 페이지 - 유저 관심사
     @GetMapping
     public ResponseEntity<?> getInterest(HttpServletRequest request, HttpServletResponse httpServletResponse) throws JsonProcessingException {
-        Long userId = tokenService.getUserId(request);
-        Optional<Report> reportOptional = reportRepository.findByUserId(userId);
+        try {
+            Long userId = tokenService.getUserId(request);
+            Optional<Report> reportOptional = reportRepository.findByUserId(userId);
 
-        if(reportOptional.isPresent()) {
-            String jsonString = reportOptional.get().getReport();
-            String formattedJson = jsonString.replace("\\", "\n");
-            ObjectMapper objectMapper = new ObjectMapper();
-            return ResponseEntity.ok(ApiResponseDTO.success("분석 레포트 조회 성공", objectMapper.readTree(formattedJson)));
-        }
-        else {
-            return ResponseEntity.ok(ApiResponseDTO.failure("404", "레포트 조회 실패"));
+            if (reportOptional.isPresent()) {
+                String jsonString = reportOptional.get().getReport();
+                // JSON 문자열 처리
+                String formattedJson = jsonString.replace("\\", "\n");
+                JsonNode jsonNode = objectMapper.readTree(formattedJson);
+
+                return ResponseEntity.ok(ApiResponseDTO.success("분석 레포트 조회 성공", jsonNode));
+            } else {
+                // 데이터가 없는 경우
+                return ResponseEntity.ok(ApiResponseDTO.success("레포트 데이터가 없습니다", null));
+            }
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body(ApiResponseDTO.failure("E401", "토큰이 유효하지 않습니다"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(ApiResponseDTO.failure("E500", "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요."));
         }
     }
 
