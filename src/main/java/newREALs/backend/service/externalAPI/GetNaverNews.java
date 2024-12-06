@@ -65,7 +65,7 @@ public class GetNaverNews {
 
 
 
-    @Scheduled(cron = "0 46 02 ? * *")
+    @Scheduled(cron = "0 05 03 ? * *")
     public void getBasenews() {
         System.out.println("getBasenews in");
         List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
