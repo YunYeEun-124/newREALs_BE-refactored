@@ -63,15 +63,15 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
-    @Scheduled(cron = "0 10 06 ? * *")
-    public void getEconomyBasenewsnews(){
-        getBasenews("경제");
-    }
+    // @Scheduled(cron = "0 10 06 ? * *")
+    // public void getEconomyBasenewsnews(){
+    //     getBasenews("경제");
+    // }
 
-//    @Scheduled(cron = "0 15 12 ? * *")
-//    public void getSocietyBasenewsnews(){
-//        getBasenews("사회");
-//    }
+   @Scheduled(cron = "0 00 13 ? * *")
+   public void getSocietyBasenewsnews(){
+       getBasenews("사회");
+   }
 //
 //    @Scheduled(cron = "0 15 12 ? * *")
 //    public void getPoliticsBasenewsnews(){
