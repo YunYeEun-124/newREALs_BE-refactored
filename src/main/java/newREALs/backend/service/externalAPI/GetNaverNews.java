@@ -64,20 +64,22 @@ public class GetNaverNews {
     }
 
 
-    // @Scheduled(cron = "0 10 06 ? * *")
+    // @Scheduled(cron = "0 10 00 ? * *")
     // public void getEconomyBasenewsnews(){
     //     getBasenews("경제");
     // }
 
-//    @Scheduled(cron = "0 00 13 ? * *")
-//    public void getSocietyBasenewsnews(){
-//        getBasenews("사회");
-//    }
-//
-//    @Scheduled(cron = "0 15 12 ? * *")
-//    public void getPoliticsBasenewsnews(){
-//        getBasenews("정치");
-//    }
+    //    @Scheduled(cron = "0 00 13 ? * *")
+    //    public void getSocietyBasenewsnews(){
+    //        getBasenews("사회");
+    //    }
+    //
+       @Scheduled(cron = "0 47 00 ? * *")
+       public void getPoliticsBasenewsnews(){
+           getBasenews("정치");
+       }
+
+    
     // @Scheduled(cron = "0 45 03 ? * *")
     // public void test() {
 
