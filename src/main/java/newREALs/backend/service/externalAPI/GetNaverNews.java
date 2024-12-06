@@ -65,7 +65,7 @@ public class GetNaverNews {
 
 
 
-    @Scheduled(cron = "0 05 03 ? * *")
+    @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
         System.out.println("getBasenews in");
         List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
@@ -103,7 +103,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 17 00 ? * *")
+    @Scheduled(cron = "0 00 06 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
