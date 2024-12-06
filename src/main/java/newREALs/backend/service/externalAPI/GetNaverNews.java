@@ -92,7 +92,7 @@ public class GetNaverNews {
                 Thread.currentThread().interrupt();
                 System.out.println("Batch delay interrupted");
             }
-            break;
+          
 
         }
 
