@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-
+import org.apache.commons.collections4.ListUtils;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Category;
 import newREALs.backend.domain.Keyword;
@@ -64,62 +64,36 @@ public class GetNaverNews {
     }
 
 
-    // @Scheduled(cron = "0 10 00 ? * *")
-    // public void getEconomyBasenewsnews(){
-    //     getBasenews("경제");
-    // }
 
-    //    @Scheduled(cron = "0 00 13 ? * *")
-    //    public void getSocietyBasenewsnews(){
-    //        getBasenews("사회");
-    //    }
-    //
-       @Scheduled(cron = "0 00 02 ? * *")
-       public void getPoliticsBasenewsnews(){
-           getBasenews("정치");
-       }
-
-    
-    // @Scheduled(cron = "0 45 03 ? * *")
-    // public void test() {
-
-    //     Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
-    //     try {
-    //         keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
-    //         Thread.sleep(1000); // 1초 대기
-    //     } catch (InterruptedException e) {
-    //         Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-    //         System.out.println("Thread interrupted during delay");
-    //     }
-
-    //     newsService.automaticBaseProcess();
-
-    // }
-
-
-
-
-    public void getBasenews(String category) {
+    @Scheduled(cron = "0 46 02 ? * *")
+    public void getBasenews() {
         System.out.println("getBasenews in");
-        List<Keyword> keywords = keywordRepository.findAllByCategoryName(category); //key word 다 불러와
+        List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
 
         if (keywords.isEmpty()) {
             System.out.println("no keywords ");
             return;
         }
-       // int count = 0;
 
-        for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-           // if(count == 3) break;
+        for (List<Keyword> keywordList : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
+             for(Keyword keyword : keywordList){
+                 try {
+                     keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
+                     Thread.sleep(1000); // 1초 대기
+                 } catch (InterruptedException e) {
+                     Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+                     System.out.println("Thread interrupted during delay");
+                 }
+             }
+            // 배치 간 대기
             try {
-                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,2);
-                Thread.sleep(1000); // 1초 대기
+                Thread.sleep(2000); // 각 배치 처리 후 2초 대기
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-                System.out.println("Thread interrupted during delay");
+                Thread.currentThread().interrupt();
+                System.out.println("Batch delay interrupted");
             }
+            break;
 
-           // count++;
         }
 
         newsService.automaticBaseProcess();
