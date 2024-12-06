@@ -45,6 +45,7 @@ dependencies {
 //	implementation 'io.github.cdimascio:dotenv-java:2.2.0' // jwt secret key .env 파일에서 자동으로 가져오도록..
 	implementation 'org.postgresql:postgresql:42.7.3'
 	implementation 'com.google.guava:guava:32.1.2-jre' // 최신 JRE 버전
+	implementation 'org.apache.commons:commons-collections4:4.5.0-M2'
 
 
 
