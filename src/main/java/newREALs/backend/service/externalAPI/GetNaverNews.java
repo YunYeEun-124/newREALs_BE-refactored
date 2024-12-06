@@ -74,7 +74,7 @@ public class GetNaverNews {
     //        getBasenews("사회");
     //    }
     //
-       @Scheduled(cron = "0 30 01 ? * *")
+       @Scheduled(cron = "0 00 02 ? * *")
        public void getPoliticsBasenewsnews(){
            getBasenews("정치");
        }
