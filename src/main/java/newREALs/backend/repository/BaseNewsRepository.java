@@ -34,19 +34,22 @@ public interface BaseNewsRepository extends JpaRepository<Basenews,Long> {
 
     List<Basenews> findTop5ByIsDailyNewsTrueOrderByIdDesc();
 
-    @Query("SELECT n FROM Basenews n JOIN n.keyword k WHERE k.name = :KeywordName")
+    @Query("SELECT n FROM Basenews n JOIN n.keyword k WHERE k.name = :KeywordName ORDER BY n.id DESC")
     Page<Basenews> findAllByKeywordName(@Param("KeywordName") String KeywordName, Pageable pageable);
 
-    @Query("SELECT n FROM Basenews n JOIN n.category c WHERE c.name = :CategoryName")
+
+
+    @Query("SELECT n FROM Basenews n JOIN n.category c WHERE c.name = :CategoryName ORDER BY n.id DESC")
     Page<Basenews> findAllByCategoryName(@Param("CategoryName") String CategoryName, Pageable pageable);
 
-    @Query("SELECT n FROM Basenews n JOIN n.subCategory s WHERE s.name = :SubCategoryName")
+
+    @Query("SELECT n FROM Basenews n JOIN n.subCategory s WHERE s.name = :SubCategoryName ORDER BY n.id DESC")
     Page<Basenews> findAllBySubCategoryName(@Param("SubCategoryName") String subCategoryName, Pageable pageable);
 
-    @Query("SELECT b FROM Basenews b WHERE b.title LIKE %:searchword% OR b.description LIKE %:searchword%")
+    @Query("SELECT b FROM Basenews b WHERE b.title LIKE %:searchword% OR b.description LIKE %:searchword% ORDER BY b.id DESC")
     Page<Basenews> findAllByTitleContainingOrDescriptionContaining(String searchword, Pageable pageable);
 
-    @Query("SELECT bn FROM Basenews bn  WHERE bn.keyword.name IN :keywordsName")
+    @Query("SELECT bn FROM Basenews bn  WHERE bn.keyword.name IN :keywordsName ORDER BY bn.id DESC")
     Page<Basenews> findAllByKeywords(@Param("keywordsName") List<String> keywordsId, Pageable pageable);
 
     List<Basenews> findAllByIsDailyNews(boolean b);

@@ -9,7 +9,7 @@ spring:
       pool:
         core-size: 2
         max-size: 4
-        queue-capacity: 10
+        queue-capacity: 50
       thread-name-prefix: "Async-"
 
   datasource:
