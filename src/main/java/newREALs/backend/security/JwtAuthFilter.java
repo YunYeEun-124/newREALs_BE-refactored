@@ -1,5 +1,6 @@
 package newREALs.backend.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -66,6 +67,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     return;
                 }
             }
+        } catch(ExpiredJwtException e) {
+            log.error("JwtAuthFiler - 만료된 액세스 토큰: {}", e.getMessage());
+            sendUnauthorizedResponse(response, "토큰이 만료되었습니다.");
+            return;
+
         } catch (Exception e) {
             log.error("JwtAuthFilter - 토큰 검증 중 예외 발생: {}", e.getMessage());
             sendForbiddenResponse(response, "유효하지 않은 토큰입니다.");
@@ -74,7 +80,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
+    private void sendUnauthorizedResponse(HttpServletResponse response, String message) throws IOException {
+        response.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 에러
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
+    }
     private void sendForbiddenResponse(HttpServletResponse response, String message) throws IOException {
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");
