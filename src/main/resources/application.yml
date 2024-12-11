@@ -65,8 +65,8 @@ logging:
 
 
 jwt:
-  access-expiration-time: 60000
-  refresh-expiration-time: 2592000000
+  access-expiration-time: 1209600000
+  refresh-expiration-time: 1296000000 
   secret-key: ${JWT_SECRET_KEY}
 
 naver:
