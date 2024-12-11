@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-
+import org.apache.commons.collections4.ListUtils;
 import newREALs.backend.domain.Basenews;
 import newREALs.backend.domain.Category;
 import newREALs.backend.domain.Keyword;
@@ -63,60 +63,37 @@ public class GetNaverNews {
         this.keywordProcessingService = keywordProcessingService;
     }
 
+
+
     @Scheduled(cron = "0 10 06 ? * *")
-    public void getEconomyBasenewsnews(){
-        getBasenews("경제");
-    }
-
-//    @Scheduled(cron = "0 15 12 ? * *")
-//    public void getSocietyBasenewsnews(){
-//        getBasenews("사회");
-//    }
-//
-//    @Scheduled(cron = "0 15 12 ? * *")
-//    public void getPoliticsBasenewsnews(){
-//        getBasenews("정치");
-//    }
-    // @Scheduled(cron = "0 45 03 ? * *")
-    // public void test() {
-
-    //     Optional<Keyword> keyword = keywordRepository.findByName("대통령 연설");
-    //     try {
-    //         keywordProcessingService.processKeyword(keyword.get().getName(),keyword.get(),false,10);
-    //         Thread.sleep(1000); // 1초 대기
-    //     } catch (InterruptedException e) {
-    //         Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-    //         System.out.println("Thread interrupted during delay");
-    //     }
-
-    //     newsService.automaticBaseProcess();
-
-    // }
-
-
-
-
-    public void getBasenews(String category) {
+    public void getBasenews() {
         System.out.println("getBasenews in");
-        List<Keyword> keywords = keywordRepository.findAllByCategoryName(category); //key word 다 불러와
+        List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
 
         if (keywords.isEmpty()) {
             System.out.println("no keywords ");
             return;
         }
-       // int count = 0;
 
-        for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-           // if(count == 3) break;
+        for (List<Keyword> keywordList : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
+             for(Keyword keyword : keywordList){
+                 try {
+                     keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
+                     Thread.sleep(1000); // 1초 대기
+                 } catch (InterruptedException e) {
+                     Thread.currentThread().interrupt(); // 인터럽트 상태 복구
+                     System.out.println("Thread interrupted during delay");
+                 }
+             }
+            // 배치 간 대기
             try {
-                keywordProcessingService.processKeyword(keyword.getName(),keyword,false,3);
-                Thread.sleep(1000); // 1초 대기
+                Thread.sleep(2000); // 각 배치 처리 후 2초 대기
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-                System.out.println("Thread interrupted during delay");
+                Thread.currentThread().interrupt();
+                System.out.println("Batch delay interrupted");
             }
+          
 
-           // count++;
         }
 
         newsService.automaticBaseProcess();
@@ -126,7 +103,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
-    @Scheduled(cron = "0 55 05 ? * *")
+    @Scheduled(cron = "0 00 06 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
@@ -138,18 +115,18 @@ public class GetNaverNews {
             baseNewsRepository.saveAll(previousDailyNews);
         }
         System.out.println("now daily news size :"+baseNewsRepository.findAllByIsDailyNews(true).size());
-        List<Category> categoryList = categoryRepository.findAll();
+        String[] category = {"사회","경제","정치"};
 
         int pageNum = 102; int limit = 2;
 
-        for(int i=0;i<categoryList.size();i++){ //사회(102), 경제(101) 정치(100) 순서
+        for(int i=0;i<3;i++){ //사회(102), 경제(101) 정치(100) 순서
 
-            Category currentCategory = categoryList.get(i);
+            String currentCategory = category[i];
 
-            if(Objects.equals(currentCategory.getName(), "정치")){
+            if(Objects.equals(currentCategory, "정치")){
                 limit = 1;
                 pageNum = 100;
-            }else if(Objects.equals(currentCategory.getName(), "사회")){
+            }else if(Objects.equals(currentCategory, "사회")){
                 limit = 2;
                 pageNum = 101;
             }else {
@@ -161,19 +138,21 @@ public class GetNaverNews {
 
             //Dailynews mapping : 이미 있는 기사면 isDailynews = t 로 수정처리 .
             StringTokenizer st;
-            for(int j=0;j<titleKeywordList.size();j++){
+            for(int j=0;j<limit;j++){
 
                 st = new StringTokenizer(titleKeywordList.get(j),":");
                 String title = st.nextToken().trim(); //공백, 구분자 제거
                 String k = st.nextToken().trim();
-                System.out.println("=================== this is k ::: "+ k);
                 Optional<Keyword> keyword = keywordRepository.findByName(k);
 
                 if(keyword.isPresent()){
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
                     // 딜레이 추가
                     try {
-                        keywordProcessingService.processKeyword(title,keyword.get(),true,3);
+                        List<Basenews> createdNews = keywordProcessingService.processKeyword(title,keyword.get(),true,3);
+                        if(createdNews.size() != limit){
+                            System.out.println(currentCategory +" size 안 맞음 ~~ ========================================================");
+                        }
                         Thread.sleep(1000); // 1초 대기
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -194,35 +173,39 @@ public class GetNaverNews {
     }
 
 
-    public  List<String> mapTitleKeyword(int pageNum,int limit,Category category){
+    public  List<String> mapTitleKeyword(int pageNum,int limit,String category){
 
-        String keywordList = String.join(",",keywordRepository.findAllByCategory_Name(category.getName()));
+        String keywordList = String.join(",",keywordRepository.findAllByCategory_Name(category));
+
         //사회 2, 정치 1, 경제 2
         String titleList = String.join("\n",getDailyTitles("https://news.naver.com/section/"+pageNum));
 
         List<Map<String, String>> titleMessages = new ArrayList<>();
-        titleMessages.add(Map.of("role", "system", "content", "입문자수준에서 사회면에서 중요한 기사 "+limit+"개를 선별해야해."));
-        titleMessages.add(Map.of("role", "user", "content", "다음 타이틀 리스트에서 사회면에서 중요한 타이틀 "+limit+"개를 골라줘"+titleList +
+
+        titleMessages.add(Map.of("role", "system", "content", "입문자수준에서 "+category+"면에서 중요한 기사 "+limit+"개를 선별해야해."));
+        titleMessages.add(Map.of("role", "user", "content", "다음 타이틀 리스트에서 "+category+"에서 중요한 타이틀 "+limit+"개만 골라야돼."+titleList +
                 "0. 가장 중요하다고 생각되는 타이틀을 골라야해."+
-                "1. 평소에 뉴스를 읽지 않는 10대 20대들도 꼭 알아야하는 뉴스라고 생각되는 것을 선별해야하고" +
-                "2. "+category.getName()+" 카테고리에 적합한 걸 골라" +
-                "3. 해당 타이틀의 뉴스로 입문자를 위한 퀴즈 만들어야하기 때문에 이를 고려해서 골라" +
-                "4. 특정 지역에 관한 내용은 제외" +
+                "1. 평소에 뉴스를 읽지 않는 10대 20대들도 꼭 알아야하는 뉴스라고 생각되는 것을 선별" +
+                "2. "+category+" 카테고리에 적합해야함" +
+                "3. 해당 타이틀의 뉴스로 입문자를 위한 퀴즈 생성까지 고려해서 골라" +
                 "다음은 고른 타이틀과 카테고리를 한개씩 매핑해야해. 카테고리는 다음과 같아. " + keywordList
-                +"이 카테고리 외에 다른 카테고리를 매핑시키면 안되고, 정확한 이름,띄어쓰기도 지켜야해" +
+                +"이 카테고리 외에 다른 카테고리를 매핑시키면 안되고,정확한 이름,띄어쓰기도 지켜야해" +
                 "최종 결과물 형식은 " +
                 "타이틀 : 카테고리 이걸 꼭 지켜야해 " +
-                " 예시는 다음과 같아 . 대통령, 캐나다 총리와 정상회담…방산 등 포괄적 안보협력 확대 : 대통령 연설 \n "+
-                "\n 이 형식에 넘버링도 하지말고 쌍따옴표로 감싸도 안돼. 무조건 내가 말한 타이틀 : 카테고리가 한줄씩 출력 "
+                " 예시는 다음과 같아 . " +
+                "\n 대통령, 캐나다 총리와 정상회담…방산 등 포괄적 안보협력 확대 : 대통령 연설 \n "+
+                "\n 넘버링도 하지말고 쌍따옴표로 감싸도 안돼. 무조건 내가 말한 타이틀 : 카테고리가 한줄씩 출력 "
         ));
 
         String titleKeyword = (String) chatGPTService.generateContent(titleMessages).get("text");
         StringTokenizer st = new StringTokenizer(titleKeyword,"\n");
+
         List<String> titleKeywordList = new ArrayList<>();
-        int i=0;
-        while(st.hasMoreTokens()){
+
+
+        while(st.hasMoreTokens())
             titleKeywordList.add(st.nextToken());
-        }
+
 
         return titleKeywordList;
 
@@ -245,12 +228,11 @@ public class GetNaverNews {
 
             for(Element element : elements){
                 title = element.text();
-                //  System.out.println(element.text());
                 titles.add(title);
             }
 
         }catch (IOException e){
-            throw new RuntimeException("뉴스 원문 못 가져왔대요~~", e);
+            throw new RuntimeException("타이틀 못 뽑았네요~~~~~", e);
         }
 
         return titles;
