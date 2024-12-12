@@ -61,7 +61,5 @@ public interface SubInterestRepository extends JpaRepository<SubInterest,Long> {
             "WHERE si.user.id = :userId")
     Integer findTotalAttCountByUserId(@Param("userId") Long userId);
 
-    List<SubInterest> findByUserId(Long id);
-
-    List<Accounts> findAllUsers();
+    
 }
