@@ -182,7 +182,7 @@ public class ProfileService {
         }
 
         if(file!=null&&!file.isEmpty()) {
-            String s3Url = s3Service.uploadFile(file);
+            String s3Url = s3Service.uploadImageFile(file);
             user.setProfilePath(s3Url);
         }
 
