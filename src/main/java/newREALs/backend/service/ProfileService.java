@@ -186,22 +186,6 @@ public class ProfileService {
             user.setProfilePath(s3Url);
         }
 
-//        if (file != null && !file.isEmpty()) {
-//            File directory = new File(uploadDir);
-//
-//            if (!directory.exists()) {
-//                if (!directory.mkdirs()) {
-//                    throw new IOException("디렉토리를 생성할 수 없습니다: " + uploadDir);
-//                }
-//            }
-
-//            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-//            File saveFile = new File(uploadDir + fileName);
-//            file.transferTo(saveFile);
-//
-//            // 일단 로컬로 설정
-//            String newProfilePath = "http://localhost:8080/" + uploadDir + fileName;
-//            user.setProfilePath(newProfilePath);
 
         userRepository.save(user);
     }

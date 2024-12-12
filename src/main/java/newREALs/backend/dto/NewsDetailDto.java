@@ -38,9 +38,9 @@ public class NewsDetailDto {
     private SimpleNewsDto prevNews;
     private SimpleNewsDto nextNews;
     private String wherePageFrom;
+    private boolean dailynews;
 
-
-    public NewsDetailDto(Basenews basenews) {
+    public NewsDetailDto(Basenews basenews,boolean dailynews) {
         this.id = basenews.getId();
         this.title = basenews.getTitle();
         this.summary = basenews.getSummary();
@@ -55,6 +55,7 @@ public class NewsDetailDto {
         this.category=basenews.getCategory().getName();
         this.subCategory=basenews.getSubCategory().getName();
         this.keyword=basenews.getKeyword().getName();
+        this.dailynews=dailynews;
 
     }
 
