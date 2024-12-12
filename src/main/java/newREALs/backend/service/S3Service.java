@@ -1,5 +1,7 @@
 package newREALs.backend.service;
 
+import lombok.RequiredArgsConstructor;
+import newREALs.backend.repository.SubInterestRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -7,20 +9,18 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.UUID;
-
+@RequiredArgsConstructor
 @Service
 public class S3Service {
-
     private final S3Client s3Client;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
-    public S3Service(S3Client s3Client) {
-        this.s3Client = s3Client;
-    }
 
     public String uploadFile(MultipartFile file) {
         try {

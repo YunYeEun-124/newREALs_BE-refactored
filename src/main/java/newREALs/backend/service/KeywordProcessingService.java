@@ -143,6 +143,7 @@ public class KeywordProcessingService {
 
     //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
     public List<String> getArticle(String htmlUrl, String htmlId1, String htmlId2) {
+
         Document doc;
         String plainText = "";
         String imagePath = "";

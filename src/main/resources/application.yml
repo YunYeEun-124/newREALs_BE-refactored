@@ -41,7 +41,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: "http://localhost:5173/login/oauth"
+            redirect-uri: "https://new-reals-fe.vercel.app/login/oauth"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             client-name: Kakao
@@ -65,8 +65,8 @@ logging:
 
 
 jwt:
-  access-expiration-time: 86400000
-  refresh-expiration-time: 2592000000
+  access-expiration-time: 1209600000
+  refresh-expiration-time: 1296000000 
   secret-key: ${JWT_SECRET_KEY}
 
 naver:

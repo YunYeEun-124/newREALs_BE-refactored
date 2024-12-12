@@ -57,9 +57,11 @@ public class NewsDetailService {
 
         //조회수 증가
         increaseViewCount(basenews,user);
-
+        boolean daily=false;
+        //데일리뉴스 여부 확인
+        if(basenews.isDailyNews())daily=true;
         //basenews를 newsdetailDTO로 변환
-        NewsDetailDto newsDetailDto=new NewsDetailDto(basenews);
+        NewsDetailDto newsDetailDto=new NewsDetailDto(basenews,daily);
 
         //용어 목록도 DTO로 변환
         List<TermDetailDto> termList=basenews.getTermList().stream()
