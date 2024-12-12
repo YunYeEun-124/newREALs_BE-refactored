@@ -142,7 +142,8 @@ public class KeywordProcessingService {
     }
 
     //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
-   public List<String> getArticle(String htmlUrl, String htmlId1, String htmlId2) {
+    public List<String> getArticle(String htmlUrl, String htmlId1, String htmlId2) {
+
         Document doc;
         String plainText = "";
         String imagePath = "";
@@ -194,33 +195,7 @@ public class KeywordProcessingService {
         return result;
     }
 
-    ////////////////////////////네이버 뉴스 연동 메서드///////////////////
-//    public String get(String apiUrl, Map<String, String> requestHeaders) {
-//        HttpURLConnection con = connect(apiUrl);
-//        try {
-//            con.setRequestMethod("GET");
-//
-//            // 기본 요청 헤더 설정
-//            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
-//                con.setRequestProperty(header.getKey(), header.getValue());
-//            }
-//
-//            // User-Agent 추가
-//            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-//
-//            int responseCode = con.getResponseCode();
-//            if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
-//                return readBody(con.getInputStream());
-//            } else { // 오류 발생
-//                System.out.println("에러입");
-//                return readBody(con.getErrorStream());
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException("API 요청과 응답 실패", e);
-//        } finally {
-//            con.disconnect();
-//        }
-//    }
+
 
     public String get(String apiUrl, Map<String, String> requestHeaders) {
         HttpURLConnection con = connect(apiUrl);

@@ -65,6 +65,7 @@ public class GetNaverNews {
 
 
 
+
     @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
         System.out.println("getBasenews in");
@@ -103,6 +104,7 @@ public class GetNaverNews {
 
 
     //매일 아침마다 하루 한 번 실행
+
     @Scheduled(cron = "0 00 06 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
@@ -141,8 +143,10 @@ public class GetNaverNews {
             for(int j=0;j<limit;j++){
 
                 st = new StringTokenizer(titleKeywordList.get(j),":");
+                System.out.println("this is a title"+titleKeywordList.get(j));
                 String title = st.nextToken().trim(); //공백, 구분자 제거
                 String k = st.nextToken().trim();
+                System.out.println("title , keyword from gpt : "+title+"."+k);
                 Optional<Keyword> keyword = keywordRepository.findByName(k);
 
                 if(keyword.isPresent()){
@@ -150,9 +154,6 @@ public class GetNaverNews {
                     // 딜레이 추가
                     try {
                         List<Basenews> createdNews = keywordProcessingService.processKeyword(title,keyword.get(),true,3);
-                        if(createdNews.size() != limit){
-                            System.out.println(currentCategory +" size 안 맞음 ~~ ========================================================");
-                        }
                         Thread.sleep(1000); // 1초 대기
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
