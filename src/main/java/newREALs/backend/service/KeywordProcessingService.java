@@ -14,6 +14,7 @@ import newREALs.backend.dto.newsInfo;
 import newREALs.backend.repository.BaseNewsRepository;
 import newREALs.backend.repository.CategoryRepository;
 import newREALs.backend.repository.KeywordRepository;
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -22,10 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLEncoder;
+import java.net.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -144,74 +142,59 @@ public class KeywordProcessingService {
     }
 
     //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
-    public List<String> getArticle(String htmlUrl,String htmlId1, String htmlId2){
+    public List<String> getArticle(String htmlUrl, String htmlId1, String htmlId2) {
         Document doc;
         String plainText = "";
         String imagePath = "";
-        List<String> set = new ArrayList<>();
-        try{
-            String url = htmlUrl;
-            doc = Jsoup.connect(url)
+        List<String> result = new ArrayList<>();
+
+        try {
+            // Jsoup 연결 설정
+            doc = Jsoup.connect(htmlUrl)
                     .timeout(60000) // 타임아웃 60초
-                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 추가
+                    .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36") // User-Agent 설정
                     .get();
 
-
-            //기사 데려오기v & 기사사진
+            // 기사 본문 추출
             Element elements = doc.selectFirst(htmlId1);
             Element imageElements = doc.selectFirst(htmlId2);
 
-            if(elements != null){
-                plainText = elements.text(); //각종 태그 없애고 텍스트만 가져오기
-                if(imageElements != null){
-                    imagePath = imageElements.attr("data-src");//태그 안 정보 가져오기
-                }else{ //default image
-                    imagePath = null;
+            if (elements != null) {
+                plainText = elements.text(); // HTML 태그 제거 후 텍스트만 추출
+                if (imageElements != null) {
+                    imagePath = imageElements.attr("data-src"); // 이미지 URL 추출
+                } else {
+                    System.out.println("No image found for URL: " + htmlUrl);
+                    imagePath = null; // 기본 이미지 처리
                 }
 
-                set.add(imagePath);
-                set.add(plainText);
+                result.add(imagePath);
+                result.add(plainText);
 
-            }else {
-                //  elements = doc.selectFirst("#_article_");
-                System.out.println("추출 안된 주소 : "+url);
-                throw  new RuntimeException("기사 추출 못했음. ");
+            } else {
+                System.out.println("Failed to find article content at: " + htmlUrl);
+                throw new RuntimeException("기사 본문 추출 실패");
             }
 
-        }catch (IOException e){
-            throw new RuntimeException("뉴스 원문 못 가져왔대요~~", e);
+        } catch (HttpStatusException e) {
+            // HTTP 상태 코드 문제 처리
+            System.out.printf("HTTP Status Error (%d) for URL: %s%n", e.getStatusCode(), htmlUrl);
+            throw new RuntimeException("HTTP 호출 실패: " + e.getStatusCode(), e);
+        } catch (SocketTimeoutException e) {
+            // 타임아웃 문제 처리
+            System.out.println("Timeout occurred while connecting to: " + htmlUrl);
+            throw new RuntimeException("요청 타임아웃", e);
+        } catch (IOException e) {
+            // 기타 IO 에러 처리
+            System.out.println("IO Error while fetching article: " + htmlUrl);
+            throw new RuntimeException("네트워크 문제 발생", e);
         }
-        //  System.out.println("get article 기사 추출 성공");
-        return set;
+
+        System.out.println("Successfully 뉴스 원문 가져오기 성공: " + htmlUrl);
+        return result;
     }
 
-    ////////////////////////////네이버 뉴스 연동 메서드///////////////////
-//    public String get(String apiUrl, Map<String, String> requestHeaders) {
-//        HttpURLConnection con = connect(apiUrl);
-//        try {
-//            con.setRequestMethod("GET");
-//
-//            // 기본 요청 헤더 설정
-//            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
-//                con.setRequestProperty(header.getKey(), header.getValue());
-//            }
-//
-//            // User-Agent 추가
-//            con.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
-//
-//            int responseCode = con.getResponseCode();
-//            if (responseCode == HttpURLConnection.HTTP_OK) { // 정상 호출
-//                return readBody(con.getInputStream());
-//            } else { // 오류 발생
-//                System.out.println("에러입");
-//                return readBody(con.getErrorStream());
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException("API 요청과 응답 실패", e);
-//        } finally {
-//            con.disconnect();
-//        }
-//    }
+
 
     public String get(String apiUrl, Map<String, String> requestHeaders) {
         HttpURLConnection con = connect(apiUrl);

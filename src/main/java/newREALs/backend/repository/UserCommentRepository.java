@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,4 +28,7 @@ public interface UserCommentRepository extends JpaRepository<UserComment,Long> {
             "from UserComment uc " +
             "WHERE uc.user.id = :userid")
     Slice<UserCommentListDTO> findAllByUserId(@Param("userid")Long userid, Pageable pageable);
+
+    @Query("select tc.userComment from UserComment tc where tc.thinkComment.id = :id")
+    List<String> findByThinkComment_Id(Long id);
 }
