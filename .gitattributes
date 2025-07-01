@@ -2,5 +2,5 @@
 *.bat text eol=crlf
 *.jar binary
 
-src/** linguist-documentation=false
-src/** linguist-vendored=false
+*.java linguist-vendored=false
+*.java linguist-documentation=false
