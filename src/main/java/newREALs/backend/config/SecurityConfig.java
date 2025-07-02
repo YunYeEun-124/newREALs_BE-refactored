@@ -1,8 +1,8 @@
 package newREALs.backend.config;
 
 
-import newREALs.backend.security.JwtAuthFilter;
-import newREALs.backend.service.TokenService;
+import newREALs.backend.common.security.JwtAuthFilter;
+import newREALs.backend.common.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;

@@ -1,11 +1,11 @@
 package newREALs.backend.config;
 
-import newREALs.backend.domain.Category;
-import newREALs.backend.domain.Keyword;
-import newREALs.backend.domain.SubCategory;
-import newREALs.backend.repository.CategoryRepository;
-import newREALs.backend.repository.KeywordRepository;
-import newREALs.backend.repository.SubCategoryRepository;
+import newREALs.backend.news.domain.Category;
+import newREALs.backend.news.domain.Keyword;
+import newREALs.backend.news.domain.SubCategory;
+import newREALs.backend.news.repository.CategoryRepository;
+import newREALs.backend.news.repository.KeywordRepository;
+import newREALs.backend.news.service.SubCategoryRepository;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
