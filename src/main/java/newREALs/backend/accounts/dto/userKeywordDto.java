@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Data
 @AllArgsConstructor
-public class userKeywordDTO {
+public class userKeywordDto {
     // private Long userId;
     private String keywordName;
     private Long keywordId;

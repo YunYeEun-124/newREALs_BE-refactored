@@ -3,7 +3,7 @@ package newREALs.backend.news.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.common.dto.ApiResponseDTO;
-import newREALs.backend.news.dto.SearchDTO;
+import newREALs.backend.news.dto.SearchDto;
 import newREALs.backend.news.service.NewsService2;
 import newREALs.backend.common.service.TokenService;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,7 @@ public class SearchController {
             throw new IllegalArgumentException("매개변수 null");
         }
 
-        SearchDTO result = newsService.getSearch(userid,searchWord,page);
+        SearchDto result = newsService.getSearch(userid,searchWord,page);
 
         if(result.getTotalElement() == 0) {
             return ResponseEntity.ok(

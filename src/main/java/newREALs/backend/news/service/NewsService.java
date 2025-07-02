@@ -3,9 +3,9 @@ package newREALs.backend.news.service;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Quiz;
-import newREALs.backend.news.domain.ThinkComment;
+import newREALs.backend.news.domain.ThoughtComment;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.InsightRepository;
+import newREALs.backend.news.repository.ThouhtCommentRepository;
 import newREALs.backend.news.repository.QuizRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
-    private final InsightRepository insightRepository;
+    private final ThouhtCommentRepository thouhtCommentRepository;
     private final ArticleProcessingService articleProcessingService;
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
@@ -137,7 +137,7 @@ public class NewsService {
    // @Async
     public void generateAndSaveThinkCommentForDailyNews(Basenews news){
         System.out.println("generateAndSaveThinkCommentForDailyNews in");
-        if (insightRepository.existsByBasenews(news)) {
+        if (thouhtCommentRepository.existsByBasenews(news)) {
             log.warn("insight already exists for Basenews ID: {}", news.getId());
             return;
         }
@@ -167,8 +167,8 @@ public class NewsService {
                 aiComment = line.substring(3).trim(); // "설명:" 이후 내용
         }
 
-        insightRepository.save(
-          ThinkComment.builder()
+        thouhtCommentRepository.save(
+          ThoughtComment.builder()
                   .topic(topic)
                   .AIComment(aiComment)
                   .basenews(news).build()

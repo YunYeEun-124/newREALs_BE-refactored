@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.SubCategory;
 import newREALs.backend.common.dto.ApiResponseDTO;
-import newREALs.backend.news.dto.ViewCategoryDTO;
+import newREALs.backend.news.dto.ViewCategoryDto;
 import newREALs.backend.news.service.SubCategoryRepository;
 import newREALs.backend.news.service.NewsService2;
 import newREALs.backend.common.service.TokenService;
@@ -40,7 +40,7 @@ public class CategoryNewsController {
         Optional<SubCategory> sub = subCategoryRepository.findByName(subCategory);
 
         if (sub.isPresent() && category.equals(sub.get().getCategory().getName())){ //subcategory - category mapping check
-             ViewCategoryDTO result  = newsService.getSubCategory(userid,category,subCategory,page);
+             ViewCategoryDto result  = newsService.getSubCategory(userid,category,subCategory,page);
             // 결과가 비어 있는 경우
             if (result.getBasenewsList().isEmpty() || result.getDailynews() == null)
                 return ResponseEntity.ok(
@@ -72,7 +72,7 @@ public class CategoryNewsController {
         if(!category.equals("사회") && !category.equals("경제") && !category.equals("정치") ){
             throw  new IllegalArgumentException("잘못된 카테고리 입력");
         }
-        ViewCategoryDTO result = newsService.getCategory(userid, category, page);
+        ViewCategoryDto result = newsService.getCategory(userid, category, page);
 
         // 결과가 비어 있는 경우
         if (result.getBasenewsList().isEmpty() || result.getDailynews() == null) {

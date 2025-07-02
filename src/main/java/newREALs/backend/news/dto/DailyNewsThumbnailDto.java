@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @AllArgsConstructor
 @Getter @Setter
-public class DailyNewsThumbnailDTO {
+public class DailyNewsThumbnailDto {
     private Long dailynewsId;
     private String title;
     private String imagePath;

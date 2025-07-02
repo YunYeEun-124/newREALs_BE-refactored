@@ -6,17 +6,11 @@ import lombok.Setter;
 
 import java.util.List;
 
-//category, subcategory view 불러올대.
-
-
 @Getter @Setter @AllArgsConstructor
-public class ViewCategoryDTO {
+public class SearchDto {
 
-    //daily하나
-    private DailyNewsThumbnailDTO dailynews;
     //밑에 카테고리 관련 전체 base뉴스
-    private List<BaseNewsThumbnailDTO> basenewsList ;
-    //private Page<BaseNewThumbnailDTO> basesnewsList;
+    private List<BaseNewsThumbnailDto> basenewsList ;
     private int totalPage;
     private Long totalElement;
 }

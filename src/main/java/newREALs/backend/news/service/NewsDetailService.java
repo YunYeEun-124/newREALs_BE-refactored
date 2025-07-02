@@ -4,14 +4,14 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.domain.Accounts;
-import newREALs.backend.accounts.domain.Click;
+import newREALs.backend.accounts.domain.UserNewsClick;
 import newREALs.backend.accounts.domain.Likes;
 import newREALs.backend.accounts.domain.Scrap;
 import newREALs.backend.accounts.repository.ScrapRepository;
-import newREALs.backend.accounts.repository.SubInterestRepository;
+import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
 import newREALs.backend.accounts.repository.UserKeywordRepository;
 import newREALs.backend.accounts.repository.UserRepository;
-import newREALs.backend.accounts.dto.LikesDTO;
+import newREALs.backend.accounts.dto.LikesDto;
 import newREALs.backend.common.repository.ClickRepository;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Category;
@@ -37,7 +37,7 @@ public class NewsDetailService {
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
     private final UserKeywordRepository.LikesRepository likesRepository;
-    private final SubInterestRepository subInterestRepository;
+    private final CurrentSubInterestRepository currentSubInterestRepository;
     private final ClickRepository clickRepository;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
@@ -46,7 +46,7 @@ public class NewsDetailService {
 
     //공감 조회
     @Transactional
-    public LikesDTO getLikesDetail(Long basenewsId, Long userId){
+    public LikesDto getLikesDetail(Long basenewsId, Long userId){
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         Accounts user=userRepository.findById(userId)
@@ -56,7 +56,7 @@ public class NewsDetailService {
         if(likes.isPresent()){
             reactionType=likes.get().getReactionType();
         }
-        LikesDTO likesDTO=new LikesDTO(basenews,reactionType);
+        LikesDto likesDTO=new LikesDto(basenews,reactionType);
         return likesDTO;
 
     }
@@ -174,16 +174,16 @@ public class NewsDetailService {
     //조회수 증가 메서드
     @Transactional
     public void increaseViewCount(Basenews basenews, Accounts user){
-        Optional<Click> click=clickRepository.findByUserAndBasenews(user,basenews);
+        Optional<UserNewsClick> click=clickRepository.findByUserAndBasenews(user,basenews);
         if(!click.isPresent()){
             //처음 클릭하는거면
-            Click c=new Click(user,basenews);
+            UserNewsClick c=new UserNewsClick(user,basenews);
             clickRepository.save(c);
             basenews.setViewCount(basenews.getViewCount()+1);
             basenewsRepository.save(basenews);
         }else{
             //내가 이걸 몇번 봤는지만 카운트.. 뉴스자체의 조회수는 안올라감
-            Click c= click.get();
+            UserNewsClick c= click.get();
             c.setCount(c.getCount()+1);
         }
     }

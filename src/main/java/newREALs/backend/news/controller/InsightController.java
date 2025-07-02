@@ -4,8 +4,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.dto.ProfileInterestProjection;
 import newREALs.backend.common.dto.ApiResponseDTO;
-import newREALs.backend.news.dto.RequestUserCommentDTO;
-import newREALs.backend.news.service.InsightService;
+import newREALs.backend.news.dto.RequestUserCommentDto;
+import newREALs.backend.news.service.ThoughtCommentService;
 import newREALs.backend.common.service.TokenService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/news/insight")
 public class InsightController {
     private final TokenService tokenService;
-    private final InsightService insightService;
+    private final ThoughtCommentService thoughtCommentService;
     //해당 뉴스의 인사이트가 없으면 200-null
     //해동 뉴스의 유저코멘트가 없으면 200-topic
     //해당 뉴스의 유저코멘트가 잇어면 200- topic, usercomment,aicomment
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserInsight(@PathVariable Long id, HttpServletRequest request){
         Long userId = tokenService.getUserId(request);
-        ProfileInterestProjection.ResponseUserCommentDTO result = insightService.getUserInsight(userId,id);
+        ProfileInterestProjection.ResponseUserCommentDTO result = thoughtCommentService.getUserInsight(userId,id);
 
         if(result == null){
             return ResponseEntity.ok(
@@ -37,14 +37,14 @@ public class InsightController {
     //
     @PostMapping("/{id}")
     public ResponseEntity<?> saveUserInsight(@PathVariable Long id, //newsid
-                                        @RequestBody(required = false) RequestUserCommentDTO userComment,
+                                        @RequestBody(required = false) RequestUserCommentDto userComment,
                                         HttpServletRequest request){
         Long userId = tokenService.getUserId(request);
 
         if(userComment.getComment().isEmpty() || userComment == null)
             throw new IllegalArgumentException("user의 Comment가 비어있습니다.");
 
-        String message = insightService.saveUserInsight(userComment.getComment(), userId, id);
+        String message = thoughtCommentService.saveUserInsight(userComment.getComment(), userId, id);
         if (message == null) {
             throw  new IllegalStateException("user comment 저장 실패",null);
         }

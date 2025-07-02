@@ -4,13 +4,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.repository.ScrapRepository;
 import newREALs.backend.accounts.repository.UserKeywordRepository;
-import newREALs.backend.news.dto.KeywordNewsDTO;
+import newREALs.backend.news.dto.KeywordNewsDto;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Category;
-import newREALs.backend.news.dto.BaseNewsThumbnailDTO;
-import newREALs.backend.news.dto.DailyNewsThumbnailDTO;
-import newREALs.backend.news.dto.SearchDTO;
-import newREALs.backend.news.dto.ViewCategoryDTO;
+import newREALs.backend.news.dto.BaseNewsThumbnailDto;
+import newREALs.backend.news.dto.DailyNewsThumbnailDto;
+import newREALs.backend.news.dto.SearchDto;
+import newREALs.backend.news.dto.ViewCategoryDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
 import newREALs.backend.news.repository.CategoryRepository;
 import newREALs.backend.news.repository.QuizRepository;
@@ -35,7 +35,7 @@ public class NewsService2 {
     private final UserKeywordRepository userKeywordRepository;
     private final CategoryRepository categoryRepository;
 
-    public ViewCategoryDTO getSubCategory(Long userid, String category, String subCategory, int page){
+    public ViewCategoryDto getSubCategory(Long userid, String category, String subCategory, int page){
 
         Pageable pageable = getPageInfo(page);
 
@@ -43,7 +43,7 @@ public class NewsService2 {
     }
 
     //error처리해라//category처음 로딩시
-    public ViewCategoryDTO getCategory(Long userid,String category,int page){
+    public ViewCategoryDto getCategory(Long userid, String category, int page){
         System.out.println("category service in ");
 
         Pageable pageable = getPageInfo(page);
@@ -51,19 +51,19 @@ public class NewsService2 {
         return getCategoryAndSubPage(baseNewsRepository.findAllByCategoryName(category,pageable),category,userid);
     }
 
-    public SearchDTO getSearch(Long userid, String searchword, int page){
+    public SearchDto getSearch(Long userid, String searchword, int page){
         Pageable pageable = getPageInfo(page);
         //검색어 필드 : 카테고리,소카테고리,키워드, 본문 타이틀,
         Page<Basenews> pageNews = baseNewsRepository.findAllByTitleContainingOrDescriptionContaining(searchword,pageable);
         System.out.println("page news size :"+pageNews.get().toList().size());
-        List<BaseNewsThumbnailDTO> basenewsList = getBaseNewsList(pageNews,userid);
+        List<BaseNewsThumbnailDto> basenewsList = getBaseNewsList(pageNews,userid);
         System.out.println("list news size : "+basenewsList.size());
-        return new SearchDTO(basenewsList,pageNews.getTotalPages(),pageNews.getTotalElements());
+        return new SearchDto(basenewsList,pageNews.getTotalPages(),pageNews.getTotalElements());
     }
 
     //common code 0
-    public DailyNewsThumbnailDTO getDailyNewsOne(String category) {
-        DailyNewsThumbnailDTO dailynewsdto = null;
+    public DailyNewsThumbnailDto getDailyNewsOne(String category) {
+        DailyNewsThumbnailDto dailynewsdto = null;
         Category dailynewsCategory=categoryRepository.findByName(category).get();
 
         // 데일리 뉴스 가져오기
@@ -83,7 +83,7 @@ public class NewsService2 {
 
 
         // DTO 생성
-        dailynewsdto = new DailyNewsThumbnailDTO(
+        dailynewsdto = new DailyNewsThumbnailDto(
                 dailynews.get().getId(),
                 dailynews.get().getTitle(),
                 dailynews.get().getImageUrl(),
@@ -97,16 +97,16 @@ public class NewsService2 {
     }
 
     //getSubCategory, getCategory 페이지에 공통으로 쓰임.
-    public ViewCategoryDTO getCategoryAndSubPage(Page<Basenews> repositoryFindBy,String category,Long userid){
+    public ViewCategoryDto getCategoryAndSubPage(Page<Basenews> repositoryFindBy, String category, Long userid){
 
-        ViewCategoryDTO result;
+        ViewCategoryDto result;
 
-        DailyNewsThumbnailDTO dailynewsdto =  getDailyNewsOne(category);
+        DailyNewsThumbnailDto dailynewsdto =  getDailyNewsOne(category);
 
         Page<Basenews> page = repositoryFindBy;
-        List<BaseNewsThumbnailDTO> basenewsList = getBaseNewsList(page,userid);
+        List<BaseNewsThumbnailDto> basenewsList = getBaseNewsList(page,userid);
 
-        result = new ViewCategoryDTO(dailynewsdto,basenewsList,page.getTotalPages(),page.getTotalElements());
+        result = new ViewCategoryDto(dailynewsdto,basenewsList,page.getTotalPages(),page.getTotalElements());
         if(dailynewsdto == null) {
             System.out.println("daily is null");
             return null;
@@ -116,15 +116,15 @@ public class NewsService2 {
     }
 
     //common code 1 : page<basenews> -> list<dto>
-    public List<BaseNewsThumbnailDTO> getBaseNewsList(Page<Basenews> page,Long userid){
-        List<BaseNewsThumbnailDTO> basenewsdtolist = new ArrayList<>();
+    public List<BaseNewsThumbnailDto> getBaseNewsList(Page<Basenews> page, Long userid){
+        List<BaseNewsThumbnailDto> basenewsdtolist = new ArrayList<>();
 
         if(page!=null){
 
             for(Basenews basenews : page){
                 //scrap 여부 확인하기 매 리스트마다.
                 boolean scrap = scrapRepository.existsByUser_IdAndBasenews_Id(userid,basenews.getId());
-                BaseNewsThumbnailDTO basenewsdto = new BaseNewsThumbnailDTO(
+                BaseNewsThumbnailDto basenewsdto = new BaseNewsThumbnailDto(
                         basenews.getId(),
                         basenews.getSubCategory().getName(),
                         basenews.getCategory().getName(),
@@ -153,15 +153,15 @@ public class NewsService2 {
         return  PageRequest.of(page-1,12,Sort.by(sorts));
     }
 
-    public List<DailyNewsThumbnailDTO> getDailynewsList(){
+    public List<DailyNewsThumbnailDto> getDailynewsList(){
         List<Basenews> dailynewsList = baseNewsRepository.findAllByIsDailyNews(true);
 
-        List<DailyNewsThumbnailDTO> dailydtoList = new ArrayList<>();
+        List<DailyNewsThumbnailDto> dailydtoList = new ArrayList<>();
 
         for(Basenews dnews : dailynewsList) {
             String quizQuestion = quizRepository.findProblemByBasenewsId(dnews.getId()).orElseThrow(null);
             dailydtoList.add(
-                    new DailyNewsThumbnailDTO(
+                    new DailyNewsThumbnailDto(
                             dnews.getId(),
                             dnews.getTitle(),
                             dnews.getImageUrl(),
@@ -179,7 +179,7 @@ public class NewsService2 {
 
     //keywordIndex : 유저마다 최소 1개 최대 5개의 키워드를 리스트로 반환. 기본값은 keywordIndex =0으로 시작
     // case 2 : index = -1일 경우 전체 다 보여주는 로직
-    public KeywordNewsDTO getKeywordnewsList(Long userid, int keywordIndex, int page){
+    public KeywordNewsDto getKeywordnewsList(Long userid, int keywordIndex, int page){
 
         List<String> keywords = userKeywordRepository.findAllByUser_Id(userid);  //사용자의 키워드 list
         Pageable pageable = getPageInfo(page);
@@ -194,8 +194,8 @@ public class NewsService2 {
 
         }
 
-        List<BaseNewsThumbnailDTO> keywordNewsList = getBaseNewsList(pageNews, userid);
-        return new KeywordNewsDTO(keywords, keywordNewsList, pageNews.getTotalPages(), pageNews.getTotalElements());
+        List<BaseNewsThumbnailDto> keywordNewsList = getBaseNewsList(pageNews, userid);
+        return new KeywordNewsDto(keywords, keywordNewsList, pageNews.getTotalPages(), pageNews.getTotalElements());
 
     }
 

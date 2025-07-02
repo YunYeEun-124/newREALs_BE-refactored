@@ -3,7 +3,7 @@ package newREALs.backend.news.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.common.dto.ApiResponseDTO;
-import newREALs.backend.accounts.dto.LikesDTO;
+import newREALs.backend.accounts.dto.LikesDto;
 import newREALs.backend.news.dto.NewsDetailDto;
 import newREALs.backend.news.service.NewsDetailService;
 import newREALs.backend.common.service.TokenService;
@@ -40,7 +40,7 @@ public class NewsDetailController {
             @PathVariable Long id,
             HttpServletRequest request){
         Long userId=tokenService.getUserId(request);
-        LikesDTO likesDTO=newsDetailService.getLikesDetail(id,userId);
+        LikesDto likesDTO=newsDetailService.getLikesDetail(id,userId);
         return ResponseEntity.ok(
                 ApiResponseDTO.success("공감 정보를 성공적으로 조회했습니다.",likesDTO)
         );

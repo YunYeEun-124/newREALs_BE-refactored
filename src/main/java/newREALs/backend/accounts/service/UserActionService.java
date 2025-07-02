@@ -6,9 +6,9 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.domain.Accounts;
 import newREALs.backend.accounts.domain.Likes;
 import newREALs.backend.accounts.domain.Scrap;
-import newREALs.backend.accounts.domain.SubInterest;
+import newREALs.backend.accounts.domain.CurrentSubInterest;
 import newREALs.backend.accounts.repository.ScrapRepository;
-import newREALs.backend.accounts.repository.SubInterestRepository;
+import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
 import newREALs.backend.accounts.repository.UserKeywordRepository;
 import newREALs.backend.accounts.repository.UserRepository;
 import newREALs.backend.news.domain.Basenews;
@@ -24,7 +24,7 @@ public class UserActionService {
     private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
     private final UserKeywordRepository.LikesRepository likesRepository;
-    private final SubInterestRepository subInterestRepository;
+    private final CurrentSubInterestRepository currentSubInterestRepository;
     private final ScrapRepository scrapRepository;
  //   private final
 
@@ -37,7 +37,7 @@ public class UserActionService {
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         //유저관심도, 스크랩
-        Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
+        Optional<CurrentSubInterest> subInterest= currentSubInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
         Optional<Scrap> isScrapped=scrapRepository.findByUserAndBasenews(user,basenews);
         int keywordId = basenews.getKeyword().getId().intValue();
 
@@ -79,7 +79,7 @@ public class UserActionService {
 
         //Likes 객체 받아와서
         Optional<Likes> existingLike=likesRepository.findByUserAndBasenews(user,basenews);
-        Optional<SubInterest> subInterest=subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
+        Optional<CurrentSubInterest> subInterest= currentSubInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
         String message;
 
         if(existingLike.isPresent()){

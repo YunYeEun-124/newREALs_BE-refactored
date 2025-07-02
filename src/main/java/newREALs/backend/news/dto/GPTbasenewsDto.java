@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class GPTbasenewsDTO {
+public class GPTbasenewsDto {
     private String title;
     private String description;
     private String summary;

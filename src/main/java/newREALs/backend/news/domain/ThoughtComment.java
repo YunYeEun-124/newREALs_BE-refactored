@@ -9,7 +9,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ThinkComment {
+public class ThoughtComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -36,7 +36,7 @@ public class ThinkComment {
     //배열로 관리 ?
 
     @Builder
-    public ThinkComment(String topic,String AIComment,Basenews basenews){
+    public ThoughtComment(String topic, String AIComment, Basenews basenews){
         this.topic = topic;
         this.AIComment = AIComment;
         this.basenews= basenews;

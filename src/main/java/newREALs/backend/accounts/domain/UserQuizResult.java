@@ -12,7 +12,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class QuizStatus {
+public class UserQuizResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(updatable = false)
@@ -32,7 +32,7 @@ public class QuizStatus {
     private boolean isCorrect;
 
     @Builder
-    public QuizStatus(boolean isCorrect, Quiz quiz, Accounts user) {
+    public UserQuizResult(boolean isCorrect, Quiz quiz, Accounts user) {
         this.isCorrect = isCorrect;
         this.quiz = quiz;
         this.user = user;

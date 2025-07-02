@@ -13,7 +13,7 @@ import newREALs.backend.accounts.dto.ReportInterestDto;
 import newREALs.backend.accounts.repository.*;
 import newREALs.backend.news.repository.KeywordRepository;
 import newREALs.backend.news.service.ChatGPTService;
-import newREALs.backend.news.service.InsightService;
+import newREALs.backend.news.service.ThoughtCommentService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -144,9 +144,9 @@ KakaoService {
         private final UserKeywordRepository userKeywordRepository;
         private final KeywordRepository keywordRepository;
         private final ChatGPTService chatGPTService;
-        private final SubInterestRepository subInterestRepository;
-        private final PreSubInterestRepository preSubInterestRepository;
-        private final InsightService insightService;
+        private final CurrentSubInterestRepository currentSubInterestRepository;
+        private final PreviousSubInterestRepository previousSubInterestRepository;
+        private final ThoughtCommentService thoughtCommentService;
 
         public Map<String, Object> generateReportData(Long userId) {
             // 서현
@@ -239,9 +239,9 @@ KakaoService {
             result.put("정치", new ArrayList<>());
             result.put("경제", new ArrayList<>());
 
-            int societyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-            int politicsCount = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-            int economyCount = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+            int societyCount = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+            int politicsCount = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+            int economyCount = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
             List<Integer> categoryCount = new ArrayList<>();
             categoryCount.add(societyCount);
@@ -250,17 +250,17 @@ KakaoService {
 
             int totalCount = societyCount + politicsCount + economyCount;
 
-            int societyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "사회");
-            int societyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "사회");
-            int societyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "사회");
+            int societyQuiz = currentSubInterestRepository.findQuizCountByUserIdAndCategory(userId, "사회");
+            int societyComment = currentSubInterestRepository.findCommentCountByUserIdAndCategory(userId, "사회");
+            int societyScrap = currentSubInterestRepository.findScrapCountByUserIdAndCategory(userId, "사회");
 
-            int politicsQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "정치");
-            int politicsComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "정치");
-            int politicsScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "정치");
+            int politicsQuiz = currentSubInterestRepository.findQuizCountByUserIdAndCategory(userId, "정치");
+            int politicsComment = currentSubInterestRepository.findCommentCountByUserIdAndCategory(userId, "정치");
+            int politicsScrap = currentSubInterestRepository.findScrapCountByUserIdAndCategory(userId, "정치");
 
-            int economyQuiz = subInterestRepository.findQuizCountByUserIdAndCategory(userId, "경제");
-            int economyComment = subInterestRepository.findCommentCountByUserIdAndCategory(userId, "경제");
-            int economyScrap = subInterestRepository.findScrapCountByUserIdAndCategory(userId, "경제");
+            int economyQuiz = currentSubInterestRepository.findQuizCountByUserIdAndCategory(userId, "경제");
+            int economyComment = currentSubInterestRepository.findCommentCountByUserIdAndCategory(userId, "경제");
+            int economyScrap = currentSubInterestRepository.findScrapCountByUserIdAndCategory(userId, "경제");
 
             List<Integer> percentage = getReportPercentage(categoryCount, totalCount);
 
@@ -325,9 +325,9 @@ KakaoService {
             Map<String, Object> result = new HashMap<>();
             result.put("GPTComment", "");
 
-            Integer lastSociety = preSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-            Integer lastPolitics = preSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-            Integer lastEconomy = preSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+            Integer lastSociety = previousSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+            Integer lastPolitics = previousSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+            Integer lastEconomy = previousSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
             boolean hasLastSocietyData = lastSociety != null && lastSociety > 0;
             boolean hasLastPoliticsData = lastPolitics != null && lastPolitics > 0;
@@ -336,9 +336,9 @@ KakaoService {
             boolean hasNoLastData = !hasLastSocietyData && !hasLastPoliticsData && !hasLastEconomyData;
             result.put("hasNoLastData", hasNoLastData);
 
-            Integer thisSociety = subInterestRepository.findCountByUserIdAndCategory(userId, "사회");
-            Integer thisPolitics = subInterestRepository.findCountByUserIdAndCategory(userId, "정치");
-            Integer thisEconomy = subInterestRepository.findCountByUserIdAndCategory(userId, "경제");
+            Integer thisSociety = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "사회");
+            Integer thisPolitics = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "정치");
+            Integer thisEconomy = currentSubInterestRepository.findCountByUserIdAndCategory(userId, "경제");
 
             Map<String, Integer> changeMap = new HashMap<>();
             if (hasLastSocietyData) {
@@ -404,13 +404,13 @@ KakaoService {
             result.put("lastMonth", new ArrayList<>());
             result.put("thisMonth", new ArrayList<>());
 
-            int lastQuiz = preSubInterestRepository.findTotalQuizCountByUserId(userId);
-            int lastComment = preSubInterestRepository.findTotalCommentCountByUserId(userId);
-            int lastAtt = preSubInterestRepository.findTotalAttCountByUserId(userId);
+            int lastQuiz = previousSubInterestRepository.findTotalQuizCountByUserId(userId);
+            int lastComment = previousSubInterestRepository.findTotalCommentCountByUserId(userId);
+            int lastAtt = previousSubInterestRepository.findTotalAttCountByUserId(userId);
 
-            int thisQuiz = subInterestRepository.findTotalQuizCountByUserId(userId);
-            int thisComment = subInterestRepository.findTotalCommentCountByUserId(userId);
-            int thisAtt = subInterestRepository.findTotalAttCountByUserId(userId);
+            int thisQuiz = currentSubInterestRepository.findTotalQuizCountByUserId(userId);
+            int thisComment = currentSubInterestRepository.findTotalCommentCountByUserId(userId);
+            int thisAtt = currentSubInterestRepository.findTotalAttCountByUserId(userId);
 
             result.get("lastMonth").add(ReportCompareDto.builder()
                     .quiz(lastQuiz)

@@ -17,7 +17,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class PreSubInterest {
+public class PreviousSubInterest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +55,7 @@ public class PreSubInterest {
 
 
     @Builder
-    public PreSubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
+    public PreviousSubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;

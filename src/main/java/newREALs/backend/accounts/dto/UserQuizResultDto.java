@@ -3,7 +3,7 @@ package newREALs.backend.accounts.dto;
 import lombok.Getter;
 
 @Getter
-public class QuizStatusDto {
+public class UserQuizResultDto {
     private Long quizId;
     private String problem;
     private Boolean answer;
@@ -11,7 +11,7 @@ public class QuizStatusDto {
     private Boolean state; //맞춤(true) 틀림(false) 안풂(null)
     private Long basenewsId;
 
-    public QuizStatusDto(Long quizId, String problem, Boolean answer, String comment, Boolean isCorrect,Long basenewsId) {
+    public UserQuizResultDto(Long quizId, String problem, Boolean answer, String comment, Boolean isCorrect, Long basenewsId) {
         this.quizId = quizId;
         this.problem = problem;
         this.answer = answer;

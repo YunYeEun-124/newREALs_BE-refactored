@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class InsightDTO {
+public class ThoughtCommentDto {
 
     private String topic;
     private String category;

@@ -4,19 +4,19 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.domain.Accounts;
-import newREALs.backend.accounts.domain.SubInterest;
-import newREALs.backend.accounts.domain.UserComment;
+import newREALs.backend.accounts.domain.CurrentSubInterest;
+import newREALs.backend.accounts.domain.UserThoughtComment;
 import newREALs.backend.accounts.dto.ProfileInterestProjection;
 import newREALs.backend.accounts.dto.ReportDto;
-import newREALs.backend.accounts.dto.userKeywordDTO;
-import newREALs.backend.accounts.repository.SubInterestRepository;
+import newREALs.backend.accounts.dto.userKeywordDto;
+import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
 import newREALs.backend.accounts.repository.UserRepository;
-import newREALs.backend.news.dto.InsightDTO;
-import newREALs.backend.accounts.repository.UserCommentRepository;
+import newREALs.backend.accounts.repository.UserThoughtCommentRepository;
 import newREALs.backend.news.domain.Basenews;
-import newREALs.backend.news.domain.ThinkComment;
+import newREALs.backend.news.domain.ThoughtComment;
+import newREALs.backend.news.dto.ThoughtCommentDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.InsightRepository;
+import newREALs.backend.news.repository.ThouhtCommentRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -32,12 +32,12 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class InsightService {
+public class ThoughtCommentService {
 
-    private  final InsightRepository insightRepository;
-    private final UserCommentRepository userCommentRepository;
+    private  final ThouhtCommentRepository thouhtCommentRepository;
+    private final UserThoughtCommentRepository userThoughtCommentRepository;
     private final UserRepository userRepository;
-    private final SubInterestRepository subInterestRepository;
+    private final CurrentSubInterestRepository currentSubInterestRepository;
     private final BaseNewsRepository baseNewsRepository;
     private final ChatGPTService chatGPTService;
     //해당 뉴스의 인사이트가 없으면 200-null
@@ -46,11 +46,11 @@ public class InsightService {
 
 
     //pros,cons,neutral
-    public boolean gatherOpinions(ThinkComment thinkComment){
-        if(thinkComment.getPros() != null | thinkComment.getCons() != null || thinkComment.getNeutral() != null)//이미 채워져있다면?
+    public boolean gatherOpinions(ThoughtComment thoughtComment){
+        if(thoughtComment.getPros() != null | thoughtComment.getCons() != null || thoughtComment.getNeutral() != null)//이미 채워져있다면?
             return true;
 
-        List<String> userComments = userCommentRepository.findByThinkComment_Id(thinkComment.getId());
+        List<String> userComments = userThoughtCommentRepository.findByThinkComment_Id(thoughtComment.getId());
 
         System.out.println("userComment size is : "+userComments.size());
         if(userComments.size() >= 3){
@@ -58,7 +58,7 @@ public class InsightService {
             List<Map<String, String>> titleMessages = new ArrayList<>();
 
             titleMessages.add(Map.of("role", "system", "content", userComments+"를 찬성(pros),반성(cons),중립(neutral)으로 나눠야해. "));
-            titleMessages.add(Map.of("role", "user", "content", thinkComment.getTopic()+"에 대한 사람들의 의견을 모았어. 이걸 찬성,반대,중립 세 가지로 분류하고 요약해줘" +
+            titleMessages.add(Map.of("role", "user", "content", thoughtComment.getTopic()+"에 대한 사람들의 의견을 모았어. 이걸 찬성,반대,중립 세 가지로 분류하고 요약해줘" +
                     "너의 의도 " +
                     "1. 사람들의 댓글 중 비속어,의미없는 댓글들을 안보이게 하기\n" +
                     "2. 다른 입장도 생각해보기 \n" +
@@ -78,10 +78,10 @@ public class InsightService {
             String neutral = extractSection(opinions, "neutral");
 
             // ThinkComment에 값 설정
-            thinkComment.setPros(pros);
-            thinkComment.setCons(cons);
-            thinkComment.setNeutral(neutral);
-            insightRepository.save(thinkComment);
+            thoughtComment.setPros(pros);
+            thoughtComment.setCons(cons);
+            thoughtComment.setNeutral(neutral);
+            thouhtCommentRepository.save(thoughtComment);
             return true;
         }else return false;
     }
@@ -100,28 +100,28 @@ public class InsightService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 ID의 뉴스를 찾을 수 없습니다."));
         ProfileInterestProjection.ResponseUserCommentDTO result;
 
-        ThinkComment thinkComment = insightRepository.findByBasenews_Id(newsId)
+        ThoughtComment thoughtComment = thouhtCommentRepository.findByBasenews_Id(newsId)
                 .orElse(null);
-        if(thinkComment == null) return null ; //해당 뉴스에 인사이트 기능이 없음.
+        if(thoughtComment == null) return null ; //해당 뉴스에 인사이트 기능이 없음.
 
-        String userComment =  userCommentRepository.findByThinkComment_IdAndUser_Id(thinkComment.getId(),userId);
-        boolean isGathered = gatherOpinions(thinkComment);
+        String userComment =  userThoughtCommentRepository.findByThinkComment_IdAndUser_Id(thoughtComment.getId(),userId);
+        boolean isGathered = gatherOpinions(thoughtComment);
 
         if(userComment == null){ //response 1. topic just
-            result = new ProfileInterestProjection.ResponseUserCommentDTO(thinkComment.getTopic());
+            result = new ProfileInterestProjection.ResponseUserCommentDTO(thoughtComment.getTopic());
         }else{
 
            if(!isGathered){//response 2. 댓글이 안 모인 경우
                System.out.println("gather is false ");
-                result = new ProfileInterestProjection.ResponseUserCommentDTO(thinkComment.getTopic(),userComment, thinkComment.getAIComment());
+                result = new ProfileInterestProjection.ResponseUserCommentDTO(thoughtComment.getTopic(),userComment, thoughtComment.getAIComment());
            }else {//response 3. 댓글이 모여서 찬,반,중으로 나눈 경우
                System.out.println("댓글 3개 이상 모임! ");
                result = new ProfileInterestProjection.ResponseUserCommentDTO(
-                       thinkComment.getTopic(),
+                       thoughtComment.getTopic(),
                        userComment,
-                       thinkComment.getPros(),
-                       thinkComment.getCons(),
-                       thinkComment.getNeutral());
+                       thoughtComment.getPros(),
+                       thoughtComment.getCons(),
+                       thoughtComment.getNeutral());
            }
 
         }
@@ -138,13 +138,13 @@ public class InsightService {
         Accounts user=userRepository.findById(userId)
                 .orElseThrow(()->new EntityNotFoundException("해당 ID의 사용자를 찾을 수 없습니다."));
 
-        Optional<SubInterest> subInterest= subInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
-        Optional<ThinkComment> thinkComment = insightRepository.findByBasenews_Id(newsId);
+        Optional<CurrentSubInterest> subInterest= currentSubInterestRepository.findByUserAndSubCategory(user,basenews.getSubCategory());
+        Optional<ThoughtComment> thinkComment = thouhtCommentRepository.findByBasenews_Id(newsId);
 
         if( thinkComment.isPresent() && subInterest.isPresent()){
             //해당 뉴스의 소카테고리 관심도 카운트 올리기.
-            userCommentRepository.save(
-                    UserComment.builder().
+            userThoughtCommentRepository.save(
+                    UserThoughtComment.builder().
                     userComment(userComment).
                     user(user).
                     thinkComment(thinkComment.get()).
@@ -159,9 +159,9 @@ public class InsightService {
     }
 
 
-    public List<InsightDTO> getInsightList(){
+    public List<ThoughtCommentDto> getInsightList(){
 
-        List<InsightDTO> result = insightRepository.findAllBy();
+        List<ThoughtCommentDto> result = thouhtCommentRepository.findAllBy();
 
 
         if(result.size() != 5){
@@ -175,7 +175,7 @@ public class InsightService {
     //사용자가 쓴 코멘트, 해당 토픽, 토픽에 대한 뉴스의 아이디
     public ReportDto.ResponseUserCommentListDTO getUserInsightList(Long userid, int page){
         Pageable pageable = getPageInfo(page);
-        Slice<userKeywordDTO.UserCommentListDTO> slice = userCommentRepository.findAllByUserId(userid,pageable);
+        Slice<userKeywordDto.UserCommentListDTO> slice = userThoughtCommentRepository.findAllByUserId(userid,pageable);
         return new ReportDto.ResponseUserCommentListDTO(slice.getContent(),slice.hasNext(),slice.hasContent(),slice.getNumber()+1);
 
     }

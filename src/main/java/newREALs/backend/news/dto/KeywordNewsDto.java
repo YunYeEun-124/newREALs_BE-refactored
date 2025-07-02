@@ -7,10 +7,10 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class KeywordNewsDTO
+public class KeywordNewsDto
 {
     private List<String> userKeywords;
-    private List<BaseNewsThumbnailDTO> baseNewsList;
+    private List<BaseNewsThumbnailDto> baseNewsList;
     private int totalPage;
     private Long totalElement;
 }

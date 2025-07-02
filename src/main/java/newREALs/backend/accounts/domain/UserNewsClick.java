@@ -9,7 +9,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Click {
+public class UserNewsClick {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
@@ -28,7 +28,7 @@ public class Click {
     @Column(nullable=false)
     private Long count;
     @Builder
-    public Click(Accounts user, Basenews basenews){
+    public UserNewsClick(Accounts user, Basenews basenews){
         this.user=user;
         this.basenews=basenews;
         this.count=1L;

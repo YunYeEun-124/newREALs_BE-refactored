@@ -21,7 +21,7 @@ public class ReportDto {
     @AllArgsConstructor
     public static class ResponseUserCommentListDTO {
 
-        private List<userKeywordDTO.UserCommentListDTO> insightList;
+        private List<userKeywordDto.UserCommentListDTO> insightList;
         private boolean hasNext;
         private boolean hasContent;
         private int nowPage;

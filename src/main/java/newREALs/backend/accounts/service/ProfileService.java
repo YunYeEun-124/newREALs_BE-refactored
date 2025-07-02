@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import newREALs.backend.accounts.domain.Accounts;
 import newREALs.backend.accounts.domain.Scrap;
-import newREALs.backend.accounts.domain.SubInterest;
+import newREALs.backend.accounts.domain.CurrentSubInterest;
 import newREALs.backend.accounts.dto.ProfileAttendanceListDto;
 import newREALs.backend.accounts.dto.ProfileInfoDto;
 import newREALs.backend.accounts.dto.ProfileInterestDto;
@@ -12,7 +12,7 @@ import newREALs.backend.accounts.dto.ProfileInterestProjection;
 import newREALs.backend.accounts.repository.*;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Keyword;
-import newREALs.backend.news.dto.BaseNewsThumbnailDTO;
+import newREALs.backend.news.dto.BaseNewsThumbnailDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
 import newREALs.backend.news.service.SubCategoryRepository;
 import newREALs.backend.common.service.S3Service;
@@ -32,10 +32,10 @@ public class ProfileService {
     private final AccountsRepository accountsRepository;
     private final ScrapRepository scrapRepository;
     private final BaseNewsRepository baseNewsRepository;
-    private final SubInterestRepository subInterestRepository;
+    private final CurrentSubInterestRepository currentSubInterestRepository;
     private final SubCategoryRepository subCategoryRepository;
     private final S3Service s3Service;
-    private final PreSubInterestRepository preSubInterestRepository;
+    private final PreviousSubInterestRepository previousSubInterestRepository;
 
 
     //[get] 프로필 정보
@@ -81,7 +81,7 @@ public class ProfileService {
     }
 
     //[get] 스크랩 보여주기
-    public Page<BaseNewsThumbnailDTO> getScrapNewsThumbnail(Long userId, int page) {
+    public Page<BaseNewsThumbnailDto> getScrapNewsThumbnail(Long userId, int page) {
         Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
@@ -93,7 +93,7 @@ public class ProfileService {
 
         return scrapNewsList.map(scrap -> {
             Basenews basenews = scrap.getBasenews();
-            return BaseNewsThumbnailDTO.builder()
+            return BaseNewsThumbnailDto.builder()
                     .basenewsId(basenews.getId())
                     .category(basenews.getCategory().getName())
                     .subCategory(basenews.getSubCategory().getName())
@@ -219,17 +219,17 @@ public class ProfileService {
         user.updateKeywordInterest(keywordId, -2);
         userRepository.save(user);
 
-        SubInterest subInterest = subInterestRepository.findByUserAndSubCategoryId(user, news.getSubCategory().getId())
+        CurrentSubInterest currentSubInterest = currentSubInterestRepository.findByUserAndSubCategoryId(user, news.getSubCategory().getId())
                 .orElseThrow(() -> new IllegalArgumentException("subInterest 없음"));
 
-            subInterest.setScrapCount(subInterest.getScrapCount() - 1);
-            subInterestRepository.save(subInterest);
+            currentSubInterest.setScrapCount(currentSubInterest.getScrapCount() - 1);
+            currentSubInterestRepository.save(currentSubInterest);
         // scrap 삭제
         scrapRepository.delete(scrap);
 
     }
 
-    public Page<BaseNewsThumbnailDTO> getScrapSearchList(Long userId, String keyword, int page){
+    public Page<BaseNewsThumbnailDto> getScrapSearchList(Long userId, String keyword, int page){
         Accounts user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("없는 userId"));
 
@@ -237,7 +237,7 @@ public class ProfileService {
 
         Page<Basenews> scrapSearchList = scrapRepository.findByUserAndTitleContainingOrDescriptionContaining(userId, keyword, pageable);
 
-        return scrapSearchList.map(basenews -> BaseNewsThumbnailDTO.builder()
+        return scrapSearchList.map(basenews -> BaseNewsThumbnailDto.builder()
                 .basenewsId(basenews.getId())
                 .category(basenews.getCategory().getName())
                 .subCategory(basenews.getSubCategory().getName())

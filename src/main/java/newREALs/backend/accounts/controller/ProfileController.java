@@ -9,9 +9,9 @@ import newREALs.backend.accounts.dto.ProfileInterestDto;
 import newREALs.backend.accounts.dto.ReportDto;
 import newREALs.backend.common.dto.ApiResponseDTO;
 import newREALs.backend.accounts.repository.AccountsRepository;
-import newREALs.backend.news.dto.BaseNewsThumbnailDTO;
-import newREALs.backend.accounts.dto.QuizStatusDto;
-import newREALs.backend.news.service.InsightService;
+import newREALs.backend.news.dto.BaseNewsThumbnailDto;
+import newREALs.backend.accounts.dto.UserQuizResultDto;
+import newREALs.backend.news.service.ThoughtCommentService;
 import newREALs.backend.accounts.service.ProfileService;
 import newREALs.backend.news.service.QuizService;
 import newREALs.backend.common.service.TokenService;
@@ -33,13 +33,13 @@ public class ProfileController {
     private final TokenService tokenService;
     private final ProfileService profileService;
     private final AccountsRepository accountsRepository;
-    private final InsightService insightService;
+    private final ThoughtCommentService thoughtCommentService;
     //[get] 프로필 페이지 - 퀴즈 정보
     @GetMapping("/quiz")
-    public ResponseEntity<ApiResponseDTO<List<QuizStatusDto>>> getQuizStatus(HttpServletRequest request) {
+    public ResponseEntity<ApiResponseDTO<List<UserQuizResultDto>>> getQuizStatus(HttpServletRequest request) {
         //토큰이 유효하지 않으면 getUserId에서 401에러 "토큰이 유효하지 않습니다"를 반환함
         Long userId = tokenService.getUserId(request);
-        List<QuizStatusDto> quizStatusList = quizService.getQuizStatus(userId);
+        List<UserQuizResultDto> quizStatusList = quizService.getQuizStatus(userId);
         return ResponseEntity.ok(ApiResponseDTO.success("퀴즈 상태 조회 성공", quizStatusList));
 
     }
@@ -69,7 +69,7 @@ public class ProfileController {
         }
 
         Long userId = tokenService.getUserId(request);
-        Page<BaseNewsThumbnailDTO> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
+        Page<BaseNewsThumbnailDto> scrapNewsPage = profileService.getScrapNewsThumbnail(userId, page);
 
         Map<String, Object> response = new HashMap<>();
         response.put("user_id", userId);
@@ -134,7 +134,7 @@ public class ProfileController {
             throw new IllegalArgumentException("파라미터가 비어있습니다.");
         }
         Long userId = tokenService.getUserId(request);
-        Page<BaseNewsThumbnailDTO> scrapSearchPage = profileService.getScrapSearchList(userId, keyword, page);
+        Page<BaseNewsThumbnailDto> scrapSearchPage = profileService.getScrapSearchList(userId, keyword, page);
 
         Map<String, Object> response = new HashMap<>();
         response.put("user_id", userId);
@@ -149,7 +149,7 @@ public class ProfileController {
     @GetMapping("/insight")
     public ResponseEntity<?> getUserInsightList(HttpServletRequest request,@RequestParam int page){
         Long userId = tokenService.getUserId(request);
-        ReportDto.ResponseUserCommentListDTO result = insightService.getUserInsightList(userId,page);
+        ReportDto.ResponseUserCommentListDTO result = thoughtCommentService.getUserInsightList(userId,page);
 
         return ResponseEntity.ok(ApiResponseDTO.success("유저 인사이트 목록 조회 성공",result ));
     }

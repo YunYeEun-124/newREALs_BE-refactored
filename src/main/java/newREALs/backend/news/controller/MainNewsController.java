@@ -4,11 +4,11 @@ package newREALs.backend.news.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.common.dto.ApiResponseDTO;
-import newREALs.backend.news.dto.DailyNewsThumbnailDTO;
-import newREALs.backend.news.dto.InsightDTO;
+import newREALs.backend.news.dto.DailyNewsThumbnailDto;
 import newREALs.backend.accounts.repository.UserKeywordRepository;
-import newREALs.backend.news.dto.KeywordNewsDTO;
-import newREALs.backend.news.service.InsightService;
+import newREALs.backend.news.dto.KeywordNewsDto;
+import newREALs.backend.news.dto.ThoughtCommentDto;
+import newREALs.backend.news.service.ThoughtCommentService;
 import newREALs.backend.news.service.NewsService2;
 import newREALs.backend.common.service.TokenService;
 import org.springframework.http.ResponseEntity;
@@ -28,15 +28,15 @@ public class MainNewsController {
     private final NewsService2 newsService;
     private final TokenService tokenService;
     private final UserKeywordRepository userKeywordRepository;
-    private final InsightService insightService;
+    private final ThoughtCommentService thoughtCommentService;
 
     //main news list
 
     @GetMapping("/daily")
     public ResponseEntity<?> viewDailynewsList(HttpServletRequest userInfo){
 
-        List<DailyNewsThumbnailDTO> list = newsService.getDailynewsList();
-        HashMap<String,List<DailyNewsThumbnailDTO>> result= new HashMap<>();
+        List<DailyNewsThumbnailDto> list = newsService.getDailynewsList();
+        HashMap<String,List<DailyNewsThumbnailDto>> result= new HashMap<>();
         result.put("dailynewsList",list);
         if(list.size() != 5){ //error
             throw new IllegalStateException("dailynews 5개 조회 실패. 서버 문제");
@@ -55,7 +55,7 @@ public class MainNewsController {
                                                  @RequestParam int page){
 
         Long userid = tokenService.getUserId(userInfo);
-        KeywordNewsDTO keywordnewsList;
+        KeywordNewsDto keywordnewsList;
 
         if(keywordIndex == null){ //다 골라오기.
             keywordnewsList =  newsService.getKeywordnewsList(userid,-1,page);
@@ -75,13 +75,13 @@ public class MainNewsController {
     @GetMapping("/insight")
     public ResponseEntity<?> viewInsightList(){
 
-       List<InsightDTO> list = insightService.getInsightList();
+       List<ThoughtCommentDto> list = thoughtCommentService.getInsightList();
 
         if(list.isEmpty()){
             throw new IllegalStateException("insight 리스트 조회 실패. 서버 문제");
         }
 
-        HashMap<String,List<InsightDTO>> result = new HashMap<>();
+        HashMap<String,List<ThoughtCommentDto>> result = new HashMap<>();
         result.put("insightList",list);
 
         return ResponseEntity.ok(

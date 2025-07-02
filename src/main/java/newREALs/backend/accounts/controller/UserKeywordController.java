@@ -4,16 +4,16 @@ import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import newREALs.backend.accounts.domain.Accounts;
-import newREALs.backend.accounts.domain.PreSubInterest;
-import newREALs.backend.accounts.domain.SubInterest;
-import newREALs.backend.accounts.repository.PreSubInterestRepository;
-import newREALs.backend.accounts.repository.SubInterestRepository;
+import newREALs.backend.accounts.domain.PreviousSubInterest;
+import newREALs.backend.accounts.domain.CurrentSubInterest;
+import newREALs.backend.accounts.repository.PreviousSubInterestRepository;
+import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
 import newREALs.backend.accounts.repository.UserRepository;
 import newREALs.backend.common.dto.ApiResponseDTO;
 import newREALs.backend.news.domain.SubCategory;
 import newREALs.backend.news.service.SubCategoryRepository;
 import newREALs.backend.common.service.TokenService;
-import newREALs.backend.news.service.UserKeywordService;
+import newREALs.backend.accounts.service.UserKeywordService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,8 +30,8 @@ public class UserKeywordController {
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final SubCategoryRepository subCategoryRepository;
-    private final SubInterestRepository subInterestRepository;
-    private final PreSubInterestRepository preSubInterestRepository;
+    private final CurrentSubInterestRepository currentSubInterestRepository;
+    private final PreviousSubInterestRepository previousSubInterestRepository;
 
 
     @PutMapping("/edit")
@@ -123,7 +123,7 @@ public class UserKeywordController {
         try {
             List<SubCategory> subCategories = subCategoryRepository.findAll();
             for(SubCategory subCategory : subCategories) {
-                PreSubInterest preSubInterest = PreSubInterest.builder()
+                PreviousSubInterest previousSubInterest = PreviousSubInterest.builder()
                         .user(user)
                         .subCategory(subCategory)
                         .count(0)
@@ -131,8 +131,8 @@ public class UserKeywordController {
                         .scrapCount(0)
                         .commentCount(0)
                         .build();
-                preSubInterestRepository.save(preSubInterest);
-                SubInterest subInterest = SubInterest.builder()
+                previousSubInterestRepository.save(previousSubInterest);
+                CurrentSubInterest currentSubInterest = CurrentSubInterest.builder()
                         .user(user)
                         .subCategory(subCategory)
                         .count(0)
@@ -140,7 +140,7 @@ public class UserKeywordController {
                         .scrapCount(0)
                         .commentCount(0)
                         .build();
-                subInterestRepository.save(subInterest);
+                currentSubInterestRepository.save(currentSubInterest);
             }
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

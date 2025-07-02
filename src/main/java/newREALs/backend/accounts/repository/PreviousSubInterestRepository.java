@@ -1,13 +1,13 @@
 package newREALs.backend.accounts.repository;
 
-import newREALs.backend.accounts.domain.PreSubInterest;
+import newREALs.backend.accounts.domain.PreviousSubInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PreSubInterestRepository extends JpaRepository<PreSubInterest, Long> {
+public interface PreviousSubInterestRepository extends JpaRepository<PreviousSubInterest, Long> {
     @Query("SELECT COALESCE(SUM(psi.count), 0) " +
             "FROM PreSubInterest psi " +
             "JOIN psi.subCategory sc " +

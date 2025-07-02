@@ -2,7 +2,7 @@ package newREALs.backend.accounts.repository;
 
 import newREALs.backend.accounts.domain.Accounts;
 import newREALs.backend.news.domain.SubCategory;
-import newREALs.backend.accounts.domain.SubInterest;
+import newREALs.backend.accounts.domain.CurrentSubInterest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,10 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
-public interface SubInterestRepository extends JpaRepository<SubInterest,Long> {
+public interface CurrentSubInterestRepository extends JpaRepository<CurrentSubInterest,Long> {
 
-    Optional<SubInterest> findByUserAndSubCategory(Accounts user, SubCategory subCategory);
-    Optional<SubInterest> findByUserAndSubCategoryId(Accounts user, Long subCategoryId);
+    Optional<CurrentSubInterest> findByUserAndSubCategory(Accounts user, SubCategory subCategory);
+    Optional<CurrentSubInterest> findByUserAndSubCategoryId(Accounts user, Long subCategoryId);
     // Category 별 quizCount
     @Query("SELECT SUM(si.quizCount) " +
             "FROM SubInterest si " +

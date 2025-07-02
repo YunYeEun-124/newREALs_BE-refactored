@@ -1,4 +1,4 @@
-package newREALs.backend.news.service;
+package newREALs.backend.accounts.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

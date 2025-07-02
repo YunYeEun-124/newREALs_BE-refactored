@@ -2,14 +2,14 @@ package newREALs.backend.accounts.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import newREALs.backend.news.domain.ThinkComment;
+import newREALs.backend.news.domain.ThoughtComment;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter @Setter
-public class UserComment {
+public class UserThoughtComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,15 +24,15 @@ public class UserComment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "thinkComment_id", nullable = false)
     @OnDelete(action= OnDeleteAction.CASCADE)
-    private ThinkComment thinkComment;
+    private ThoughtComment thoughtComment;
 
     @Column
     private String userComment;
 
     @Builder
-    public UserComment(String userComment,Accounts user,ThinkComment thinkComment){
+    public UserThoughtComment(String userComment, Accounts user, ThoughtComment thoughtComment){
         this.userComment = userComment;
-        this.thinkComment = thinkComment;
+        this.thoughtComment = thoughtComment;
         this.user = user;
     }
 }

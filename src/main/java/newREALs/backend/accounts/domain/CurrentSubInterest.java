@@ -15,7 +15,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SubInterest {
+public class CurrentSubInterest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +53,7 @@ public class SubInterest {
 
 
     @Builder
-    public SubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
+    public CurrentSubInterest(Accounts user, SubCategory subCategory, int count, int quizCount, int scrapCount, int commentCount, int attCount) {
         this.user = user;
         this.subCategory = subCategory;
         this.count = count;
