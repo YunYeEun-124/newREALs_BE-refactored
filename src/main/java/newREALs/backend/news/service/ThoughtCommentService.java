@@ -16,7 +16,7 @@ import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.ThoughtComment;
 import newREALs.backend.news.dto.ThoughtCommentDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.ThouhtCommentRepository;
+import newREALs.backend.news.repository.ThoughtCommentRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class ThoughtCommentService {
 
-    private  final ThouhtCommentRepository thouhtCommentRepository;
+    private  final ThoughtCommentRepository thouhtCommentRepository;
     private final UserThoughtCommentRepository userThoughtCommentRepository;
     private final UserRepository userRepository;
     private final CurrentSubInterestRepository currentSubInterestRepository;
@@ -50,7 +50,7 @@ public class ThoughtCommentService {
         if(thoughtComment.getPros() != null | thoughtComment.getCons() != null || thoughtComment.getNeutral() != null)//이미 채워져있다면?
             return true;
 
-        List<String> userComments = userThoughtCommentRepository.findByThinkComment_Id(thoughtComment.getId());
+        List<String> userComments = userThoughtCommentRepository.findByThoughtComment_Id(thoughtComment.getId());
 
         System.out.println("userComment size is : "+userComments.size());
         if(userComments.size() >= 3){
@@ -104,7 +104,7 @@ public class ThoughtCommentService {
                 .orElse(null);
         if(thoughtComment == null) return null ; //해당 뉴스에 인사이트 기능이 없음.
 
-        String userComment =  userThoughtCommentRepository.findByThinkComment_IdAndUser_Id(thoughtComment.getId(),userId);
+        String userComment =  userThoughtCommentRepository.findByThoughtComment_IdAndUser_Id(thoughtComment.getId(),userId);
         boolean isGathered = gatherOpinions(thoughtComment);
 
         if(userComment == null){ //response 1. topic just
@@ -146,8 +146,7 @@ public class ThoughtCommentService {
             userThoughtCommentRepository.save(
                     UserThoughtComment.builder().
                     userComment(userComment).
-                    user(user).
-                    thinkComment(thinkComment.get()).
+                    user(user).thoughtComment(thinkComment.get()).
                     build());
 
             subInterest.get().updateCommentCount();

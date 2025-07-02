@@ -33,8 +33,6 @@ public class ThoughtComment {
     @Column
     private String neutral;
 
-    //배열로 관리 ?
-
     @Builder
     public ThoughtComment(String topic, String AIComment, Basenews basenews){
         this.topic = topic;

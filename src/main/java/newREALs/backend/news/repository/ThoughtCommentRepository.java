@@ -10,18 +10,19 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ThouhtCommentRepository extends JpaRepository<ThoughtComment,Long> {
+public interface ThoughtCommentRepository extends JpaRepository<ThoughtComment,Long> {
 
 
 
-    @Query("SELECT new newREALs.backend.dto.InsightDTO(tc.topic, tc.basenews.category.name, tc.basenews.id) " +
-            "FROM ThinkComment tc " +
+    @Query("SELECT new newREALs.backend.news.dto.ThoughtCommentDto(tc.topic, tc.basenews.category.name, tc.basenews.id) " +
+            "FROM ThoughtComment tc " +
             "WHERE tc.basenews.isDailyNews = true")
     List<ThoughtCommentDto> findAllBy();
 
-    @Query("select tc from ThinkComment tc where tc.basenews.id = :newsId")
+    @Query("select tc from ThoughtComment tc where tc.basenews.id = :newsId")
     Optional<ThoughtComment> findByBasenews_Id(@Param("newsId") Long newsId);
 
 
     boolean existsByBasenews(Basenews news);
 }
+

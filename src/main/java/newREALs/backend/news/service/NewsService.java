@@ -5,7 +5,7 @@ import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Quiz;
 import newREALs.backend.news.domain.ThoughtComment;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.ThouhtCommentRepository;
+import newREALs.backend.news.repository.ThoughtCommentRepository;
 import newREALs.backend.news.repository.QuizRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
-    private final ThouhtCommentRepository thouhtCommentRepository;
+    private final ThoughtCommentRepository thouhtCommentRepository;
     private final ArticleProcessingService articleProcessingService;
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 

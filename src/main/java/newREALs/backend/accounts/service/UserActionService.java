@@ -7,10 +7,7 @@ import newREALs.backend.accounts.domain.Accounts;
 import newREALs.backend.accounts.domain.Likes;
 import newREALs.backend.accounts.domain.Scrap;
 import newREALs.backend.accounts.domain.CurrentSubInterest;
-import newREALs.backend.accounts.repository.ScrapRepository;
-import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
-import newREALs.backend.accounts.repository.UserKeywordRepository;
-import newREALs.backend.accounts.repository.UserRepository;
+import newREALs.backend.accounts.repository.*;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.repository.BaseNewsRepository;
 import org.springframework.stereotype.Service;
@@ -23,7 +20,7 @@ import java.util.Optional;
 public class UserActionService {
     private final BaseNewsRepository basenewsRepository;
     private final UserRepository userRepository;
-    private final UserKeywordRepository.LikesRepository likesRepository;
+    private final LikesRepository likesRepository;
     private final CurrentSubInterestRepository currentSubInterestRepository;
     private final ScrapRepository scrapRepository;
  //   private final

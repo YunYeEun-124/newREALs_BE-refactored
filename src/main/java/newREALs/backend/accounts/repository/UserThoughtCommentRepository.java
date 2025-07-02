@@ -15,20 +15,20 @@ import java.util.Optional;
 @Repository
 public interface UserThoughtCommentRepository extends JpaRepository<UserThoughtComment,Long> {
 
-    @Query("select tc.userComment from UserComment tc where tc.thinkComment.id = :id and tc.user.id = :userId")
-    String findByThinkComment_IdAndUser_Id(@Param("id") Long id, @Param("userId") Long userId);
+   // @Query("select tc.UserThoughtComment from UserThoughtComment tc where tc.ThoughtComment.id = :id and tc.user.id = :userId")
+    String findByThoughtComment_IdAndUser_Id(@Param("id") Long id, @Param("userId") Long userId);
 
 
-    @Query("select tc from UserComment tc where tc.thinkComment.basenews.id = :newsId and tc.user.id = :userId")
-    UserThoughtComment findUserCommentByThinkComment_IdAndUser_Id(@Param("newsId") Long newsId, @Param("userId") Long userId);
+   // @Query("select tc from UserThoughtComment tc where tc.ThoughtComment.basenews.id = :newsId and tc.user.id = :userId")
+    UserThoughtComment findUserCommentByThoughtComment_IdAndUser_Id(@Param("newsId") Long newsId, @Param("userId") Long userId);
 
     Optional<UserThoughtComment> findByUser_Id(Long userid);
-
-    @Query("select new newREALs.backend.dto.UserCommentListDTO(uc.thinkComment.topic, uc.userComment, uc.thinkComment.basenews.id) " +
-            "from UserComment uc " +
-            "WHERE uc.user.id = :userid")
+//
+//    @Query("select new newREALs.backend.accounts.dto.userKeywordDto.UserCommentListDTO(uc.ThoughtComment.topic, uc.UserThoughtComment, uc.ThoughtComment.basenews.id) " +
+//            "from UserThoughtComment uc " +
+//            "WHERE uc.user.id = :userid")
     Slice<userKeywordDto.UserCommentListDTO> findAllByUserId(@Param("userid")Long userid, Pageable pageable);
 
-    @Query("select tc.userComment from UserComment tc where tc.thinkComment.id = :id")
-    List<String> findByThinkComment_Id(Long id);
+   // @Query("select tc.UserThoughtComment from UserThoughtComment tc where tc.ThoughtComment.id = :id")
+    List<String> findByThoughtComment_Id(Long id);
 }

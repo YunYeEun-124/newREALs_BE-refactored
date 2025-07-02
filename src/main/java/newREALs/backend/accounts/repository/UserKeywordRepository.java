@@ -37,9 +37,5 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword,Long> {
 
     boolean existsByUserId(Long userId);
 
-    @Repository
-    interface LikesRepository extends JpaRepository<Likes,Long> {
 
-        Optional<Likes> findByUserAndBasenews(Accounts user, Basenews basenews);
-    }
 }
