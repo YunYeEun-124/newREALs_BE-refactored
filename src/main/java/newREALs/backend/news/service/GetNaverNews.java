@@ -33,15 +33,15 @@ public class GetNaverNews {
     private final ChatGPTService chatGPTService;
 
     private final NewsService newsService;
-    private final KeywordProcessingService keywordProcessingService;
+    private final NaverNewsApiService naverNewsApiService;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService, KeywordProcessingService keywordProcessingService) {
+    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService, NaverNewsApiService naverNewsApiService) {
         this.chatGPTService = chatGPTService;
         this.newsService = newsService;
-        this.keywordProcessingService = keywordProcessingService;
+        this.naverNewsApiService = naverNewsApiService;
     }
 
 
@@ -60,7 +60,7 @@ public class GetNaverNews {
         for (List<Keyword> keywordList : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
              for(Keyword keyword : keywordList){
                  try {
-                     keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
+                     naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1);
                      Thread.sleep(1000); // 1초 대기
                  } catch (InterruptedException e) {
                      Thread.currentThread().interrupt(); // 인터럽트 상태 복구
@@ -131,7 +131,7 @@ public class GetNaverNews {
                     System.out.println("추출한 키워드 : "+keyword.get().getName());
                     // 딜레이 추가
                     try {
-                        List<Basenews> createdNews = keywordProcessingService.processKeyword(title,keyword.get(),true,3);
+                        naverNewsApiService.executeFullNewsFlow(title,keyword.get(),true,3);
                         Thread.sleep(1000); // 1초 대기
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();

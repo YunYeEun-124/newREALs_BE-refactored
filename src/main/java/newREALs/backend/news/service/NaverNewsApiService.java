@@ -26,87 +26,65 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-public class KeywordProcessingService {
+public class NaverNewsApiService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private NewsService newsService;
-
     @Value("${naver.api.client-id}")
     private String clientId;
-
     @Value("${naver.api.secret-key}")
     private String clientSecret;
 
-    @Autowired
-    private KeywordRepository keywordRepository;
 
     @Autowired
     private BaseNewsRepository baseNewsRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+
 
     private final RateLimiter rateLimiter = RateLimiter.create(1.0); // 초당 1회 호출
 
+
+    //TEST 1
     @Transactional
-    public List<Basenews> processKeyword(String title, Keyword keyword, boolean isDailyNews, int display) {
+    public void executeFullNewsFlow(String title, Keyword keyword, boolean isDailyNews, int display) {
         rateLimiter.acquire(); // 호출 속도 제한
 
-        // API 호출 후 데이터 처리
-        List<Basenews> createdNews = ProcessNews(title, keyword, isDailyNews, display);
+        String naverApiResponseBody =  fetchNewsItemsFromNaver(title,display); //1. naverapi로 뉴스 item 리스트 받아옴
+        parseAndStoreNews(naverApiResponseBody,title,keyword,isDailyNews); //2. 받아온 리스트로
+
         entityManager.flush(); // 즉시 데이터 반영
 
-        // 생성된 뉴스가 없으면 로그 출력
-        if (createdNews.isEmpty()) {
-            System.out.println("No new Basenews created for keyword: " + keyword.getName());
-        }
 
-        return createdNews;
     }
 
-
-    public List<Basenews> ProcessNews(String title, Keyword keyword, Boolean isDailyNews, int display) {
-        List<Basenews> createdNews = new ArrayList<>();
-
-        String text;
-        try {
-            text = URLEncoder.encode(title, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException("검색어 인코딩 실패", e);
-        }
-
-        //API 호출
-        String apiURL = "https://openapi.naver.com/v1/search/news?query=" + text + "&display="+display+"&sort=sim";    // JSON 결과
-        System.out.println("naver url 검색어 : "+ title);
-        Map<String, String> requestHeaders = new HashMap<>();
-        requestHeaders.put("X-Naver-Client-Id", clientId);
-        requestHeaders.put("X-Naver-Client-Secret", clientSecret);
-
-        String responseBody = get(apiURL, requestHeaders);
-
-
+    /*
+    * 불러온 뉴스 정보로 뉴스 원문 크롤링 후 중복 체크 후 저장
+    * ------------------------------------------------------------
+    * case 1 . isDailyNews = true 인 경우, 데일리 뉴스로 호출했을 때 |
+    * case 2.  isDailyNews = false 인 경우, 일반 뉴스로 호출했을 때  |
+    *
+    * */
+    public void parseAndStoreNews(String naverApiResponseBody,String title, Keyword keyword, Boolean isDailyNews){
         // API 응답 파싱
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .setPrettyPrinting()
                 .create();
-        newsInfo newsinfo = gson.fromJson(responseBody, newsInfo.class);
+
+        newsInfo newsinfo = gson.fromJson(naverApiResponseBody, newsInfo.class);
 
         if (newsinfo == null || newsinfo.getItems().isEmpty()) {
             System.out.println("No news items found for title: " + title);
-            return createdNews;
+            return;
+
         }
 
         for (newsInfo.Item item : newsinfo.getItems()) {
-            if (!item.getLink().contains("n.news.naver.com")) {
-                System.out.println("Ignoring non-Naver news: " + item.getLink());
-                continue;
-            }
+            if (!item.getLink().contains("n.news.naver.com")) continue; //naver 기사 아닌 경우 PASS
 
             Optional<Basenews> existingNews = baseNewsRepository.findFirstByNewsUrl(item.getLink());
+
             if (existingNews.isPresent()) {
-                System.out.println("News already exists: " + item.getTitle());
                 if (isDailyNews) existingNews.get().checkDailyNews();
             } else {
                 try {
@@ -126,17 +104,40 @@ public class KeywordProcessingService {
                             .build();
 
                     baseNewsRepository.save(bnews);
-                    createdNews.add(bnews);
+
 
                     if (isDailyNews) break; // 데일리 뉴스는 하나만 필요
-                } catch (Exception e) {
+               } catch (Exception e) {
                     e.printStackTrace();
                     throw new RuntimeException("Failed to create Basenews", e);
                 }
             }
         }
 
-        return createdNews;
+    }
+
+    /*
+    * Naver Search API 연동하여 뉴스 정보 불러옵니다.
+    * */
+    public String fetchNewsItemsFromNaver(String title, int display) {
+
+
+        String text;
+        try {
+            text = URLEncoder.encode(title, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException("검색어 인코딩 실패", e);
+        }
+
+        //API 호출
+        String apiURL = "https://openapi.naver.com/v1/search/news?query=" + text + "&display="+display+"&sort=sim";    // JSON 결과
+        Map<String, String> requestHeaders = new HashMap<>();
+        requestHeaders.put("X-Naver-Client-Id", clientId);
+        requestHeaders.put("X-Naver-Client-Secret", clientSecret);
+
+        return get(apiURL, requestHeaders); //뉴스 정보 리스트
+
+
     }
 
     //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
@@ -247,16 +248,16 @@ public class KeywordProcessingService {
 
 
         try (BufferedReader lineReader = new BufferedReader(streamReader)) {
-            StringBuilder responseBody = new StringBuilder();
+            StringBuilder naverApiResponseBody = new StringBuilder();
 
 
             String line;
             while ((line = lineReader.readLine()) != null) {
-                responseBody.append(line);
+                naverApiResponseBody.append(line);
             }
 
 
-            return responseBody.toString();
+            return naverApiResponseBody.toString();
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는 데 실패했습니다.", e);
         }
