@@ -14,7 +14,7 @@ import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Keyword;
 import newREALs.backend.news.dto.BaseNewsThumbnailDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.service.SubCategoryRepository;
+import newREALs.backend.news.repository.SubCategoryRepository;
 import newREALs.backend.common.service.S3Service;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;

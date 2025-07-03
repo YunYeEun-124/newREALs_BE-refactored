@@ -23,7 +23,7 @@ public class NewsService {
     private final ChatGPTService chatGPTService;
     private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
-    private final ThoughtCommentRepository thouhtCommentRepository;
+    private final ThoughtCommentRepository thoughtCommentRepository;
     private final ArticleProcessingService articleProcessingService;
     private static final Logger log = LoggerFactory.getLogger(NewsService.class);
 
@@ -137,7 +137,7 @@ public class NewsService {
    // @Async
     public void generateAndSaveThinkCommentForDailyNews(Basenews news){
         System.out.println("generateAndSaveThinkCommentForDailyNews in");
-        if (thouhtCommentRepository.existsByBasenews(news)) {
+        if (thoughtCommentRepository.existsByBasenews(news)) {
             log.warn("insight already exists for Basenews ID: {}", news.getId());
             return;
         }
@@ -167,7 +167,7 @@ public class NewsService {
                 aiComment = line.substring(3).trim(); // "설명:" 이후 내용
         }
 
-        thouhtCommentRepository.save(
+        thoughtCommentRepository.save(
           ThoughtComment.builder()
                   .topic(topic)
                   .AIComment(aiComment)

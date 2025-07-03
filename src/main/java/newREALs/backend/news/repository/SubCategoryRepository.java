@@ -1,4 +1,4 @@
-package newREALs.backend.news.service;
+package newREALs.backend.news.repository;
 
 import newREALs.backend.news.domain.SubCategory;
 import org.springframework.data.jpa.repository.JpaRepository;

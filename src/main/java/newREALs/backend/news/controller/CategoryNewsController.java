@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.SubCategory;
 import newREALs.backend.common.dto.ApiResponseDTO;
 import newREALs.backend.news.dto.ViewCategoryDto;
-import newREALs.backend.news.service.SubCategoryRepository;
+import newREALs.backend.news.repository.SubCategoryRepository;
 import newREALs.backend.news.service.NewsService2;
 import newREALs.backend.common.service.TokenService;
 import org.springframework.http.ResponseEntity;

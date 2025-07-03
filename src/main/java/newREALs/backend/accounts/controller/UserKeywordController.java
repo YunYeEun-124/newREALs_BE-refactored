@@ -11,7 +11,7 @@ import newREALs.backend.accounts.repository.CurrentSubInterestRepository;
 import newREALs.backend.accounts.repository.UserRepository;
 import newREALs.backend.common.dto.ApiResponseDTO;
 import newREALs.backend.news.domain.SubCategory;
-import newREALs.backend.news.service.SubCategoryRepository;
+import newREALs.backend.news.repository.SubCategoryRepository;
 import newREALs.backend.common.service.TokenService;
 import newREALs.backend.accounts.service.UserKeywordService;
 import org.springframework.http.HttpStatus;

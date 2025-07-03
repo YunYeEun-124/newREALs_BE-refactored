@@ -20,6 +20,7 @@ import newREALs.backend.news.dto.TermDetailDto;
 import newREALs.backend.news.repository.BaseNewsRepository;
 import newREALs.backend.news.repository.CategoryRepository;
 import newREALs.backend.news.repository.KeywordRepository;
+import newREALs.backend.news.repository.SubCategoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +35,6 @@ public class NewsDetailService {
     private final UserRepository userRepository;
     private final ScrapRepository scrapRepository;
     private final LikesRepository likesRepository;
-    private final CurrentSubInterestRepository currentSubInterestRepository;
     private final ClickRepository clickRepository;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;

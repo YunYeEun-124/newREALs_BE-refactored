@@ -82,10 +82,7 @@ public class GetNaverNews {
 
     }
 
-
-
     //매일 아침마다 하루 한 번 실행
-
     @Scheduled(cron = "0 48 01 ? * *")
     public void getDailynews(){
         System.out.println("getDailynews");
@@ -153,7 +150,6 @@ public class GetNaverNews {
         newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
 
     }
-
 
     public  List<String> mapTitleKeyword(int pageNum,int limit,String category){
 
