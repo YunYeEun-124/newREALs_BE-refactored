@@ -49,8 +49,6 @@ public class NaverNewsApiService {
         parseAndStoreNews(naverApiResponseBody,title,keyword,isDailyNews); //2. 받아온 리스트로
         
         entityManager.flush(); // 즉시 데이터 반영
-
-
     }
 
     /*

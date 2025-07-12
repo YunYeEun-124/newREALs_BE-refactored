@@ -1,7 +1,5 @@
 package newREALs.backend.news.service;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.apache.commons.collections4.ListUtils;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Keyword;
 import newREALs.backend.news.repository.BaseNewsRepository;
@@ -10,7 +8,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,20 +16,16 @@ import java.io.*;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class NewsScheduler {
     private final BaseNewsRepository baseNewsRepository;
     private final KeywordRepository keywordRepository;
     private final ChatGPTService chatGPTService;
-    private final NewsService newsService;
+    private final BasenewsCompletionService basenewsCompletionService;
+    private final DailynewsCompletionService dailynewsCompletionService;
     private final NaverNewsApiService naverNewsApiService;
 
-    public NewsScheduler(BaseNewsRepository baseNewsRepository, ChatGPTService chatGPTService, NewsService newsService, KeywordRepository keywordRepository, NaverNewsApiService naverNewsApiService) {
-        this.baseNewsRepository = baseNewsRepository;
-        this.chatGPTService = chatGPTService;
-        this.newsService = newsService;
-        this.keywordRepository = keywordRepository;
-        this.naverNewsApiService = naverNewsApiService;
-    }
+
 
     @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
@@ -42,19 +35,18 @@ public class NewsScheduler {
         }
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-            naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1);
-
-            // 배치 간 대기
+            naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1); // basenews entity에 원문 담겨 저장
+            //  하나의 keyword 뉴스 처리 실행 -> 2초 대기 후 반복
             try {
-                Thread.sleep(2000); // 각 배치 처리 후 2초 대기
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Batch delay interrupted");
+                System.out.println("Batch delay interrupted"+e.getMessage());
             }
           
 
         }
-        newsService.automaticBaseProcess();
+        basenewsCompletionService.automaticBaseProcess();
 
     }
 
@@ -122,8 +114,8 @@ public class NewsScheduler {
 
         }
 
-        newsService.automaticBaseProcess(); //내용 채우기
-        newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
+        basenewsCompletionService.automaticBaseProcess(); //내용 채우기
+        dailynewsCompletionService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
 
     }
 
