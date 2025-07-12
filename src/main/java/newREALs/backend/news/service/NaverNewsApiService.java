@@ -38,9 +38,6 @@ public class NaverNewsApiService {
 
     @Autowired
     private BaseNewsRepository baseNewsRepository;
-
-
-
     private final RateLimiter rateLimiter = RateLimiter.create(1.0); // 초당 1회 호출
 
 
@@ -152,7 +149,6 @@ public class NaverNewsApiService {
                 if (imageElements != null) {
                     imagePath = imageElements.attr("data-src"); // 이미지 URL 추출
                 } else {
-                    System.out.println("No image found for URL: " + htmlUrl);
                     imagePath = null; // 기본 이미지 처리
                 }
 

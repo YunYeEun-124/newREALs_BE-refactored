@@ -33,15 +33,11 @@ public class NewsService {
         basenewsRepository.saveAll(processedNews);
     }
 
-   // @Scheduled(cron = "0 15 23 ? * *")
     public void automaticBaseProcess(){
-        System.out.println("automaticBaseProcess in ");
-
 
         long startTime = System.currentTimeMillis(); // 시작 시간 기록
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
         if(newBasenews.isEmpty()) {
-            System.out.println("summary null news NOPE");
             return ;
         }
 

@@ -37,7 +37,7 @@ public class ArticleProcessingService {
 
     @Transactional
     public Basenews processArticle(Long basenewsId) throws Throwable {
-        System.out.println("processArticle in ");
+
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
         //생성 통합하기

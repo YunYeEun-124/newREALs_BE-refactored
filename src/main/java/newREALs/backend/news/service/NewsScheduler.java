@@ -5,7 +5,6 @@ import org.apache.commons.collections4.ListUtils;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Keyword;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.CategoryRepository;
 import newREALs.backend.news.repository.KeywordRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,53 +19,31 @@ import java.io.*;
 import java.util.*;
 
 @Service
-public class GetNaverNews {
-    @Autowired
-    private  KeywordRepository keywordRepository;
-
-    @Autowired
-    private BaseNewsRepository baseNewsRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
+public class NewsScheduler {
+    private final BaseNewsRepository baseNewsRepository;
+    private final KeywordRepository keywordRepository;
     private final ChatGPTService chatGPTService;
-
     private final NewsService newsService;
     private final NaverNewsApiService naverNewsApiService;
 
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService, NaverNewsApiService naverNewsApiService) {
+    public NewsScheduler(BaseNewsRepository baseNewsRepository, ChatGPTService chatGPTService, NewsService newsService, KeywordRepository keywordRepository, NaverNewsApiService naverNewsApiService) {
+        this.baseNewsRepository = baseNewsRepository;
         this.chatGPTService = chatGPTService;
         this.newsService = newsService;
+        this.keywordRepository = keywordRepository;
         this.naverNewsApiService = naverNewsApiService;
     }
 
-
-
-
     @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
-        System.out.println("getBasenews in");
-        List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
-
+        List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
         if (keywords.isEmpty()) {
-            System.out.println("no keywords ");
             return;
         }
 
-        for (List<Keyword> keywordList : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-             for(Keyword keyword : keywordList){
-                 try {
-                     naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1);
-                     Thread.sleep(1000); // 1초 대기
-                 } catch (InterruptedException e) {
-                     Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-                     System.out.println("Thread interrupted during delay");
-                 }
-             }
+        for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
+            naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1);
+
             // 배치 간 대기
             try {
                 Thread.sleep(2000); // 각 배치 처리 후 2초 대기
@@ -77,7 +54,6 @@ public class GetNaverNews {
           
 
         }
-
         newsService.automaticBaseProcess();
 
     }
@@ -210,7 +186,7 @@ public class GetNaverNews {
             }
 
         }catch (IOException e){
-            throw new RuntimeException("타이틀 못 뽑았네요~~~~~", e);
+            throw new RuntimeException("타이틀 추출 실패", e);
         }
 
         return titles;
