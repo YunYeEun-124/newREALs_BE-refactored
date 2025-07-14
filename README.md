@@ -17,7 +17,8 @@ NewREALs는 사용자의 키워드를 통해 자신에게 맞는 진짜 뉴스�
 
 ---
 ## ERD 
-<img width="1724" height="948" alt="image" src="https://github.com/user-attachments/assets/efeef109-8b14-46d1-a502-103dbb4faa78" />
+<img width="1258" height="702" alt="image" src="https://github.com/user-attachments/assets/ef9cc1ab-155e-4a9e-bcd8-dc2917423a3e" />
+
 
 
 
