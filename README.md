@@ -16,6 +16,10 @@ NewREALs는 사용자의 키워드를 통해 자신에게 맞는 진짜 뉴스�
   
 
 ---
+## ERD 
+<img width="1724" height="948" alt="image" src="https://github.com/user-attachments/assets/efeef109-8b14-46d1-a502-103dbb4faa78" />
+
+
 
 ## 📂 프로젝트 디렉토리 구조
 
@@ -23,18 +27,36 @@ NewREALs는 사용자의 키워드를 통해 자신에게 맞는 진짜 뉴스�
 src
 ├── main
 │   ├── java
-│   │   └── newREALs.backend
-│   │       ├── 🛠️ config         # 설정 파일 (Spring Security 등)
-│   │       ├── 📂 controller     # 컨트롤러 레이어
-│   │       ├── 🗃️ domain         # 엔티티 클래스
-│   │       ├── 📑 DTO            # 데이터 전송 객체 (DTO)
-│   │       ├── 📦 repository     # JPA 리포지토리
-│   │       ├── 🔒 security       # 보안 관련 클래스 (JWT, 필터 등)
-│   │       └── 🧩 service        # 서비스 레이어
-│   └── resources
-│       ├── ⚙️ application.yml    # Spring Boot 설정 파일
-│       ├── 🧪 DummyData.sql      # 테스트용 데이터 SQL
-│       └── 📜 schema.sql         # 데이터베이스 스키마 SQL
+│   │   └── newREALs
+│   │       └── backend
+│   │           ├── accounts             # 사용자 계정 관련 도메인
+│   │           │   ├── controller       # 계정 관련 API 컨트롤러
+│   │           │   ├── domain           # 계정 관련 엔티티 클래스
+│   │           │   ├── dto              # 계정 관련 DTO
+│   │           │   ├── repository       # 계정 관련 JPA 리포지토리
+│   │           │   └── service          # 계정 관련 서비스 레이어
+│   │           │
+│   │           ├── news                 # 뉴스 도메인
+│   │           │   ├── controller       # 뉴스 관련 API 컨트롤러
+│   │           │   ├── domain           # 뉴스 관련 엔티티 클래스
+│   │           │   ├── dto              # 뉴스 관련 DTO
+│   │           │   ├── repository       # 뉴스 관련 JPA 리포지토리
+│   │           │   └── service          # 뉴스 관련 서비스 레이어
+│   │           │
+│   │           ├── common               # 공통 기능 모듈
+│   │           │   ├── controller       # 공통 API 컨트롤러
+│   │           │   ├── dto              # 공통 DTO
+│   │           │   ├── repository       # 공통 리포지토리
+│   │           │   ├── security         # 공통 보안 필터, 인증 관련 클래스
+│   │           │   └── service          # 공통 서비스 로직
+│   │           │
+│   │           ├── config               # 환경 설정 (보안, GPT, S3, 스케줄 등)
+│   │           │
+│   │           └── BackendApplication.java  # 스프링 부트 메인 클래스
+│
+└── resources
+ 
+
 ```
 
 ---
@@ -78,6 +100,3 @@ KAKAO_CLIENT_SECRET=
 - `.env` 파일을 선택하면 자동으로 환경 변수를 로드합니다.
 
 
----
-
-## 🔮 향후 계획
