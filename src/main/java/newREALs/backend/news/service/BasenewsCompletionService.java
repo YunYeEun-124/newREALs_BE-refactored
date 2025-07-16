@@ -1,29 +1,62 @@
 package newREALs.backend.news.service;
 
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.Basenews;
+import newREALs.backend.news.domain.Quiz;
 import newREALs.backend.news.domain.TermDetail;
+import newREALs.backend.news.domain.ThoughtComment;
 import newREALs.backend.news.repository.BaseNewsRepository;
+import newREALs.backend.news.repository.ThoughtCommentRepository;
+import newREALs.backend.news.repository.QuizRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
+
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-public class ArticleProcessingService {
-    private final ChatGPTService chatGPTService;
+@RequiredArgsConstructor
+public class BasenewsCompletionService {
+
+
     private final BaseNewsRepository basenewsRepository;
-    private static final Logger log = LoggerFactory.getLogger(NewsService.class);
+    private final ChatGPTService chatGPTService;
+    private static final Logger log = LoggerFactory.getLogger(BasenewsCompletionService.class);
 
-    public ArticleProcessingService(ChatGPTService chatGPTService, BaseNewsRepository basenewsRepository) {
-        this.chatGPTService = chatGPTService;
-        this.basenewsRepository = basenewsRepository;
 
+    public void completeBasenewsPipeline(){
+
+        long startTime = System.currentTimeMillis(); // 시작 시간 기록
+        List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
+        if(newBasenews.isEmpty()) {
+            return ;
+        }
+
+        List<CompletableFuture<Basenews>> futures = new ArrayList<>();
+        for(Basenews news : newBasenews)
+            futures.add((processArticleAsync(news.getId())));
+
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        List<Basenews> resultList = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList();
+
+        //개별 저장
+        for(Basenews basenews : resultList){
+            try{
+                basenewsRepository.save(basenews);
+            }catch (Exception e ) {
+                log.warn("뉴스 저장 실패: {}", basenews.getId());
+            }
+        }
+
+        long endTime = System.currentTimeMillis(); // 종료 시간 기록
+        System.out.println("비동기 작업 전체 처리 시간: " + (endTime - startTime) + "ms");
     }
+
 
     @Async("taskExecutor")
     public CompletableFuture<Basenews> processArticleAsync(Long id) {
@@ -35,9 +68,10 @@ public class ArticleProcessingService {
         }
     }
 
-    @Transactional
+
+    //뉴스 1개의 용어,설명,요약 후 parse 해서 update
     public Basenews processArticle(Long basenewsId) throws Throwable {
-        System.out.println("processArticle in ");
+
         Basenews basenews = basenewsRepository.findById(basenewsId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid news ID"));
         //생성 통합하기
@@ -85,7 +119,6 @@ public class ArticleProcessingService {
     }
 
     //용어,요약,설명 파싱 메서드
-    @Async
     public Basenews parseBasenews(String termsContent,Basenews basenews) {
         List<TermDetail> termDetails = new ArrayList<>();
         String summary = "";
@@ -136,4 +169,6 @@ public class ArticleProcessingService {
 
         return basenews;
     }
+
+
 }

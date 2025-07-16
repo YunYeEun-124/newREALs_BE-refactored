@@ -78,11 +78,6 @@ public class Accounts {
         keywordInterest.set(keywordId - 1, keywordInterest.get(keywordId - 1) + change);
     }
 
-    public int getKeywordInterest(int keywordId){
-        if(keywordId<1 || keywordId>keywordInterest.size()) {
-            throw new IllegalArgumentException("keywordId는 1에서 50까지 입니다");
-        }
-        return keywordInterest.get(keywordId-1);
-    }
+
 
 }

@@ -5,68 +5,25 @@ import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Quiz;
 import newREALs.backend.news.domain.ThoughtComment;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.ThoughtCommentRepository;
 import newREALs.backend.news.repository.QuizRepository;
+import newREALs.backend.news.repository.ThoughtCommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
-public class NewsService {
-
+public class DailynewsCompletionService {
     private final ChatGPTService chatGPTService;
-    private final BaseNewsRepository basenewsRepository;
     private final QuizRepository quizRepository;
     private final ThoughtCommentRepository thoughtCommentRepository;
-    private final ArticleProcessingService articleProcessingService;
-    private static final Logger log = LoggerFactory.getLogger(NewsService.class);
+    private final BaseNewsRepository basenewsRepository;
 
+    private static final Logger log = LoggerFactory.getLogger(DailynewsCompletionService.class);
 
-    @Transactional
-    public void saveProcessedNews(List<Basenews> processedNews) {
-        basenewsRepository.saveAll(processedNews);
-    }
-
-   // @Scheduled(cron = "0 15 23 ? * *")
-    public void automaticBaseProcess(){
-        System.out.println("automaticBaseProcess in ");
-
-
-        long startTime = System.currentTimeMillis(); // 시작 시간 기록
-        List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
-        if(newBasenews.isEmpty()) {
-            System.out.println("summary null news NOPE");
-            return ;
-        }
-
-        List<CompletableFuture<Basenews>> futures = new ArrayList<>();
-        for(Basenews news : newBasenews)
-            futures.add((articleProcessingService.processArticleAsync(news.getId())));
-
-        //futures.add 하는 이유 : 모든 비동기 작업이 완류 된 후 다음 save해야되기 때문
-        // 기다리는 작업(allOf) 해야하는데 리스트에 담아서 관리하지 않으면 작업 완료 여부 파악힘들다.
-        // and for문 돌리면서 어디서 작업이 실패했는지 파악도 해야함.
-
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        List<Basenews> resultList = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList();
-
-        saveProcessedNews(resultList);
-
-        long endTime = System.currentTimeMillis(); // 종료 시간 기록
-        System.out.println("비동기 작업 전체 처리 시간: " + (endTime - startTime) + "ms");
-    }
-
-
-
-   // @Transactional
-    public void automaticDailyProcess(){
-        System.out.println("automaticDailyProcess in");
+    public void completeDailynewsPipeline(){
         for (Basenews news : basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc()) {
             try {
                 generateAndSaveQuizzesForDailyNews(news);
@@ -75,13 +32,11 @@ public class NewsService {
                 log.error("Failed to generate quiz for article ID: {}", news.getId(), e);
             }
         }
-
     }
-    //요약, 설명, 용어 생성 메서드
+
 
 
     //퀴즈 생성하는 메서드
-    //@Transactional
     public void generateAndSaveQuizzesForDailyNews(Basenews news) {
         // 이미 isDailynews=true인 basenews를 전달받음
         // 1. 이미 해당 뉴스에 대한 퀴즈가 존재하는지 확인
@@ -89,7 +44,6 @@ public class NewsService {
             log.warn("Quiz already exists for Basenews ID: {}", news.getId());
             return;
         }
-        System.out.println("generateAndSaveQuizzesForDailyNews in");
 
         List<Map<String, String>> quizMessages = new ArrayList<>();
         quizMessages.add(Map.of("role", "system", "content",
@@ -133,8 +87,7 @@ public class NewsService {
         quizRepository.save(quiz);
     }
 
-    //ThinkComment generate function
-   // @Async
+    //ThinkComment generate function_
     public void generateAndSaveThinkCommentForDailyNews(Basenews news){
         System.out.println("generateAndSaveThinkCommentForDailyNews in");
         if (thoughtCommentRepository.existsByBasenews(news)) {
@@ -168,20 +121,17 @@ public class NewsService {
         }
 
         thoughtCommentRepository.save(
-          ThoughtComment.builder()
-                  .topic(topic)
-                  .AIComment(aiComment)
-                  .basenews(news).build()
+                ThoughtComment.builder()
+                        .topic(topic)
+                        .AIComment(aiComment)
+                        .basenews(news).build()
         );
 
         StringTokenizer st = new StringTokenizer(quizContent,":");
         st.nextToken();
     }
 
-
-
     //퀴즈 파싱 메서드
-    //@Async
     private Map<String, String> parseQuizContent(String quizContent) {
         Map<String, String> parsedQuiz = new HashMap<>();
         String[] lines = quizContent.split("\n");

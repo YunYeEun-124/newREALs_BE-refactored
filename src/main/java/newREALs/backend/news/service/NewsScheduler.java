@@ -1,17 +1,13 @@
 package newREALs.backend.news.service;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.apache.commons.collections4.ListUtils;
+import lombok.RequiredArgsConstructor;
 import newREALs.backend.news.domain.Basenews;
 import newREALs.backend.news.domain.Keyword;
 import newREALs.backend.news.repository.BaseNewsRepository;
-import newREALs.backend.news.repository.CategoryRepository;
 import newREALs.backend.news.repository.KeywordRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -20,72 +16,42 @@ import java.io.*;
 import java.util.*;
 
 @Service
-public class GetNaverNews {
-    @Autowired
-    private  KeywordRepository keywordRepository;
-
-    @Autowired
-    private BaseNewsRepository baseNewsRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
+@RequiredArgsConstructor
+public class NewsScheduler {
+    private final BaseNewsRepository baseNewsRepository;
+    private final KeywordRepository keywordRepository;
     private final ChatGPTService chatGPTService;
-
-    private final NewsService newsService;
-    private final KeywordProcessingService keywordProcessingService;
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    public GetNaverNews(ChatGPTService chatGPTService, NewsService newsService, ArticleProcessingService articleProcessingService, KeywordProcessingService keywordProcessingService) {
-        this.chatGPTService = chatGPTService;
-        this.newsService = newsService;
-        this.keywordProcessingService = keywordProcessingService;
-    }
-
+    private final BasenewsCompletionService basenewsCompletionService;
+    private final DailynewsCompletionService dailynewsCompletionService;
+    private final NaverNewsApiService naverNewsApiService;
 
 
 
     @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
-        System.out.println("getBasenews in");
-        List<List<Keyword>> keywords =ListUtils.partition(keywordRepository.findAll(),10); //key word 다 불러와
+        List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
+        if (keywords.isEmpty())  return;
 
-        if (keywords.isEmpty()) {
-            System.out.println("no keywords ");
-            return;
-        }
 
-        for (List<Keyword> keywordList : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
-             for(Keyword keyword : keywordList){
-                 try {
-                     keywordProcessingService.processKeyword(keyword.getName(),keyword,false,1);
-                     Thread.sleep(1000); // 1초 대기
-                 } catch (InterruptedException e) {
-                     Thread.currentThread().interrupt(); // 인터럽트 상태 복구
-                     System.out.println("Thread interrupted during delay");
-                 }
-             }
-            // 배치 간 대기
+        for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
+            naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1); // basenews entity에 원문 담겨 저장
+            //  하나의 keyword 뉴스 처리 실행 -> 2초 대기 후 반복
             try {
-                Thread.sleep(2000); // 각 배치 처리 후 2초 대기
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                System.out.println("Batch delay interrupted");
+                System.out.println("Batch delay interrupted"+e.getMessage());
             }
           
 
         }
-
-        newsService.automaticBaseProcess();
+        basenewsCompletionService.completeBasenewsPipeline();
 
     }
 
     //매일 아침마다 하루 한 번 실행
     @Scheduled(cron = "0 48 01 ? * *")
     public void getDailynews(){
-        System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
 
         if (!previousDailyNews.isEmpty()) {
@@ -94,7 +60,6 @@ public class GetNaverNews {
             }
             baseNewsRepository.saveAll(previousDailyNews);
         }
-        System.out.println("now daily news size :"+baseNewsRepository.findAllByIsDailyNews(true).size());
         String[] category = {"사회","경제","정치"};
 
         int pageNum = 102; int limit = 2;
@@ -121,17 +86,14 @@ public class GetNaverNews {
             for(int j=0;j<limit;j++){
 
                 st = new StringTokenizer(titleKeywordList.get(j),":");
-                System.out.println("this is a title"+titleKeywordList.get(j));
                 String title = st.nextToken().trim(); //공백, 구분자 제거
                 String k = st.nextToken().trim();
-                System.out.println("title , keyword from gpt : "+title+"."+k);
                 Optional<Keyword> keyword = keywordRepository.findByName(k);
 
                 if(keyword.isPresent()){
-                    System.out.println("추출한 키워드 : "+keyword.get().getName());
                     // 딜레이 추가
                     try {
-                        List<Basenews> createdNews = keywordProcessingService.processKeyword(title,keyword.get(),true,3);
+                        naverNewsApiService.executeFullNewsFlow(title,keyword.get(),true,3);
                         Thread.sleep(1000); // 1초 대기
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -146,8 +108,8 @@ public class GetNaverNews {
 
         }
 
-        newsService.automaticBaseProcess(); //내용 채우기
-        newsService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
+        basenewsCompletionService.completeBasenewsPipeline(); //내용 채우기
+        dailynewsCompletionService.completeDailynewsPipeline(); // 퀴즈, 인사이트 생성
 
     }
 
@@ -210,7 +172,7 @@ public class GetNaverNews {
             }
 
         }catch (IOException e){
-            throw new RuntimeException("타이틀 못 뽑았네요~~~~~", e);
+            throw new RuntimeException("타이틀 추출 실패", e);
         }
 
         return titles;

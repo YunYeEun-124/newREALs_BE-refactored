@@ -22,52 +22,86 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.net.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
-public class KeywordProcessingService {
+public class NaverNewsApiService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    private NewsService newsService;
-
     @Value("${naver.api.client-id}")
     private String clientId;
-
     @Value("${naver.api.secret-key}")
     private String clientSecret;
 
     @Autowired
-    private KeywordRepository keywordRepository;
-
-    @Autowired
     private BaseNewsRepository baseNewsRepository;
-
-    @Autowired
-    private CategoryRepository categoryRepository;
-
     private final RateLimiter rateLimiter = RateLimiter.create(1.0); // 초당 1회 호출
 
+
     @Transactional
-    public List<Basenews> processKeyword(String title, Keyword keyword, boolean isDailyNews, int display) {
+    public void executeFullNewsFlow(String title, Keyword keyword, boolean isDailyNews, int display) {
         rateLimiter.acquire(); // 호출 속도 제한
 
-        // API 호출 후 데이터 처리
-        List<Basenews> createdNews = ProcessNews(title, keyword, isDailyNews, display);
+        String naverApiResponseBody =  fetchNewsItemsFromNaver(title,display); //1. naverapi로 뉴스 item 리스트 받아옴
+        parseAndStoreNews(naverApiResponseBody,title,keyword,isDailyNews); //2. 받아온 리스트로
+        
         entityManager.flush(); // 즉시 데이터 반영
-
-        // 생성된 뉴스가 없으면 로그 출력
-        if (createdNews.isEmpty()) {
-            System.out.println("No new Basenews created for keyword: " + keyword.getName());
-        }
-
-        return createdNews;
     }
 
+    /*
+    * 불러온 뉴스 정보로 뉴스 원문 크롤링 후 중복 체크 후 저장
+    * ------------------------------------------------------------
+    * case 1 . isDailyNews = true 인 경우, 데일리 뉴스로 호출했을 때 |
+    * case 2.  isDailyNews = false 인 경우, 일반 뉴스로 호출했을 때  |
+    *
+    * */
 
-    public List<Basenews> ProcessNews(String title, Keyword keyword, Boolean isDailyNews, int display) {
-        List<Basenews> createdNews = new ArrayList<>();
+    private void parseAndStoreNews(String naverApiResponseBody,String title, Keyword keyword, Boolean isDailyNews){
+        // API 응답 파싱
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .setPrettyPrinting()
+                .create();
+
+        newsInfo newsinfo = gson.fromJson(naverApiResponseBody, newsInfo.class);
+
+        if (newsinfo == null || newsinfo.getItems().isEmpty()) {
+            System.out.println("No news items found for title: " + title);
+            return;
+
+        }
+
+        for (newsInfo.Item item : newsinfo.getItems()) {
+            if (!item.getLink().contains("n.news.naver.com")) continue; //naver 기사 아닌 경우 PASS
+
+            Optional<Basenews> existingNews = baseNewsRepository.findFirstByNewsUrl(item.getLink());
+
+            if (existingNews.isPresent()) {
+                if (isDailyNews) existingNews.get().checkDailyNews();
+                continue;
+            }
+            
+            try {
+                Basenews basenews = createBaseNews(item, keyword,isDailyNews);
+                baseNewsRepository.save(basenews);
+                if (isDailyNews) break; // 데일리 뉴스는 하나만 필요
+            } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new RuntimeException("Failed to create Basenews", e);
+
+            }
+        }
+
+    }
+
+    /*
+        Naver Search API 연동하여 뉴스 정보 불러옵니다.
+    */
+    private String fetchNewsItemsFromNaver(String title, int display) {
+
 
         String text;
         try {
@@ -78,69 +112,19 @@ public class KeywordProcessingService {
 
         //API 호출
         String apiURL = "https://openapi.naver.com/v1/search/news?query=" + text + "&display="+display+"&sort=sim";    // JSON 결과
-        System.out.println("naver url 검색어 : "+ title);
         Map<String, String> requestHeaders = new HashMap<>();
         requestHeaders.put("X-Naver-Client-Id", clientId);
         requestHeaders.put("X-Naver-Client-Secret", clientSecret);
 
-        String responseBody = get(apiURL, requestHeaders);
+        return get(apiURL, requestHeaders); //뉴스 정보 리스트
 
 
-        // API 응답 파싱
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .setPrettyPrinting()
-                .create();
-        newsInfo newsinfo = gson.fromJson(responseBody, newsInfo.class);
-
-        if (newsinfo == null || newsinfo.getItems().isEmpty()) {
-            System.out.println("No news items found for title: " + title);
-            return createdNews;
-        }
-
-        for (newsInfo.Item item : newsinfo.getItems()) {
-            if (!item.getLink().contains("n.news.naver.com")) {
-                System.out.println("Ignoring non-Naver news: " + item.getLink());
-                continue;
-            }
-
-            Optional<Basenews> existingNews = baseNewsRepository.findFirstByNewsUrl(item.getLink());
-            if (existingNews.isPresent()) {
-                System.out.println("News already exists: " + item.getTitle());
-                if (isDailyNews) existingNews.get().checkDailyNews();
-            } else {
-                try {
-                    // 새로운 뉴스 생성
-                    Basenews bnews = Basenews.builder()
-                            .title(item.getTitle().replaceAll("<[^>]*>?", "").replace("&quot;", ""))
-                            .newsUrl(item.getLink())
-                            .imageUrl(getArticle(item.getLink(), "#dic_area", "#img1").get(0))
-                            .uploadDate(new SimpleDateFormat("yyyy-MM-dd").format(
-                                    new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH).parse(item.getPubDate())
-                            ))
-                            .description(getArticle(item.getLink(), "#dic_area", "#img1").get(1))
-                            .keyword(keyword)
-                            .category(keyword.getCategory())
-                            .subCategory(keyword.getSubCategory())
-                            .isDailyNews(isDailyNews)
-                            .build();
-
-                    baseNewsRepository.save(bnews);
-                    createdNews.add(bnews);
-
-                    if (isDailyNews) break; // 데일리 뉴스는 하나만 필요
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    throw new RuntimeException("Failed to create Basenews", e);
-                }
-            }
-        }
-
-        return createdNews;
     }
 
-    //////////////////////////// 스크래핑 해서 원문 기사& 이미지 받아오기/////////////////////////
-    public List<String> getArticle(String htmlUrl, String htmlId1, String htmlId2) {
+    /* 
+        스크래핑 해서 원문 기사& 이미지 받아오기
+    */
+    private List<String> getNewsContentAndImage(String htmlUrl, String htmlId1, String htmlId2) {
 
         Document doc;
         String plainText = "";
@@ -163,7 +147,6 @@ public class KeywordProcessingService {
                 if (imageElements != null) {
                     imagePath = imageElements.attr("data-src"); // 이미지 URL 추출
                 } else {
-                    System.out.println("No image found for URL: " + htmlUrl);
                     imagePath = null; // 기본 이미지 처리
                 }
 
@@ -171,31 +154,24 @@ public class KeywordProcessingService {
                 result.add(plainText);
 
             } else {
-                System.out.println("Failed to find article content at: " + htmlUrl);
                 throw new RuntimeException("기사 본문 추출 실패");
             }
 
-        } catch (HttpStatusException e) {
-            // HTTP 상태 코드 문제 처리
-            System.out.printf("HTTP Status Error (%d) for URL: %s%n", e.getStatusCode(), htmlUrl);
+        } catch (HttpStatusException e) { // HTTP 상태 코드 문제 처리
             throw new RuntimeException("HTTP 호출 실패: " + e.getStatusCode(), e);
-        } catch (SocketTimeoutException e) {
-            // 타임아웃 문제 처리
-            System.out.println("Timeout occurred while connecting to: " + htmlUrl);
+        } catch (SocketTimeoutException e) { // 타임아웃 문제 처리
             throw new RuntimeException("요청 타임아웃", e);
-        } catch (IOException e) {
-            // 기타 IO 에러 처리
-            System.out.println("IO Error while fetching article: " + htmlUrl);
+        } catch (IOException e) { // 기타 IO 에러 처리
             throw new RuntimeException("네트워크 문제 발생", e);
         }
 
-        System.out.println("Successfully 뉴스 원문 가져오기 성공: " + htmlUrl);
+
         return result;
     }
 
 
 
-    public String get(String apiUrl, Map<String, String> requestHeaders) {
+    private  String get(String apiUrl, Map<String, String> requestHeaders) {
         HttpURLConnection con = connect(apiUrl);
         int retries = 3; // 최대 재시도 횟수
         while (retries > 0) {
@@ -226,10 +202,6 @@ public class KeywordProcessingService {
         throw new RuntimeException("API 요청 실패");
     }
 
-
-
-
-
     private  HttpURLConnection connect(String apiUrl){
         try {
             URL url = new URL(apiUrl);
@@ -247,18 +219,36 @@ public class KeywordProcessingService {
 
 
         try (BufferedReader lineReader = new BufferedReader(streamReader)) {
-            StringBuilder responseBody = new StringBuilder();
+            StringBuilder naverApiResponseBody = new StringBuilder();
 
 
             String line;
             while ((line = lineReader.readLine()) != null) {
-                responseBody.append(line);
+                naverApiResponseBody.append(line);
             }
 
 
-            return responseBody.toString();
+            return naverApiResponseBody.toString();
         } catch (IOException e) {
             throw new RuntimeException("API 응답을 읽는 데 실패했습니다.", e);
         }
+    }
+
+    private Basenews createBaseNews(newsInfo.Item item,Keyword keyword,Boolean isDailyNews) throws ParseException {
+        List<String> contentAndImage = getNewsContentAndImage(item.getLink(), "#dic_area", "#img1");
+
+        return Basenews.builder()
+                .title(item.getTitle().replaceAll("<[^>]*>?", "").replace("&quot;", ""))
+                .newsUrl(item.getLink())
+                .imageUrl(contentAndImage.get(0))
+                .uploadDate(new SimpleDateFormat("yyyy-MM-dd").format(
+                        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH).parse(item.getPubDate())
+                ))
+                .description(contentAndImage.get(1))
+                .keyword(keyword)
+                .category(keyword.getCategory())
+                .subCategory(keyword.getSubCategory())
+                .isDailyNews(isDailyNews)
+                .build();
     }
 }
