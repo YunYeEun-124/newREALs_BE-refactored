@@ -30,9 +30,8 @@ public class NewsScheduler {
     @Scheduled(cron = "0 10 06 ? * *")
     public void getBasenews() {
         List<Keyword> keywords = keywordRepository.findAll(); //key word 다 불러와
-        if (keywords.isEmpty()) {
-            return;
-        }
+        if (keywords.isEmpty())  return;
+
 
         for (Keyword keyword : keywords) { //검색 for문으로 키워드 돌아가면서 실행시키
             naverNewsApiService.executeFullNewsFlow(keyword.getName(),keyword,false,1); // basenews entity에 원문 담겨 저장
@@ -46,14 +45,13 @@ public class NewsScheduler {
           
 
         }
-        basenewsCompletionService.automaticBaseProcess();
+        basenewsCompletionService.completeBasenewsPipeline();
 
     }
 
     //매일 아침마다 하루 한 번 실행
     @Scheduled(cron = "0 48 01 ? * *")
     public void getDailynews(){
-        System.out.println("getDailynews");
         List<Basenews> previousDailyNews = baseNewsRepository.findAllByIsDailyNews(true);
 
         if (!previousDailyNews.isEmpty()) {
@@ -62,7 +60,6 @@ public class NewsScheduler {
             }
             baseNewsRepository.saveAll(previousDailyNews);
         }
-        System.out.println("now daily news size :"+baseNewsRepository.findAllByIsDailyNews(true).size());
         String[] category = {"사회","경제","정치"};
 
         int pageNum = 102; int limit = 2;
@@ -89,14 +86,11 @@ public class NewsScheduler {
             for(int j=0;j<limit;j++){
 
                 st = new StringTokenizer(titleKeywordList.get(j),":");
-                System.out.println("this is a title"+titleKeywordList.get(j));
                 String title = st.nextToken().trim(); //공백, 구분자 제거
                 String k = st.nextToken().trim();
-                System.out.println("title , keyword from gpt : "+title+"."+k);
                 Optional<Keyword> keyword = keywordRepository.findByName(k);
 
                 if(keyword.isPresent()){
-                    System.out.println("추출한 키워드 : "+keyword.get().getName());
                     // 딜레이 추가
                     try {
                         naverNewsApiService.executeFullNewsFlow(title,keyword.get(),true,3);
@@ -114,8 +108,8 @@ public class NewsScheduler {
 
         }
 
-        basenewsCompletionService.automaticBaseProcess(); //내용 채우기
-        dailynewsCompletionService.automaticDailyProcess(); // 퀴즈, 인사이트 생성
+        basenewsCompletionService.completeBasenewsPipeline(); //내용 채우기
+        dailynewsCompletionService.completeDailynewsPipeline(); // 퀴즈, 인사이트 생성
 
     }
 

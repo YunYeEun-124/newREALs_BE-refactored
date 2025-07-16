@@ -28,12 +28,7 @@ public class BasenewsCompletionService {
     private static final Logger log = LoggerFactory.getLogger(BasenewsCompletionService.class);
 
 
-    @Transactional
-    public void saveProcessedNews(List<Basenews> processedNews) {
-        basenewsRepository.saveAll(processedNews);
-    }
-
-    public void automaticBaseProcess(){
+    public void completeBasenewsPipeline(){
 
         long startTime = System.currentTimeMillis(); // 시작 시간 기록
         List<Basenews> newBasenews = basenewsRepository.findBySummaryIsNull();
@@ -49,7 +44,14 @@ public class BasenewsCompletionService {
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         List<Basenews> resultList = futures.stream().map(CompletableFuture::join).filter(Objects::nonNull).toList();
 
-        saveProcessedNews(resultList);
+        //개별 저장
+        for(Basenews basenews : resultList){
+            try{
+                basenewsRepository.save(basenews);
+            }catch (Exception e ) {
+                log.warn("뉴스 저장 실패: {}", basenews.getId());
+            }
+        }
 
         long endTime = System.currentTimeMillis(); // 종료 시간 기록
         System.out.println("비동기 작업 전체 처리 시간: " + (endTime - startTime) + "ms");
@@ -68,7 +70,6 @@ public class BasenewsCompletionService {
 
 
     //뉴스 1개의 용어,설명,요약 후 parse 해서 update
-    @Transactional
     public Basenews processArticle(Long basenewsId) throws Throwable {
 
         Basenews basenews = basenewsRepository.findById(basenewsId)
@@ -118,7 +119,6 @@ public class BasenewsCompletionService {
     }
 
     //용어,요약,설명 파싱 메서드
-    @Async
     public Basenews parseBasenews(String termsContent,Basenews basenews) {
         List<TermDetail> termDetails = new ArrayList<>();
         String summary = "";

@@ -23,7 +23,7 @@ public class DailynewsCompletionService {
 
     private static final Logger log = LoggerFactory.getLogger(DailynewsCompletionService.class);
 
-    public void automaticDailyProcess(){
+    public void completeDailynewsPipeline(){
         for (Basenews news : basenewsRepository.findTop5ByIsDailyNewsTrueOrderByIdDesc()) {
             try {
                 generateAndSaveQuizzesForDailyNews(news);
